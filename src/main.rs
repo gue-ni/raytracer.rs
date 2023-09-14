@@ -194,7 +194,7 @@ pub fn main() {
         }
     }
 
-    // TODO: write image to file
+    buffer.save("output.png");
 
 
 }
