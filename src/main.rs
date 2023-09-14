@@ -4,6 +4,8 @@
 use std::vec;
 use std::ops::{Add, Mul, Sub, Div};
 
+use image::{RgbImage, Rgb, ImageBuffer};
+
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
     x: f32, 
@@ -113,7 +115,7 @@ impl Hittable for Sphere {
     }
 }
 
-pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
+pub fn camera_ray(x: usize, y: usize, x_res: usize, y_res: usize) -> Ray {
 
     let mut ray_target = Vec3::new(
         (x as f32 / x_res as f32) * 2.0 - 1.0, 
@@ -167,12 +169,14 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
 
 pub fn main() { 
 
-    const WIDTH: u32    = 100;
-    const HEIGHT: u32   = 50;
-    const SAMPLES: u32  = 1;
+    const WIDTH: usize    = 100;
+    const HEIGHT: usize   = 50;
+    const SAMPLES: usize  = 1;
 
     let scene: Vec<Sphere> = Vec::new();
-    
+
+    let pixels = vec![0; 3 * WIDTH * HEIGHT];
+    let buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
 
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
@@ -186,11 +190,11 @@ pub fn main() {
             }
 
             pixel = pixel * (1.0 / SAMPLES as f32);
-
-
-
+            buffer.put_pixel(x, y, Rgb::from_channels(pixel.x, pixel.y, pixel.z));
         }
     }
+
+    // TODO: write image to file
 
 
 }
