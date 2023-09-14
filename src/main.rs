@@ -175,7 +175,7 @@ pub fn main() {
 
     let scene: Vec<Sphere> = Vec::new();
 
-    let pixels = vec![0; 3 * WIDTH * HEIGHT];
+    let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
 
     for x in 0..WIDTH {
@@ -190,11 +190,9 @@ pub fn main() {
             }
 
             pixel = pixel * (1.0 / SAMPLES as f32);
-            buffer.put_pixel(x, y, Rgb(pixel.x, pixel.y, pixel.z));
+            buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8));
         }
     }
 
     buffer.save("output.png");
-
-
 }
