@@ -98,14 +98,16 @@ pub struct Sphere {
     radius: f32
 }
 
-pub struct HitRecord {}
+pub struct HitRecord {
+    t: f32
+}
 
 pub trait Hittable {
-    fn test(&self, ray: &Ray) -> Option<HitRecord>;
+    fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord>;
 }
 
 impl Hittable for Sphere {
-    fn test(&self, ray: &Ray) -> Option<HitRecord> {
+    fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord> {
         None
     }
 }
@@ -129,15 +131,17 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
 
+    let min_t = f32::MAX;
+    
     for object in scene {
-        let hit = object.test(ray);
+        let hit = object.test(ray, &min_t);
 
         match hit {
             None => {
 
             },
             Some(hit_record) => {
-
+                min_t = hit_record.t;
             }
         }
     }
