@@ -99,7 +99,8 @@ pub struct Sphere {
 }
 
 pub struct HitRecord {
-    t: f32
+    t: f32,
+    normal: Vec3
 }
 
 pub trait Hittable {
@@ -129,9 +130,9 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     Ray{ origin, direction }
 }
 
-pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
-
+pub fn find_hit(ray: &Ray, scene: &Vec<Sphere>) -> Option<HitRecord> {
     let min_t = f32::MAX;
+    let closet: HitRecord;
     
     for object in scene {
         let hit = object.test(ray, &min_t);
@@ -142,11 +143,26 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             },
             Some(hit_record) => {
                 min_t = hit_record.t;
+                closest = hit_record;
             }
         }
     }
-    
-    Vec3::new(0.0, 0.0, 0.0)
+    None
+}
+
+pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
+    let hit = find_closest(ray, scene);
+
+    let color = match hit {
+        None => {
+                Vec3::new(0.0, 0.0, 0.0)
+        },
+        Some(hit_record) => {
+                    Vec3::new(0.0, 0.0, 0.0)
+
+        }
+    }
+    color
 }
 
 pub fn main() { 
