@@ -190,7 +190,7 @@ pub fn main() {
             }
 
             pixel = pixel * (1.0 / SAMPLES as f32);
-            buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8));
+            buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
         }
     }
 
