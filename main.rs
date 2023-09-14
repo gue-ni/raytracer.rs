@@ -131,23 +131,24 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
 }
 
 pub fn find_hit(ray: &Ray, scene: &Vec<Sphere>) -> Option<HitRecord> {
-    let min_t = f32::MAX;
-    let closest: HitRecord;
+    let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::new(0.0, 0.0, 0.0) };
     
     for object in scene {
-        let hit = object.test(ray, min_t);
+        let hit = object.test(ray, closest.t);
 
         match hit {
-            None => {
-
-            },
+            None => {},
             Some(hit_record) => {
-                min_t = hit_record.t;
-                closest = hit_record;
+               closest = hit_record; 
             }
         }
     }
-    None
+    
+    if closest.t < f32::MAX {
+        Some(closest)
+    } else {
+        None
+    }
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
