@@ -250,7 +250,8 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
 }
 
 pub fn simple_phong(hit: &HitRecord, light: &Light) -> Vec3 {
-    let albedo = hit.normal * 0.5 + 0.5;
+    //let albedo = hit.normal * 0.5 + 0.5;
+    let albedo = Vec3::new(0.8, 0.5, 0.1);
             
     let light_dir = normalize(light.position - hit.point);
 
