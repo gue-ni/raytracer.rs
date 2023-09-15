@@ -7,7 +7,6 @@ use image::{Rgb, ImageBuffer};
 mod la {
 
     use std::ops::{Add, Mul, Sub, Div};
-    use image::Rgb;
 
     #[derive(Debug, Copy, Clone)]
     pub struct Vec3 {
@@ -239,9 +238,10 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             let light_dir = normalize(light_pos - hit.point);
 
             let ambient = light_color * 0.1;
-            let diffuse = light_color * f32::max(dot(normal, light_dir), 0.0);
+            let diffuse = light_color * f32::max(dot(hit.normal, light_dir), 0.0);
+            let specular = Vec3::zero();
 
-            let result = (ambient + diffuse) * normal_as_rgb;
+            let result = (ambient + diffuse + specular) * normal_as_rgb;
             result
         }
     };
