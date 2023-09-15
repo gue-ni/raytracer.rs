@@ -183,7 +183,8 @@ impl Hittable for Sphere {
         } 
 
         if t < min_t {
-            return Some(HitRecord{ t: t, normal: normalize(ray.point_at(t) - self.center) });
+            let normal = normalize(ray.point_at(t) - self.center);
+            return Some(HitRecord{ t, normal });
         } else {
             return None; 
         }
@@ -207,39 +208,18 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     Ray::new( origin, direction )
 }
 
-pub fn find_hit(ray: &Ray, scene: &Vec<Sphere>) -> Option<HitRecord> {
-    let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::new(0.0, 0.0, 0.0) };
-    
-    for object in scene {
-        let hit = object.test(ray, closest.t);
-
-        match hit {
-            None => {},
-            Some(hit_record) => {
-               closest = hit_record; 
-            }
-        }
-    }
-    
-    if closest.t < f32::MAX {
-        Some(closest)
-    } else {
-        None
-    }
-}
-
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
-    //let hit = find_hit(ray, scene);
     let hit = ray.cast(scene);
     
     let color = match hit {
         None => {
-            Vec3::new(0.0, 1.0, 0.0)
+            Vec3::new(0.6, 0.6, 0.6)
         },
         Some(hit_record) => {
             hit_record.normal * 0.5 + 0.5
         }
     };
+    
     color
 }
 
@@ -250,7 +230,7 @@ pub fn main() {
     const SAMPLES: u32  = 1;
 
     let mut scene: Vec<Sphere> = Vec::new();
-    scene.push(Sphere{ center: Vec3::new(0.0, 0.0, 3.0), radius: 1.0 });
+    scene.push(Sphere::new( Vec3::new(0.0, 0.0, 3.0), 1.0 ));
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
@@ -259,9 +239,9 @@ pub fn main() {
         for y in 0..HEIGHT {
 
             let mut pixel = Vec3::new(0.0, 0.0, 0.0);
-
+            let ray = camera_ray(x, y, WIDTH, HEIGHT);
+            
             for _ in 0..SAMPLES {
-                let ray = camera_ray(x, y, WIDTH, HEIGHT);
                 pixel = pixel + cast_ray(&ray, &scene);
             }
 
