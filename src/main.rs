@@ -2,6 +2,7 @@
 #[allow(dead_code)]
 
 use std::vec;
+use std::cmp::max;
 use image::{Rgb, ImageBuffer};
 
 mod la {
@@ -19,6 +20,14 @@ mod la {
     impl Vec3 {
         pub fn new(x: f32, y: f32, z: f32) -> Self {
             Vec3{ x, y, z }
+        }
+
+        pub fn zero() -> Self {
+            Vec3::fill(0.0)
+        }
+
+        pub fn one() -> Self {
+            Vec3::fill(1.0)
         }
 
         pub fn fill(v: f32) -> Self {
@@ -141,7 +150,7 @@ impl Ray {
     }
 
     fn cast(&self, scene: &Vec<Sphere>) -> Option<HitRecord> {
-        let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::fill(0.0) };
+        let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::zero(), point: Vec3::zero() };
     
         for object in scene {
             match object.test(self, closest.t) {
@@ -162,7 +171,8 @@ impl Ray {
 
 pub struct HitRecord {
     t: f32,
-    normal: Vec3
+    normal: Vec3,
+    point: Vec3
 }
 
 pub trait Hittable {
@@ -190,8 +200,9 @@ impl Hittable for Sphere {
         } 
 
         if t < min_t {
-            let normal = normalize(ray.point_at(t) - self.center);
-            return Some(HitRecord{ t, normal });
+            let point = ray.point_at(t);
+            let normal = normalize(point - self.center);
+            return Some(HitRecord{ t, normal, point });
         } else {
             return None; 
         }
@@ -216,15 +227,23 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
-    let hit = ray.cast(scene);
     
-    let color = match hit {
+    let color = match ray.cast(scene) {
         None => {
             Vec3::new(0.6, 0.6, 0.6)
         },
-        Some(hit_record) => {
-            //hit_record.normal * 0.5 + 0.5
-            (hit_record.normal + 1.0) * 0.5
+        Some(hit) => {
+            let normal_as_rgb = hit.normal * 0.5 + 0.5;
+            
+            let light_color = Vec3::one();
+            let light_pos = Vec3::new(1.0, 10.0, 2.0);
+            let light_dir = normalize(light_pos - hit.point);
+
+            let ambient = light_color * 0.1;
+            let diffuse = light_color * max(dot(normal, light_dir), 0.0);
+
+            let result = (ambient + diffuse) * normal_as_rgb;
+            result
         }
     };
     
