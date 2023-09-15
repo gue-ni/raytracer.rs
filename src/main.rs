@@ -176,7 +176,7 @@ pub fn main() {
     let scene: Vec<Sphere> = Vec::new();
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
-    let buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
+    let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
 
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
