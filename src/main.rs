@@ -111,9 +111,9 @@ pub trait Hittable {
 
 impl Hittable for Sphere {
     fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord> {
-        let m = ray.origin - sphere.center;
+        let m = ray.origin - self.center;
         let b = dot(m, r.direction);
-        let c = dot(m, m) - s.radius * s.radius;
+        let c = dot(m, m) - self.radius * self.radius;
 
         if c > 0.0 && b > 0.0
             None
@@ -131,7 +131,7 @@ impl Hittable for Sphere {
 
         if t < min_t {
             let point = ray.origin + ray.direction * t;
-            Some(HitRecord{ t: t, normal: normalize(point - sphere.center) })
+            Some(HitRecord{ t: t, normal: normalize(point - self.center) })
         } else {
             None 
         }
@@ -208,8 +208,7 @@ pub fn main() {
 
             for _ in 0..SAMPLES {
                 let ray = camera_ray(x, y, WIDTH, HEIGHT);
-                let color = cast_ray(&ray, &scene);
-                pixel = pixel + color;
+                pixel = pixel + cast_ray(&ray, &scene);
             }
 
             pixel = pixel * (1.0 / SAMPLES as f32);
