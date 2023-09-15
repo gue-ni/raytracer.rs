@@ -111,7 +111,30 @@ pub trait Hittable {
 
 impl Hittable for Sphere {
     fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord> {
-        None
+        let m = ray.origin - sphere.center;
+        let b = dot(m, r.direction);
+        let c = dot(m, m) - s.radius * s.radius;
+
+        if c > 0.0 && b > 0.0
+            None
+            
+        let discr = b * b - c;
+
+        if (discr < 0.0f)
+            None
+
+        let t = -b - sqrt(discr);
+
+        if t < 0.0 {  
+            t = 0.0;
+        } 
+
+        if t < min_t {
+            let point = ray.origin + ray.direction * t;
+            Some(HitRecord{ t: t, normal: normalize(point - sphere.center) })
+        } else {
+            None 
+        }
     }
 }
 
