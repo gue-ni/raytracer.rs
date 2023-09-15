@@ -216,7 +216,8 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             Vec3::new(0.6, 0.6, 0.6)
         },
         Some(hit_record) => {
-            hit_record.normal * 0.5 + 0.5
+            //hit_record.normal * 0.5 + 0.5
+            (hit_record.normal + 1.0) * 0.5
         }
     };
     
