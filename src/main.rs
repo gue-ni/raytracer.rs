@@ -94,10 +94,22 @@ pub struct Ray {
     direction: Vec3
 }
 
+
+
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f32
+}
+
+impl Ray {
+    fn point_at(&self, t: f32) -> Vec3 {
+        self.origin + self.direction * t
+    }
+
+    fn cast(&self, scene: &Vec<Sphere>) -> Vec3 {
+        Vec3::new(0.0, 0.0, 0.0)
+    }
 }
 
 pub struct HitRecord {
@@ -132,8 +144,7 @@ impl Hittable for Sphere {
         } 
 
         if t < min_t {
-            let point = ray.origin + ray.direction * t;
-            return Some(HitRecord{ t: t, normal: normalize(point - self.center) });
+            return Some(HitRecord{ t: t, normal: normalize(ray.point_at(t) - self.center) });
         } else {
             return None; 
         }
@@ -183,7 +194,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
 
     let color = match hit {
         None => {
-            Vec3::new(0.0, 0.0, 0.0)
+            Vec3::new(0.0, 1.0, 0.0)
         },
         Some(hit_record) => {
             Vec3::new(1.0, 0.0, 0.0)
@@ -214,6 +225,7 @@ pub fn main() {
             }
 
             pixel = pixel * (1.0 / SAMPLES as f32);
+            pixel = pixel * (u8::MAX as f32); // scale to [0, 255]
             buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
         }
     }
