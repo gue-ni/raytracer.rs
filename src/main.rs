@@ -197,7 +197,7 @@ impl Hittable for Sphere {
         } 
 
         if t < max_t {
-            let normal = normalize(point - self.center);
+            let normal = normalize(ray.point_at(t) - self.center);
             return Some(HitRecord{ t, normal });
         } else {
             return None; 
