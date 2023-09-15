@@ -107,6 +107,13 @@ mod la {
 use la::{Vec3, normalize, dot};
 
 #[derive(Debug, Copy, Clone)]
+pub struct Material {
+    albedo: Vec3,
+    emittance: Vec3,
+    roughness: f32
+}
+
+#[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f32
