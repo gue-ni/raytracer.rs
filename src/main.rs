@@ -242,8 +242,7 @@ pub fn main() {
                 pixel = pixel + cast_ray(&ray, &scene);
             }
 
-            pixel = pixel * (1.0 / SAMPLES as f32);
-            pixel = pixel * (u8::MAX as f32); // scale to [0, 255]
+            pixel = pixel * (u8::MAX as f32) / (SAMPLES as f32);
             buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
         }
     }
