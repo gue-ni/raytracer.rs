@@ -28,39 +28,34 @@ mod la {
         pub fn length(&self) -> f32 {
             (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
         }
-
-        pub fn to_rgb(&self) -> Rgb {
-            let color = self * (u8::MAX as f32);
-            Rgb([color.x as u8, color.y as u8, color.z as u8])
-        }
     }
     
     // scalar multiplication (scalar must be on the left)
     impl Mul<f32> for Vec3 {
         type Output = Self;
-        fn mul(self, other: f32) -> Self {
-            Vec3::new(self.x * other, self.y * other, self.z * other)
+        fn mul(self, scalar: f32) -> Self {
+            Vec3::new(self.x * scalar, self.y * scalar, self.z * scalar)
         }
     }
     
     impl Div<f32> for Vec3 {
         type Output = Self;
-        fn div(self, other: f32) -> Self {
-            Vec3::new(self.x / other, self.y / other, self.z / other)
+        fn div(self, scalar: f32) -> Self {
+            Vec3::new(self.x / scalar, self.y / scalar, self.z / scalar)
         }
     }
     
     impl Add<f32> for Vec3 {
         type Output = Self;
-        fn add(self, other: f32) -> Self {
-            Vec3::new(self.x + other, self.y + other, self.z + other)
+        fn add(self, scalar: f32) -> Self {
+            Vec3::new(self.x + scalar, self.y + scalar, self.z + scalar)
         }
     }
     
     impl Sub<f32> for Vec3 {
         type Output = Self;
-        fn sub(self, other: f32) -> Self {
-            Vec3::new(self.x - other, self.y - other, self.z - other)
+        fn sub(self, scalar: f32) -> Self {
+            Vec3::new(self.x - scalar, self.y - scalar, self.z - scalar)
         }
     }
     
@@ -272,8 +267,8 @@ pub fn main() {
                 pixel = pixel + cast_ray(&ray, &scene);
             }
 
-            pixel = pixel / (SAMPLES as f32);
-            buffer.put_pixel(x, y, pixel.to_rgb());
+            pixel = pixel * (u8::MAX as f32) / (SAMPLES as f32);
+            buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
         }
     }
 
