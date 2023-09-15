@@ -7,6 +7,7 @@ use image::{Rgb, ImageBuffer};
 mod la {
 
     use std::ops::{Add, Mul, Sub, Div};
+    use image::Rgb;
 
     #[derive(Debug, Copy, Clone)]
     pub struct Vec3 {
@@ -19,9 +20,18 @@ mod la {
         pub fn new(x: f32, y: f32, z: f32) -> Self {
             Vec3{ x, y, z }
         }
+
+        pub fn fill(v: f32) -> Self {
+            Vec3{ v, v, v }
+        }
     
         pub fn length(&self) -> f32 {
             (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
+        }
+
+        pub fn to_rgb(&self) -> Rgb {
+            let color = self * (u8::MAX as f32);
+            Rgb([color.x as u8, color.y as u8, color.z as u8])
         }
     }
     
@@ -127,6 +137,25 @@ impl Ray {
     fn point_at(&self, t: f32) -> Vec3 {
         self.origin + self.direction * t
     }
+
+    fn cast(&self, scene: &Vec<Sphere>) -> Option<HitRecord> {
+        let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::fill(0.0) };
+    
+        for object in scene {
+            match object.test(self, closest.t) {
+                None => {},
+                Some(hit) => {
+                   closest = hit; 
+                }
+            }
+        }
+    
+        if closest.t < f32::MAX {
+            Some(closest)
+        } else {
+            None
+        }
+    }
 }
 
 pub struct HitRecord {
@@ -207,8 +236,9 @@ pub fn find_hit(ray: &Ray, scene: &Vec<Sphere>) -> Option<HitRecord> {
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
-    let hit = find_hit(ray, scene);
-
+    //let hit = find_hit(ray, scene);
+    let hit = ray.cast(scene);
+    
     let color = match hit {
         None => {
             Vec3::new(0.0, 1.0, 0.0)
@@ -242,8 +272,8 @@ pub fn main() {
                 pixel = pixel + cast_ray(&ray, &scene);
             }
 
-            pixel = pixel * (u8::MAX as f32) / (SAMPLES as f32);
-            buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
+            pixel = pixel / (SAMPLES as f32);
+            buffer.put_pixel(x, y, pixel.to_rgb());
         }
     }
 
