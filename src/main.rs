@@ -210,6 +210,7 @@ pub fn main() {
     const SAMPLES: u32  = 1;
 
     let scene: Vec<Sphere> = Vec::new();
+    scene.push(Sphere{ center: Vec3::new(0.0, -2.0, 0.0), radius: 1.0 });
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
