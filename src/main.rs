@@ -160,7 +160,7 @@ impl Ray {
         closest.t = f32::INFINITY;
     
         for object in scene {
-            match object.test(self, closest.t) {
+            match object.test(self, 0.0, closest.t) {
                 None => {},
                 Some(hit) => {
                    closest = hit; 
@@ -199,11 +199,11 @@ pub enum RenderStrategy {
 }
 
 pub trait Hittable {
-    fn test(&self, ray: &Ray, max_t: f32) -> Option<HitRecord>;
+    fn test(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
 }
 
 impl Hittable for Sphere {
-    fn test(&self, ray: &Ray, max_t: f32) -> Option<HitRecord> {
+    fn test(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
         let m = ray.origin - self.center;
         let b = dot(m, ray.direction);
         let c = dot(m, m) - self.radius * self.radius;
@@ -217,12 +217,10 @@ impl Hittable for Sphere {
             return None;       
         }
 
-        let mut t = -b - discr.sqrt();
-        if t < 0.0 {  
-            t = 0.0;
-        } 
+        //let t = f32::max(-b - discr.sqrt(), 0.0);
+        let t = -b - discr.sqrt();
 
-        if t < max_t {
+        if min_t < t && t < max_t {
             let point = ray.point_at(t);
             let normal = normalize(point - self.center);
             return Some(HitRecord{ t, normal, point });
@@ -296,7 +294,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
 fn test_sphere_hit() {
     let sphere = Sphere::new(Vec3::new(0.0, 0.0, 5.0), 1.0);
     let ray = Ray::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 1.0));
-    let hit = sphere.test(&ray, f32::INFINITY).unwrap();
+    let hit = sphere.test(&ray, 0.0, f32::INFINITY).unwrap();
     assert_eq!(hit.t, 4.0);
     assert_eq!(hit.point, Vec3::new(0.0, 0.0, 4.0));
     assert_eq!(hit.normal, Vec3::new(0.0, 0.0, -1.0));
