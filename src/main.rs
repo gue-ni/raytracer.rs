@@ -8,7 +8,7 @@ mod la {
 
     use std::ops::{Add, Mul, Sub, Div};
 
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, PartialEq)]
     pub struct Vec3 {
         pub x: f32, 
         pub y: f32, 
@@ -243,34 +243,36 @@ pub fn simple_phong(hit: &HitRecord, light: &Light) -> Vec3 {
     let light_dir = normalize(light.position - hit.point);
 
     let ambient = light.color * 0.3;
-    let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
+    let diffuse = light.color * f32::max(dot(hit.normal, -light_dir), 0.0);
     let specular = Vec3::zero();
 
     (ambient + diffuse + specular) * albedo
 }
 
-pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
-    
-    let color = match ray.cast(scene) {
+pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {   
+    let result = match ray.cast(scene) {
         None => {
-            Vec3::new(0.6, 0.6, 0.6)
+            let background = Vec3::new(0.6, 0.6, 0.6);
+            background
         },
         Some(hit) => {
             let light = Light{ position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
-            let result = simple_phong(&hit, &light);
-            result
+            let color = simple_phong(&hit, &light);
+            color
         }
     };
     
-    color
+    result
 }
 
 #[test]
 fn test_sphere_hit() {
-    let sphere = Sphere::new(Vec3::new(0.0, 0.0, 0.0), 1.0);
-    let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
-    let hit = sphere.test(&ray, f32::INFINITY);
-    assert_eq!(hit.unwrap().t, 4.0);
+    let sphere = Sphere::new(Vec3::new(0.0, 0.0, 5.0), 1.0);
+    let ray = Ray::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 1.0));
+    let hit = sphere.test(&ray, f32::INFINITY).unwrap();
+    assert_eq!(hit.t, 4.0);
+    assert_eq!(hit.point, Vec3::new(0.0, 0.0, 4.0));
+    assert_eq!(hit.normal, Vec3::new(0.0, 0.0, -1.0));
 }
 
 pub fn main() { 
