@@ -115,7 +115,7 @@ mod la {
     
     // normalize
     pub fn normalize(v: Vec3) -> Vec3 {
-        v * (1.0 / v.length())
+        v / v.length()
     }
 }
 
@@ -249,17 +249,19 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     Ray::new( origin, direction )
 }
 
-pub fn simple_phong(hit: &HitRecord, light: &Light) -> Vec3 {
+pub fn phong(hit: &HitRecord, lights: &Vec<Light>) -> Vec3 {
     //let albedo = hit.normal * 0.5 + 0.5;
     let albedo = Vec3::new(0.8, 0.5, 0.1);
-            
-    let light_dir = normalize(light.position - hit.point);
+    let mut result = Vec3::zero();
 
-    let ambient = light.color * 0.3;
-    let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
-    let specular = Vec3::zero();
-
-    (ambient + diffuse + specular) * albedo
+    for light in lights {
+        let light_dir = normalize(light.position - hit.point);
+        let ambient = light.color * 0.3;
+        let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
+        let specular = Vec3::zero();
+        result = result + ((ambient + diffuse + specular) * albedo);
+    }
+    result
 }
 
 pub fn render(strategy: RenderStrategy, hit: &HitRecord) -> Vec3 {
@@ -267,7 +269,8 @@ pub fn render(strategy: RenderStrategy, hit: &HitRecord) -> Vec3 {
         RenderStrategy::PHONG => {
             // lights are just objects with emittance > 0
             let light = Light{ position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
-            simple_phong(&hit, &light)
+            let lights = vec![light];
+            phong(&hit, &lights)
         }
     }       
 }
@@ -280,7 +283,8 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
         },
         Some(hit) => {
             let light = Light{ position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
-            let color = simple_phong(&hit, &light);
+            let lights = vec![light];
+            let color = phong(&hit, &lights);
             color
         }
     };
