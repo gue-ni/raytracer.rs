@@ -213,7 +213,7 @@ impl Hittable for Sphere {
         if t < max_t {
             let point = ray.point_at(t);
             let normal = normalize(point - self.center);
-            return Some(HitRecord{ t, normal });
+            return Some(HitRecord{ t, normal, point });
         } else {
             return None; 
         }
@@ -257,7 +257,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
         },
         Some(hit) => {
             let light = Light{ position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
-            let result = simple_phong(hit, &light);
+            let result = simple_phong(&hit, &light);
             result
         }
     };
