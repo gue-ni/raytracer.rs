@@ -148,7 +148,7 @@ impl Ray {
     }
 
     fn cast(&self, scene: &Vec<Sphere>) -> Option<HitRecord> {
-        let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::zero(), point: Vec3::zero() };
+        let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::zero() };
     
         for object in scene {
             match object.test(self, closest.t) {
@@ -169,16 +169,15 @@ impl Ray {
 
 pub struct HitRecord {
     t: f32,
-    normal: Vec3,
-    point: Vec3
+    normal: Vec3
 }
 
 pub trait Hittable {
-    fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord>;
+    fn test(&self, ray: &Ray, max_t: f32) -> Option<HitRecord>;
 }
 
 impl Hittable for Sphere {
-    fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord> {
+    fn test(&self, ray: &Ray, max_t: f32) -> Option<HitRecord> {
         let m = ray.origin - self.center;
         let b = dot(m, ray.direction);
         let c = dot(m, m) - self.radius * self.radius;
@@ -197,10 +196,9 @@ impl Hittable for Sphere {
             t = 0.0;
         } 
 
-        if t < min_t {
-            let point = ray.point_at(t);
+        if t < max_t {
             let normal = normalize(point - self.center);
-            return Some(HitRecord{ t, normal, point });
+            return Some(HitRecord{ t, normal });
         } else {
             return None; 
         }
@@ -224,6 +222,10 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     Ray::new( origin, direction )
 }
 
+pub fn simple_phong(hit: &HitRecord, light_pos: Vec3) -> Vec3 {
+    Vec3::zero()
+}
+
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
     
     let color = match ray.cast(scene) {
@@ -232,12 +234,13 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
         },
         Some(hit) => {
             let normal_as_rgb = hit.normal * 0.5 + 0.5;
+            let point = ray.point_at(hit.t);
             
-            let light_color = Vec3::one();
+            let light_color = Vec3::fill(1.0);
             let light_pos = Vec3::new(1.0, 10.0, 2.0);
-            let light_dir = normalize(light_pos - hit.point);
+            let light_dir = normalize(light_pos - point);
 
-            let ambient = light_color * 0.1;
+            let ambient = light_color * 0.3;
             let diffuse = light_color * f32::max(dot(hit.normal, light_dir), 0.0);
             let specular = Vec3::zero();
 
@@ -247,6 +250,14 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
     };
     
     color
+}
+
+#[test]
+fn test_sphere_hit() {
+    let sphere = Sphere::new(Vec3::new(0.0, 0.0, 0.0), 1.0);
+    let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
+    let hit = sphere.hit(&ray, f32::INFINITY);
+    assert_eq!(hit.unwrap().t, 4.0);
 }
 
 pub fn main() { 
