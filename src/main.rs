@@ -194,7 +194,7 @@ impl HitRecord {
     }
 }
 
-enum RenderStrategy {
+pub enum RenderStrategy {
     PHONG
 }
 
