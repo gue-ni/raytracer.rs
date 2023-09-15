@@ -214,7 +214,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             Vec3::new(0.0, 1.0, 0.0)
         },
         Some(hit_record) => {
-            Vec3::new(1.0, 0.0, 0.0)
+            hit_record.normal * 0.5 + 0.5
         }
     };
     color
