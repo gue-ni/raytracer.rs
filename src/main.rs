@@ -6,7 +6,7 @@ use image::{Rgb, ImageBuffer};
 
 mod la {
 
-    use std::ops::{Add, Mul, Sub, Div};
+    use std::ops::{Add, Mul, Sub, Div, Neg};
 
     #[derive(Debug, Copy, Clone, PartialEq)]
     pub struct Vec3 {
@@ -69,7 +69,7 @@ mod la {
     // vector multiplication
     impl Mul<Vec3> for Vec3 {
         type Output = Self;
-        fn mul(self, other: Vec3) -> Self {
+        fn mul(self, other: Self) -> Self {
             Vec3::new(self.x * other.x, self.y * other.y, self.z * other.z)
         }
     } 
@@ -77,7 +77,7 @@ mod la {
     // vector addition
     impl Add<Vec3> for Vec3 {
         type Output = Self;
-        fn add(self, other: Vec3) -> Self {
+        fn add(self, other: Self) -> Self {
             Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z)
         }
     } 
@@ -85,8 +85,16 @@ mod la {
     // vector subtraction
     impl Sub<Vec3> for Vec3 {
         type Output = Self;
-        fn sub(self, other: Vec3) -> Self {
+        fn sub(self, other: Self) -> Self {
             Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z)
+        }
+    }
+
+    // negation
+    impl Neg for Vec3 {
+        type Output = Self;
+        fn neg(self) -> Self {
+            Vec3::new(-self.x, -self.y, -self.z)
         }
     }
     
