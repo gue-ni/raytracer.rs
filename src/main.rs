@@ -116,16 +116,16 @@ impl Hittable for Sphere {
         let c = dot(m, m) - self.radius * self.radius;
 
         if c > 0.0 && b > 0.0 {
-            None 
+            return None;
         }
             
         let discr = b * b - c;
 
-        if discr < 0.0f {
-            None        
+        if discr < 0.0 {
+            return None;       
         }
 
-        let mut t = -b - sqrt(discr);
+        let mut t = -b - discr.sqrt();
 
         if t < 0.0 {  
             t = 0.0;
@@ -133,9 +133,9 @@ impl Hittable for Sphere {
 
         if t < min_t {
             let point = ray.origin + ray.direction * t;
-            Some(HitRecord{ t: t, normal: normalize(point - self.center) })
+            return Some(HitRecord{ t: t, normal: normalize(point - self.center) });
         } else {
-            None 
+            return None; 
         }
     }
 }
