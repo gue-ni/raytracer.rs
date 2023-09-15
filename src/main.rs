@@ -148,7 +148,8 @@ impl Ray {
     }
 
     fn cast(&self, scene: &Vec<Sphere>) -> Option<HitRecord> {
-        let mut closest = HitRecord{ t: f32::MAX, normal: Vec3::zero() };
+        let mut closest = HitRecord::new();
+        closest.t = f32::INFINITY;
     
         for object in scene {
             match object.test(self, closest.t) {
@@ -159,7 +160,7 @@ impl Ray {
             }
         }
     
-        if closest.t < f32::MAX {
+        if closest.t < f32::INFINITY {
             Some(closest)
         } else {
             None
@@ -167,9 +168,22 @@ impl Ray {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+pub struct Light {
+    position: Vec3,
+    color: Vec3
+}
+
 pub struct HitRecord {
     t: f32,
-    normal: Vec3
+    normal: Vec3,
+    point: Vec3
+}
+
+impl HitRecord {
+    fn new() -> Self {
+        HitRecord{ t: f32::INFINITY, normal: Vec3::zero(), point: Vec3::zero() }
+    }
 }
 
 pub trait Hittable {
@@ -197,7 +211,8 @@ impl Hittable for Sphere {
         } 
 
         if t < max_t {
-            let normal = normalize(ray.point_at(t) - self.center);
+            let point = ray.point_at(t);
+            let normal = normalize(point - self.center);
             return Some(HitRecord{ t, normal });
         } else {
             return None; 
@@ -222,8 +237,16 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     Ray::new( origin, direction )
 }
 
-pub fn simple_phong(hit: &HitRecord, light_pos: Vec3) -> Vec3 {
-    Vec3::zero()
+pub fn simple_phong(hit: &HitRecord, light: &Light) -> Vec3 {
+    let albedo = hit.normal * 0.5 + 0.5;
+            
+    let light_dir = normalize(light.position - hit.point);
+
+    let ambient = light.color * 0.3;
+    let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
+    let specular = Vec3::zero();
+
+    (ambient + diffuse + specular) * albedo
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {    
@@ -233,18 +256,8 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             Vec3::new(0.6, 0.6, 0.6)
         },
         Some(hit) => {
-            let normal_as_rgb = hit.normal * 0.5 + 0.5;
-            let point = ray.point_at(hit.t);
-            
-            let light_color = Vec3::fill(1.0);
-            let light_pos = Vec3::new(1.0, 10.0, 2.0);
-            let light_dir = normalize(light_pos - point);
-
-            let ambient = light_color * 0.3;
-            let diffuse = light_color * f32::max(dot(hit.normal, light_dir), 0.0);
-            let specular = Vec3::zero();
-
-            let result = (ambient + diffuse + specular) * normal_as_rgb;
+            let light = Light{ position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
+            let result = simple_phong(hit, &light);
             result
         }
     };
@@ -256,7 +269,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
 fn test_sphere_hit() {
     let sphere = Sphere::new(Vec3::new(0.0, 0.0, 0.0), 1.0);
     let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
-    let hit = sphere.hit(&ray, f32::INFINITY);
+    let hit = sphere.test(&ray, f32::INFINITY);
     assert_eq!(hit.unwrap().t, 4.0);
 }
 
