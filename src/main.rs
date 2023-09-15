@@ -2,7 +2,6 @@
 #[allow(dead_code)]
 
 use std::vec;
-use std::cmp::max;
 use image::{Rgb, ImageBuffer};
 
 mod la {
@@ -240,7 +239,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             let light_dir = normalize(light_pos - hit.point);
 
             let ambient = light_color * 0.1;
-            let diffuse = light_color * max(dot(normal, light_dir), 0.0);
+            let diffuse = light_color * f32::max(dot(normal, light_dir), 0.0);
 
             let result = (ambient + diffuse) * normal_as_rgb;
             result
