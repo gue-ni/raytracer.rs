@@ -2,91 +2,104 @@
 #[allow(dead_code)]
 
 use std::vec;
-use std::ops::{Add, Mul, Sub, Div};
-
 use image::{Rgb, ImageBuffer};
 
-#[derive(Debug, Copy, Clone)]
-pub struct Vec3 {
-    x: f32, 
-    y: f32, 
-    z: f32
-}
+mod la {
 
-impl Vec3 {
-    fn new(x: f32, y: f32, z: f32) -> Self {
-        Vec3{ x, y, z }
+    use std::ops::{Add, Mul, Sub, Div};
+
+    #[derive(Debug, Copy, Clone)]
+    pub struct Vec3 {
+        pub x: f32, 
+        pub y: f32, 
+        pub z: f32
     }
-
-    fn length(&self) -> f32 {
-        (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
+    
+    impl Vec3 {
+        pub fn new(x: f32, y: f32, z: f32) -> Self {
+            Vec3{ x, y, z }
+        }
+    
+        pub fn length(&self) -> f32 {
+            (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
+        }
+    }
+    
+    // scalar multiplication (scalar must be on the left)
+    impl Mul<f32> for Vec3 {
+        type Output = Self;
+        fn mul(self, other: f32) -> Self {
+            Vec3::new(self.x * other, self.y * other, self.z * other)
+        }
+    }
+    
+    impl Div<f32> for Vec3 {
+        type Output = Self;
+        fn div(self, other: f32) -> Self {
+            Vec3::new(self.x / other, self.y / other, self.z / other)
+        }
+    }
+    
+    impl Add<f32> for Vec3 {
+        type Output = Self;
+        fn add(self, other: f32) -> Self {
+            Vec3::new(self.x + other, self.y + other, self.z + other)
+        }
+    }
+    
+    impl Sub<f32> for Vec3 {
+        type Output = Self;
+        fn sub(self, other: f32) -> Self {
+            Vec3::new(self.x - other, self.y - other, self.z - other)
+        }
+    }
+    
+    // vector multiplication
+    impl Mul<Vec3> for Vec3 {
+        type Output = Self;
+        fn mul(self, other: Vec3) -> Self {
+            Vec3::new(self.x * other.x, self.y * other.y, self.z * other.z)
+        }
+    } 
+    
+    // vector addition
+    impl Add<Vec3> for Vec3 {
+        type Output = Self;
+        fn add(self, other: Vec3) -> Self {
+            Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z)
+        }
+    } 
+    
+    // vector subtraction
+    impl Sub<Vec3> for Vec3 {
+        type Output = Self;
+        fn sub(self, other: Vec3) -> Self {
+            Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z)
+        }
+    }
+    
+    // dot product
+    pub fn dot(a: Vec3, b: Vec3) -> f32 {
+        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+    }
+    
+    // cross product
+    #[allow(dead_code)]
+    pub fn cross(a: Vec3, b: Vec3) -> Vec3 {
+        Vec3::new(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        )
+    }
+    
+    // normalize
+    pub fn normalize(v: Vec3) -> Vec3 {
+        v * (1.0 / v.length())
     }
 }
 
-// scalar multiplication (scalar must be on the left)
-impl Mul<f32> for Vec3 {
-    type Output = Self;
-    fn mul(self, other: f32) -> Self {
-        Vec3::new(self.x * other, self.y * other, self.z * other)
-    }
-}
-
-impl Add<f32> for Vec3 {
-    type Output = Self;
-    fn add(self, other: f32) -> Self {
-        Vec3::new(self.x + other, self.y + other, self.z + other)
-    }
-}
-
-impl Sub<f32> for Vec3 {
-    type Output = Self;
-    fn sub(self, other: f32) -> Self {
-        Vec3::new(self.x - other, self.y - other, self.z - other)
-    }
-}
-
-// vector multiplication
-impl Mul<Vec3> for Vec3 {
-    type Output = Self;
-    fn mul(self, other: Vec3) -> Self {
-        Vec3::new(self.x * other.x, self.y * other.y, self.z * other.z)
-    }
-} 
-
-// vector addition
-impl Add<Vec3> for Vec3 {
-    type Output = Self;
-    fn add(self, other: Vec3) -> Self {
-        Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z)
-    }
-} 
-
-// vector subtraction
-impl Sub<Vec3> for Vec3 {
-    type Output = Self;
-    fn sub(self, other: Vec3) -> Self {
-        Vec3::new(self.x - other.x, self.y - other.y, self.z - other.z)
-    }
-}
-
-// dot product
-pub fn dot(a: Vec3, b: Vec3) -> f32 {
-    (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
-}
-
-// cross product
-pub fn cross(a: Vec3, b: Vec3) -> Vec3 {
-    Vec3::new(
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x
-    )
-}
-
-// normalize
-pub fn normalize(v: Vec3) -> Vec3 {
-    v * (1.0 / v.length())
-}
+use la::{Vec3, normalize, dot};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
@@ -113,10 +126,6 @@ impl Ray {
     
     fn point_at(&self, t: f32) -> Vec3 {
         self.origin + self.direction * t
-    }
-
-    fn cast(&self, scene: &Vec<Sphere>) -> Vec3 {
-        Vec3::new(0.0, 0.0, 0.0)
     }
 }
 
