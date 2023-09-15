@@ -194,6 +194,10 @@ impl HitRecord {
     }
 }
 
+enum RenderStrategy {
+    PHONG
+}
+
 pub trait Hittable {
     fn test(&self, ray: &Ray, max_t: f32) -> Option<HitRecord>;
 }
@@ -251,10 +255,20 @@ pub fn simple_phong(hit: &HitRecord, light: &Light) -> Vec3 {
     let light_dir = normalize(light.position - hit.point);
 
     let ambient = light.color * 0.3;
-    let diffuse = light.color * f32::max(dot(hit.normal, -light_dir), 0.0);
+    let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
     let specular = Vec3::zero();
 
     (ambient + diffuse + specular) * albedo
+}
+
+pub fn render(strategy: RenderStrategy, hit: &HitRecord) -> Vec3 {
+    match strategy {
+        RenderStrategy::PHONG => {
+            // lights are just objects with emittance > 0
+            let light = Light{ position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
+            simple_phong(&hit, &light)
+        }
+    }       
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {   
