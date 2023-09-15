@@ -89,20 +89,28 @@ pub fn normalize(v: Vec3) -> Vec3 {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Ray {
-    origin: Vec3,
-    direction: Vec3
-}
-
-
-
-#[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: f32
 }
 
+impl Sphere {
+    fn new(center: Vec3, radius: f32) -> Self {
+        Sphere{ center, radius }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Ray {
+    origin: Vec3,
+    direction: Vec3
+}
+
 impl Ray {
+    fn new(origin: Vec3, direction: Vec3) -> Self {
+        Ray{ origin, direction }
+    }
+    
     fn point_at(&self, t: f32) -> Vec3 {
         self.origin + self.direction * t
     }
@@ -205,12 +213,12 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
 
 pub fn main() { 
 
-    const WIDTH: u32    = 100;
-    const HEIGHT: u32   = 50;
+    const WIDTH: u32    = 640;
+    const HEIGHT: u32   = 480;
     const SAMPLES: u32  = 1;
 
     let mut scene: Vec<Sphere> = Vec::new();
-    scene.push(Sphere{ center: Vec3::new(0.0, 0.0, 5.0), radius: 1.0 });
+    scene.push(Sphere{ center: Vec3::new(0.0, 0.0, 3.0), radius: 1.0 });
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
