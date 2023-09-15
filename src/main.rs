@@ -4,7 +4,7 @@
 use std::vec;
 use std::ops::{Add, Mul, Sub, Div};
 
-use image::{Pixel, Rgb, ImageBuffer};
+use image::{Rgb, ImageBuffer};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
@@ -112,18 +112,20 @@ pub trait Hittable {
 impl Hittable for Sphere {
     fn test(&self, ray: &Ray, min_t: f32) -> Option<HitRecord> {
         let m = ray.origin - self.center;
-        let b = dot(m, r.direction);
+        let b = dot(m, ray.direction);
         let c = dot(m, m) - self.radius * self.radius;
 
-        if c > 0.0 && b > 0.0
-            None
+        if c > 0.0 && b > 0.0 {
+            None 
+        }
             
         let discr = b * b - c;
 
-        if (discr < 0.0f)
-            None
+        if discr < 0.0f {
+            None        
+        }
 
-        let t = -b - sqrt(discr);
+        let mut t = -b - sqrt(discr);
 
         if t < 0.0 {  
             t = 0.0;
