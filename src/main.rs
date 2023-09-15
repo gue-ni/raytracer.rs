@@ -22,7 +22,7 @@ mod la {
         }
 
         pub fn fill(v: f32) -> Self {
-            Vec3{ v, v, v }
+            Vec3::new(v, v, v)
         }
     
         pub fn length(&self) -> f32 {
@@ -173,13 +173,11 @@ impl Hittable for Sphere {
         }
             
         let discr = b * b - c;
-
         if discr < 0.0 {
             return None;       
         }
 
         let mut t = -b - discr.sqrt();
-
         if t < 0.0 {  
             t = 0.0;
         } 
@@ -206,7 +204,7 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     let origin = Vec3::new(0.0, 0.0, 0.0);
     let direction = normalize(ray_target - origin);
 
-    Ray{ origin, direction }
+    Ray::new( origin, direction )
 }
 
 pub fn find_hit(ray: &Ray, scene: &Vec<Sphere>) -> Option<HitRecord> {
