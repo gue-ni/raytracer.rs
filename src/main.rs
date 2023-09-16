@@ -4,6 +4,7 @@ use crate::vector::{ Vec3, normalize, dot };
 use std::vec;
 use image::{ Rgb, ImageBuffer };
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Material {
     albedo: Vec3,
@@ -78,8 +79,8 @@ impl HitRecord {
 }
 
 pub enum RenderStrategy {
-    PHONG,
-    PATH_TRACING
+    Phong,
+    PathTracing,
 }
 
 pub trait Hittable {
@@ -106,6 +107,7 @@ impl Hittable for Sphere {
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
             let normal = normalize(point - self.center);
+            println!("{}", normal.length());
             return Some(HitRecord { t, normal, point });
         } else {
             return None;
@@ -130,33 +132,36 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
 }
 
 pub fn phong(hit: &HitRecord, lights: &Vec<Light>) -> Vec3 {
-    let albedo = hit.normal * 0.5 + 0.5;
-    //let albedo = Vec3::new(0.8, 0.5, 0.1);
+    //let albedo = hit.normal * 0.5 + 0.5;
+    let albedo = Vec3::new(1.0, 0.0, 0.0);
 
     let mut result = Vec3::zero();
 
     for light in lights {
         let light_dir = normalize(light.position - hit.point);
-        let ambient = light.color * 0.3;
-        let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
+        //let ambient = light.color * 0.3;
+        let ambient = Vec3::zero();
+
+        //println!("{:?}, {}", hit.normal, hit.normal.length());
+        let diffuse = light.color * dot(hit.normal, -light_dir);
+        //let diffuse = Vec3::zero();
+
         let specular = Vec3::zero();
         result = result + (ambient + diffuse + specular) * albedo;
     }
-    
+
     result
 }
 
 pub fn render(strategy: RenderStrategy, hit: &HitRecord) -> Vec3 {
     match strategy {
-        RenderStrategy::PHONG => {
+        RenderStrategy::Phong => {
             // lights are just objects with emittance > 0
-            let light = Light { position: Vec3::new(1.0, 10.0, 2.0), color: Vec3::one() };
+            let light = Light { position: Vec3::new(1.0, 10.0, 5.0), color: Vec3::one() };
             let lights = vec![light];
             phong(&hit, &lights)
-        },
-        RenderStrategy::PATH_TRACING => {
-            Vec3::zero()
         }
+        RenderStrategy::PathTracing => { Vec3::zero() }
     }
 }
 
@@ -166,9 +171,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             let background = Vec3::new(0.6, 0.6, 0.6);
             background
         }
-        Some(hit) => {
-            render(RenderStrategy::PHONG, &hit)
-        }
+        Some(hit) => { render(RenderStrategy::Phong, &hit) }
     };
 
     result
