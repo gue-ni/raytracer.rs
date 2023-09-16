@@ -107,7 +107,6 @@ impl Hittable for Sphere {
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
             let normal = normalize(point - self.center);
-            println!("{}", normal.length());
             return Some(HitRecord { t, normal, point });
         } else {
             return None;
@@ -139,14 +138,11 @@ pub fn phong(hit: &HitRecord, lights: &Vec<Light>) -> Vec3 {
 
     for light in lights {
         let light_dir = normalize(light.position - hit.point);
-        //let ambient = light.color * 0.3;
-        let ambient = Vec3::zero();
 
-        //println!("{:?}, {}", hit.normal, hit.normal.length());
-        let diffuse = light.color * dot(hit.normal, -light_dir);
-        //let diffuse = Vec3::zero();
-
+        let ambient = light.color * 0.3;
+        let diffuse = light.color * f32::max(dot(hit.normal, -light_dir), 0.0);
         let specular = Vec3::zero();
+
         result = result + (ambient + diffuse + specular) * albedo;
     }
 

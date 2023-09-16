@@ -24,10 +24,15 @@ impl Vec3 {
         Vec3::new(v, v, v)
     }
 
-    pub fn length(self) -> f32 {
+    pub fn length2(self) -> f32 {
         dot(self, self)
     }
+
+    pub fn length(self) -> f32 {
+        self.length2().sqrt()
+    }
 }
+
 
 // scalar multiplication (scalar must be on the left)
 impl Mul<f32> for Vec3 {
