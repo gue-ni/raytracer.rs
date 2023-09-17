@@ -192,7 +192,7 @@ pub fn main() {
     scene.push(Sphere::new(Vec3::new(0.0, 0.0, 3.0), 1.0));
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
-    let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::from_raw(
+    let mut buffer = ImageBuffer::from_raw(
         WIDTH,
         HEIGHT,
         pixels
@@ -212,5 +212,8 @@ pub fn main() {
         }
     }
 
-    buffer.save("output.png");
+     match buffer.save("output.png") {
+        Err(_) => panic!("could not save file"),
+        Ok(_) => println!("Saved file")
+    };
 }

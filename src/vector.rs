@@ -33,7 +33,6 @@ impl Vec3 {
     }
 }
 
-
 // scalar multiplication (scalar must be on the left)
 impl Mul<f32> for Vec3 {
     type Output = Self;
@@ -119,20 +118,26 @@ pub fn normalize(v: Vec3) -> Vec3 {
     v / v.length()
 }
 
-#[test]
-fn test_length() {
-    let v0 = Vec3::new(1.0, 0.0, 0.0);
-    assert_eq!(v0.length(), 1.0);
+#[cfg(test)]
+mod tests {
+
+    use crate::vector::*;
+
+    #[test]
+    fn test_length() {
+        let v0 = Vec3::new(1.0, 0.0, 0.0);
+        assert_eq!(v0.length(), 1.0);
+    }
+
+    #[test]
+    fn test_normalize() {
+        let v0 = Vec3::new(1.0, 5.0, 1.0);
+        assert_eq!(normalize(v0).length(), 1.0);
+    }
+
+    #[test]
+    fn test_cross() {}
+
+    #[test]
+    fn test_dot() {}
 }
-
-#[test]
-fn test_normalize() {
-    let v0 = Vec3::new(1.0, 5.0, 1.0);
-    assert_eq!(normalize(v0).length(), 1.0);
-}
-
-#[test]
-fn test_cross() {}
-
-#[test]
-fn test_dot() {}
