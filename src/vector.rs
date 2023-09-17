@@ -118,9 +118,12 @@ pub fn normalize(v: Vec3) -> Vec3 {
     v / v.length()
 }
 
+pub fn reflect(incoming: Vec3, normal: Vec3) -> Vec3 {
+    incoming - normal * 2.0 * dot(incoming, normal)
+}
+
 #[cfg(test)]
 mod tests {
-
     use crate::vector::*;
 
     #[test]
@@ -139,5 +142,7 @@ mod tests {
     fn test_cross() {}
 
     #[test]
-    fn test_dot() {}
+    fn test_dot() {
+        assert_eq!(dot(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0,0.0,0.0)), 0.0);
+    }
 }

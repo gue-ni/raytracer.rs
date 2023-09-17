@@ -1,5 +1,5 @@
 mod vector;
-use crate::vector::{ Vec3, normalize, dot };
+use crate::vector::{ Vec3, normalize, dot, reflect };
 
 use std::vec;
 use image::{ Rgb, ImageBuffer };
@@ -8,8 +8,6 @@ use image::{ Rgb, ImageBuffer };
 #[derive(Debug)]
 pub struct Material {
     albedo: Vec3,
-    emittance: Vec3,
-    roughness: f32,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -43,11 +41,12 @@ impl Ray {
         let mut closest = HitRecord::new();
         closest.t = f32::INFINITY;
 
-        for object in scene {
+        for (i, object) in scene.iter().enumerate() {
             match object.test(self, 0.0, closest.t) {
                 None => {}
                 Some(hit) => {
                     closest = hit;
+                    closest.idx = i;
                 }
             }
         }
@@ -70,11 +69,12 @@ pub struct HitRecord {
     t: f32,
     normal: Vec3,
     point: Vec3,
+    idx: usize,
 }
 
 impl HitRecord {
     fn new() -> Self {
-        HitRecord { t: f32::INFINITY, normal: Vec3::zero(), point: Vec3::zero() }
+        HitRecord { t: f32::INFINITY, normal: Vec3::zero(), point: Vec3::zero(), idx: 0 }
     }
 }
 
@@ -107,7 +107,8 @@ impl Hittable for Sphere {
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
             let normal = normalize(point - self.center);
-            return Some(HitRecord { t, normal, point });
+            let idx = 0;
+            return Some(HitRecord { t, normal, point, idx });
         } else {
             return None;
         }
@@ -130,33 +131,49 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     Ray::new(origin, direction)
 }
 
-pub fn phong(hit: &HitRecord, lights: &Vec<Light>) -> Vec3 {
+pub fn phong(hit: &HitRecord, scene: &Vec<Sphere>, incoming: &Ray) -> Vec3 {
+    let light = Light { position: Vec3::new(1.0, 10.0, 5.0), color: Vec3::one() };
+    let lights = vec![light];
+
     //let albedo = hit.normal * 0.5 + 0.5;
     let albedo = Vec3::new(1.0, 0.0, 0.0);
 
     let mut result = Vec3::zero();
 
     for light in lights {
-        let light_dir = normalize(light.position - hit.point);
+        let _sphere = scene[hit.idx];
 
-        let ambient = light.color * 0.3;
-        let diffuse = light.color * f32::max(dot(hit.normal, -light_dir), 0.0);
-        let specular = Vec3::zero();
+        let light_dir = normalize(hit.point - light.position);
 
-        result = result + (ambient + diffuse + specular) * albedo;
+        let ambient = light.color * 0.5;
+
+        let diffuse = light.color * f32::max(dot(hit.normal, light_dir), 0.0);
+
+        let reflected = reflect(light_dir, hit.normal);
+        let spec = f32::max(dot(incoming.direction, reflected), 0.0).powf(32.0);
+        let specular = light.color * spec * 0.5;
+
+        let ray = Ray::new(hit.point, light_dir);
+
+        let in_shadow = match ray.cast(scene) {
+            None => 1.0,
+            Some(_) => 0.0,
+        };
+
+        result = result + (ambient + (diffuse + specular) * in_shadow) * albedo;
     }
 
     result
 }
 
-pub fn render(strategy: RenderStrategy, hit: &HitRecord) -> Vec3 {
+pub fn render(
+    strategy: RenderStrategy,
+    hit: &HitRecord,
+    scene: &Vec<Sphere>,
+    incoming: &Ray
+) -> Vec3 {
     match strategy {
-        RenderStrategy::Phong => {
-            // lights are just objects with emittance > 0
-            let light = Light { position: Vec3::new(1.0, 10.0, 5.0), color: Vec3::one() };
-            let lights = vec![light];
-            phong(&hit, &lights)
-        }
+        RenderStrategy::Phong => { phong(&hit, scene, incoming) }
         RenderStrategy::PathTracing => { Vec3::zero() }
     }
 }
@@ -167,7 +184,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             let background = Vec3::new(0.6, 0.6, 0.6);
             background
         }
-        Some(hit) => { render(RenderStrategy::Phong, &hit) }
+        Some(hit) => { render(RenderStrategy::Phong, &hit, scene, ray) }
     };
 
     result
@@ -191,12 +208,11 @@ pub fn main() {
     let mut scene: Vec<Sphere> = Vec::new();
     scene.push(Sphere::new(Vec3::new(0.0, 0.0, 3.0), 1.0));
 
+    let r = 10000.0;
+    scene.push(Sphere::new(Vec3::new(0.0, r + 1.0, 3.0), r));
+
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
-    let mut buffer = ImageBuffer::from_raw(
-        WIDTH,
-        HEIGHT,
-        pixels
-    ).unwrap();
+    let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
 
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
@@ -212,8 +228,8 @@ pub fn main() {
         }
     }
 
-     match buffer.save("output.png") {
-        Err(_) => panic!("could not save file"),
-        Ok(_) => println!("Saved file")
+    match buffer.save("output.png") {
+        Err(_) => panic!("Could not save file"),
+        Ok(_) => println!("Saved file"),
     };
 }
