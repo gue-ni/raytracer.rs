@@ -139,10 +139,14 @@ mod tests {
     }
 
     #[test]
-    fn test_cross() {}
+    fn test_cross() {
+        let a = Vec3::new(2.0, 3.0, 4.0);
+        let b = Vec3::new(5.0, 6.0, 7.0);
+        assert_eq!(cross(a, b), Vec3::new(-3.0, 6.0, -3.0));
+    }
 
     #[test]
     fn test_dot() {
-        assert_eq!(dot(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0,0.0,0.0)), 0.0);
+        assert_eq!(dot(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0, 0.0, 0.0)), 0.0);
     }
 }

@@ -1,6 +1,15 @@
 mod vector;
 use crate::vector::{ Vec3, normalize, dot, reflect };
 
+mod geometry;
+use crate::geometry::*;
+
+mod ray;
+use crate::ray::*;
+
+mod common;
+use crate::common::*;
+
 use std::vec;
 use image::{ Rgb, ImageBuffer };
 
@@ -11,108 +20,14 @@ pub struct Material {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Sphere {
-    center: Vec3,
-    radius: f32,
-}
-
-impl Sphere {
-    fn new(center: Vec3, radius: f32) -> Self {
-        Sphere { center, radius }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Ray {
-    origin: Vec3,
-    direction: Vec3,
-}
-
-impl Ray {
-    fn new(origin: Vec3, direction: Vec3) -> Self {
-        Ray { origin, direction }
-    }
-
-    fn point_at(&self, t: f32) -> Vec3 {
-        self.origin + self.direction * t
-    }
-
-    fn cast(&self, scene: &Vec<Sphere>) -> Option<HitRecord> {
-        let mut closest = HitRecord::new();
-        closest.t = f32::INFINITY;
-
-        for (i, object) in scene.iter().enumerate() {
-            match object.test(self, 0.0, closest.t) {
-                None => {}
-                Some(hit) => {
-                    closest = hit;
-                    closest.idx = i;
-                }
-            }
-        }
-
-        if closest.t < f32::INFINITY {
-            Some(closest)
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
 pub struct Light {
     position: Vec3,
     color: Vec3,
 }
 
-pub struct HitRecord {
-    t: f32,
-    normal: Vec3,
-    point: Vec3,
-    idx: usize,
-}
-
-impl HitRecord {
-    fn new() -> Self {
-        HitRecord { t: f32::INFINITY, normal: Vec3::zero(), point: Vec3::zero(), idx: 0 }
-    }
-}
-
 pub enum RenderStrategy {
     Phong,
     PathTracing,
-}
-
-pub trait Hittable {
-    fn test(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
-}
-
-impl Hittable for Sphere {
-    fn test(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
-        let m = ray.origin - self.center;
-        let b = dot(m, ray.direction);
-        let c = dot(m, m) - self.radius * self.radius;
-
-        if c > 0.0 && b > 0.0 {
-            return None;
-        }
-
-        let discr = b * b - c;
-        if discr < 0.0 {
-            return None;
-        }
-
-        let t = -b - discr.sqrt();
-
-        if min_t < t && t < max_t {
-            let point = ray.point_at(t);
-            let normal = normalize(point - self.center);
-            let idx = 0;
-            return Some(HitRecord { t, normal, point, idx });
-        } else {
-            return None;
-        }
-    }
 }
 
 pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
@@ -184,7 +99,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Sphere>) -> Vec3 {
             let background = Vec3::new(0.6, 0.6, 0.6);
             background
         }
-        Some(hit) => { render(RenderStrategy::Phong, &hit, scene, ray) }
+        Some(hit) => { phong(&hit, scene, ray) }
     };
 
     result
