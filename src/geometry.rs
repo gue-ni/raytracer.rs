@@ -9,11 +9,11 @@ pub struct Sphere {
 }
 
 pub trait Hittable {
-    fn test(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
 }
 
 impl Hittable for Sphere {
-    fn test(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
         let m = ray.origin - self.center;
         let b = dot(m, ray.direction);
         let c = dot(m, m) - self.radius * self.radius;
@@ -41,6 +41,7 @@ impl Hittable for Sphere {
 }
 
 impl Sphere {
+    #[allow(dead_code)]
     pub fn new(center: Vec3, radius: f32) -> Self {
         Sphere { center, radius }
     }

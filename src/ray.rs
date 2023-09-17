@@ -17,12 +17,12 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub fn cast(&self, scene: &Vec<Sphere>) -> Option<HitRecord> {
+    pub fn cast<T: Hittable>(&self, scene: &Vec<T>) -> Option<HitRecord> {
         let mut closest = HitRecord::new();
         closest.t = f32::INFINITY;
 
         for (i, object) in scene.iter().enumerate() {
-            match object.test(self, 0.0, closest.t) {
+            match object.hit(self, 0.0, closest.t) {
                 None => {}
                 Some(hit) => {
                     closest = hit;
