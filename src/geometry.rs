@@ -18,17 +18,6 @@ pub struct Mesh {
     triangles: Vec<Triangle>,
 }
 
-// signed distance function
-pub trait SDF {
-    fn sdf(&self, point: Vec3) -> f32;
-}
-
-impl SDF for Sphere {
-    fn sdf(&self, point: Vec3) -> f32 {
-        (point - self.center).length() - self.radius
-    }
-}
-
 pub trait Hittable {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
 }

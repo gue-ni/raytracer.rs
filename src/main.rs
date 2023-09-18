@@ -67,7 +67,6 @@ pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
     };
     let lights = vec![light];
 
-    //let albedo = hit.normal * 0.5 + 0.5;
     let object = scene[hit.idx];
     let albedo = object.material.albedo;
 
@@ -103,9 +102,6 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) 
 }
 
 pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
-    //let reflected = reflect(incoming.direction, hit.normal);
-    //let ray = Ray::new(hit.point, reflected);
-
     let mut result = Vec3::zero();
 
     // direct light
