@@ -1,5 +1,87 @@
 use std::ops::{ Add, Mul, Sub, Div, Neg, IndexMut, Index };
 
+pub trait SquareRoot {
+    fn sqrt(&self) -> Self;
+}
+
+impl SquareRoot for f32 {
+    fn sqrt(&self) -> Self {
+        (*self).sqrt()
+    }
+}
+
+impl SquareRoot for f64 {
+    fn sqrt(&self) -> Self {
+        (*self).sqrt()
+    }
+}
+
+pub trait Number: Copy + Clone + 
+    Add<Output = Self> + 
+    Sub<Output = Self> + 
+    Mul<Output = Self> + 
+    Div<Output = Self> + 
+    Neg<Output = Self> + 
+    SquareRoot
+    {}
+
+impl Number for f32 {}
+
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Vec3T<T> {
+    pub x: T,
+    pub y: T,
+    pub z: T,
+}
+
+impl<T> Vec3T<T> where T: Number {
+    pub fn new(x: T, y: T, z: T) -> Self {
+        Self { x, y, z }
+    }
+
+    pub fn fill(v: T) -> Self {
+        Self::new(v, v, v)
+    }
+}
+
+pub trait Magnitude<T> where T: Number + SquareRoot {
+    fn length(self) -> T;
+}
+
+impl<T> Magnitude<T> for Vec3T<T> where T: Number {
+    fn length(self) -> T {
+        (Self::dot(self, self)).sqrt()
+    }
+}
+
+// vector addition
+impl<T> Add for Vec3T<T> where T: Number  {
+    type Output = Self;
+    fn add(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
+    }
+}
+
+// scalar multiplication (scalar must be on the left)
+impl<T> Mul<T> for Vec3T<T> where T: Number {
+    type Output = Self;
+    fn mul(self, scalar: T) -> Self {
+        Self::new(self.x * scalar, self.y * scalar, self.z * scalar)
+    }
+}
+
+pub trait Dot<T> {
+    fn dot(a: Self, b: Self) -> T;
+}
+
+impl<T> Dot<T> for Vec3T<T> where T: Number {
+    fn dot(a: Self, b: Self) -> T {
+        a.x * b.x + a.y * b.y + a.z * b.z
+    }
+}
+
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     pub x: f32,
