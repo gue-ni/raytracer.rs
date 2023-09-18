@@ -102,6 +102,17 @@ impl Neg for Vec3 {
     }
 }
 
+impl IndexMut<usize> for Vec3 {
+    fn index_mut(&mut self, i: usize) -> &mut Self {
+        match i {
+            0 => x
+            1 => y
+            2 => z
+            _ => z
+        }
+    }
+}
+
 // dot product
 pub fn dot(a: Vec3, b: Vec3) -> f32 {
     a.x * b.x + a.y * b.y + a.z * b.z
