@@ -76,7 +76,7 @@ impl Hittable for Triangle {
         let d = -dot(n, self.0);
 
         let t = -(dot(n, ray.origin) + d) / ndot;
-        if t < 0 {
+        if t < 0.0 {
             return None;
         }
 
