@@ -18,6 +18,7 @@ use std::vec;
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
     albedo: Vec3,
+    emissive: Vec3,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -97,15 +98,31 @@ pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
     result
 }
 
-pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
-    let reflected = reflect(incoming.direction, hit.normal);
-
-    let ray = Ray::new(hit.point, reflected);
-    Vec3::new(1.0, 0.0, 1.0)
-}
-
 pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) -> Vec3 {
     (Vec3::one() + hit.normal * Vec3::new(1.0, -1.0, -1.0)) * 0.5
+}
+
+pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
+    //let reflected = reflect(incoming.direction, hit.normal);
+    //let ray = Ray::new(hit.point, reflected);
+
+    let mut result = Vec3::zero();
+
+    // direct light
+    for object in scene {
+        let light_dir = normalize(hit.point - object.geometry.center);
+
+        let ray = Ray::new(hit.point, light_dir);
+        let in_shadow = match ray.cast(scene) {
+            None => 1.0,
+            Some(_) => 0.0,
+        };
+        let l = f32::max(dot(hit.normal, light_dir), 0.0);
+
+        result = result + (object.material.emissive * l * in_shadow);
+    }
+
+    result
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3 {
@@ -116,8 +133,8 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3 {
         }
         Some(hit) => {
             // choose rendering strategy
-            phong(&hit, scene, ray)
-            //visualize_normal(&hit, scene, ray)
+            //phong(&hit, scene, ray)
+            visualize_normal(&hit, scene, ray)
             //path_tracing(&hit, scene, ray)
         }
     };
@@ -132,6 +149,7 @@ pub fn main() {
 
     let material = Material {
         albedo: Vec3::new(0.0, 1.0, 0.0),
+        emissive: Vec3::zero(),
     };
 
     let mut scene: Vec<Object> = Vec::new();
@@ -151,6 +169,7 @@ pub fn main() {
         },
         material: Material {
             albedo: Vec3::new(0.0, 0.6, 1.0),
+            emissive: Vec3::zero(),
         },
     });
 
