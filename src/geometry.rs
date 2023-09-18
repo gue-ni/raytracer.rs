@@ -76,25 +76,25 @@ impl Hittable for Triangle {
         let edge0 = self.1 - self.0;
         let vp0 = point - self.0;
         c = cross(edge0, vp0);
-        if dot(n,c) < 0 {
+        if dot(n,c) < 0.0 {
             return None;
         }
 
         let edge1 = self.2 - self.1;
         let vp1 = point - self.1;
         c = cross(edge1, vp1);
-        if dot(n,c) < 0 {
+        if dot(n,c) < 0.0 {
             return None;
         }
 
         let edge2 = self.0 - self.2;
         let vp2 = point - self.2;
         c = cross(edge2, vp2);
-        if dot(n,c) < 0 {
+        if dot(n,c) < 0.0 {
             return None;
         }
         
-        Some(HitRecord { t: t, normal: n, point: point })
+        Some(HitRecord { t: t, normal: n, point: point, idx: 0 })
     }
 }
 
