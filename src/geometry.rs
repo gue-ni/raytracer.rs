@@ -111,7 +111,7 @@ impl Hittable for Triangle {
 
 impl Hittable for Mesh {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
-        for triangle in self.triangles {
+        for triangle in &self.triangles {
             let hit_record = triangle.hit(ray, min_t, max_t);
             if hit_record.is_some() {
                 return hit_record;
