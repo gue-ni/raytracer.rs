@@ -13,4 +13,13 @@ mod test {
         assert_eq!(hit.point, Vec3f::new(0.0, 0.0, 4.0));
         assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
     }
+
+    #[test]
+    fn test_triangle_hit() {
+        let t = Triangle(
+            Vec3f::new(-0.5, 0.0, 0.0),
+            Vec3f::new(0.0, 1.0, 0.0),
+            Vec3f::new(0.5, 0.0, 0.0),
+        );
+    }
 }
