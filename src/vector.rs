@@ -1,4 +1,4 @@
-use std::ops::{ Add, Mul, Sub, Div, Neg };
+use std::ops::{ Add, Mul, Sub, Div, Neg, IndexMut, Index };
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
@@ -102,12 +102,25 @@ impl Neg for Vec3 {
     }
 }
 
-impl IndexMut<usize> for Vec3 {
-    fn index_mut(&mut self, i: usize) -> &mut Self {
+impl Index<usize> for Vec3 {
+    type Output = f32;
+    fn index(&self, i: usize) -> &f32 {
         match i {
-            0 => x,
-            1 => y,
-            2 => z
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => &self.z
+        }
+    }
+}
+
+impl IndexMut<usize> for Vec3 {
+    fn index_mut(&mut self, i: usize) -> &mut f32 {
+        match i {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => &mut self.z
         }
     }
 }
@@ -131,6 +144,9 @@ pub fn normalize(v: Vec3) -> Vec3 {
 pub fn reflect(incoming: Vec3, normal: Vec3) -> Vec3 {
     incoming - normal * 2.0 * dot(incoming, normal)
 }
+
+
+
 
 #[cfg(test)]
 mod tests {
