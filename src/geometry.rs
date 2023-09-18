@@ -20,11 +20,11 @@ pub struct Mesh {
 
 // signed distance function
 pub trait SDF {
-    fn sdf(&self, ray: &Ray, point: Vec3) -> f32;
+    fn sdf(&self, point: Vec3) -> f32;
 }
 
 impl SDF for Sphere {
-    fn sdf(&self, ray: &Ray, point: Vec3) -> f32 {
+    fn sdf(&self, point: Vec3) -> f32 {
         (point - self.center).length() - self.radius
     }
 }
