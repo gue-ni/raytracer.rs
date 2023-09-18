@@ -131,6 +131,29 @@ where
     }
 }
 
+impl<T> Index<usize> for Vec3T<T> {
+    type Output = T;
+    fn index(&self, i: usize) -> &T {
+        match i {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => &self.z,
+        }
+    }
+}
+
+impl<T> IndexMut<usize> for Vec3T<T> {
+    fn index_mut(&mut self, i: usize) -> &mut T {
+        match i {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => &mut self.z,
+        }
+    }
+}
+
 pub trait Magnitude<T>
 where
     T: Number + SquareRoot,
@@ -184,6 +207,7 @@ where
 
 pub type Vec3f = Vec3T<f32>;
 
+/*
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     pub x: f32,
@@ -328,6 +352,8 @@ pub fn reflect(incoming: Vec3, normal: Vec3) -> Vec3 {
     incoming - normal * 2.0 * dot(incoming, normal)
 }
 
+*/
+
 #[cfg(test)]
 mod tests {
     use crate::vector::*;
@@ -364,19 +390,15 @@ mod tests {
         let a = Vec3f::fill(1.0);
         let b = Vec3f::fill(3.0);
         assert_eq!(a + b, Vec3f::fill(4.0));
-
         assert_eq!(a - b, Vec3f::fill(-2.0));
-
         assert_eq!(b * 2.0, Vec3f::fill(6.0));
     }
 
-    /*
     #[test]
     fn test_index() {
-        let v = Vec3::new(1.0, 2.0, 3.0);
+        let v = Vec3f::new(1.0, 2.0, 3.0);
         assert_eq!(v.x, v[0]);
         assert_eq!(v.y, v[1]);
         assert_eq!(v.z, v[2]);
     }
-    */
 }

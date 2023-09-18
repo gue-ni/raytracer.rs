@@ -1,9 +1,9 @@
-use crate::vector::Vec3;
+use crate::vector::Vec3f;
 
 pub struct HitRecord {
     pub t: f32,
-    pub normal: Vec3,
-    pub point: Vec3,
+    pub normal: Vec3f,
+    pub point: Vec3f,
     pub idx: usize,
 }
 
@@ -11,8 +11,8 @@ impl HitRecord {
     pub fn new() -> Self {
         HitRecord {
             t: f32::INFINITY,
-            normal: Vec3::zero(),
-            point: Vec3::zero(),
+            normal: Vec3f::fill(0.0),
+            point: Vec3f::fill(0.0),
             idx: 0,
         }
     }
