@@ -1,4 +1,4 @@
-use std::ops::{ Add, Mul, Sub, Div, Neg };
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
@@ -110,14 +110,20 @@ pub fn dot(a: Vec3, b: Vec3) -> f32 {
 // cross product
 #[allow(dead_code)]
 pub fn cross(a: Vec3, b: Vec3) -> Vec3 {
-    Vec3::new(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
+    Vec3::new(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x,
+    )
 }
 
 // normalize
+#[allow(dead_code)]
 pub fn normalize(v: Vec3) -> Vec3 {
     v / v.length()
 }
 
+#[allow(dead_code)]
 pub fn reflect(incoming: Vec3, normal: Vec3) -> Vec3 {
     incoming - normal * 2.0 * dot(incoming, normal)
 }

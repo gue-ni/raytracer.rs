@@ -9,6 +9,11 @@ pub struct HitRecord {
 
 impl HitRecord {
     pub fn new() -> Self {
-        HitRecord { t: f32::INFINITY, normal: Vec3::zero(), point: Vec3::zero(), idx: 0 }
+        HitRecord {
+            t: f32::INFINITY,
+            normal: Vec3::zero(),
+            point: Vec3::zero(),
+            idx: 0,
+        }
     }
 }

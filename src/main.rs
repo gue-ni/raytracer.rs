@@ -1,5 +1,5 @@
 mod vector;
-use crate::vector::{ Vec3, normalize, dot, reflect };
+use crate::vector::{dot, normalize, reflect, Vec3};
 
 mod geometry;
 use crate::geometry::*;
@@ -12,8 +12,8 @@ use crate::common::*;
 
 mod test;
 
+use image::{ImageBuffer, Rgb};
 use std::vec;
-use image::{ Rgb, ImageBuffer };
 
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
@@ -47,7 +47,7 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     let mut ray_target = Vec3::new(
         ((x as f32) / (x_res as f32)) * 2.0 - 1.0,
         ((y as f32) / (y_res as f32)) * 2.0 - 1.0,
-        1.0
+        1.0,
     );
 
     let aspect_ratio = (x_res as f32) / (y_res as f32);
@@ -60,7 +60,10 @@ pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
 }
 
 pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
-    let light = Light { position: Vec3::new(5.0, 10.0, 5.0), color: Vec3::one() };
+    let light = Light {
+        position: Vec3::new(5.0, 10.0, 5.0),
+        color: Vec3::one(),
+    };
     let lights = vec![light];
 
     //let albedo = hit.normal * 0.5 + 0.5;
@@ -94,37 +97,61 @@ pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
     result
 }
 
+pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3 {
+    let reflected = reflect(incoming.direction, hit.normal);
+
+    let ray = Ray::new(hit.point, reflected);
+    Vec3::new(1.0, 0.0, 1.0)
+}
+
+pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) -> Vec3 {
+    (Vec3::one() + hit.normal * Vec3::new(1.0, -1.0, -1.0)) * 0.5
+}
+
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3 {
     let result = match ray.cast(scene) {
         None => {
             let background = Vec3::new(0.6, 0.6, 0.6);
             background
         }
-        Some(hit) => { phong(&hit, scene, ray) }
+        Some(hit) => {
+            // choose rendering strategy
+            phong(&hit, scene, ray)
+            //visualize_normal(&hit, scene, ray)
+            //path_tracing(&hit, scene, ray)
+        }
     };
 
     result
 }
-
-
 
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
     const SAMPLES: u32 = 1;
 
-    let material = Material { albedo: Vec3::new(0.0, 1.0, 0.0) };
+    let material = Material {
+        albedo: Vec3::new(0.0, 1.0, 0.0),
+    };
 
     let mut scene: Vec<Object> = Vec::new();
     scene.push(Object {
-        geometry: Sphere { center: Vec3::new(0.0, 0.0, 3.0), radius: 1.0 },
+        geometry: Sphere {
+            center: Vec3::new(0.0, 0.0, 3.0),
+            radius: 1.0,
+        },
         material: material,
     });
 
     let r = 10000.0;
     scene.push(Object {
-        geometry: Sphere { center: Vec3::new(0.0, r + 1.0, 3.0), radius: r },
-        material: Material { albedo: Vec3::new(0.0, 0.6, 1.0) },
+        geometry: Sphere {
+            center: Vec3::new(0.0, r + 1.0, 3.0),
+            radius: r,
+        },
+        material: Material {
+            albedo: Vec3::new(0.0, 0.6, 1.0),
+        },
     });
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];

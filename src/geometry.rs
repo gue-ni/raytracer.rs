@@ -1,6 +1,6 @@
-use crate::vector::*;
 use crate::common::*;
 use crate::ray::*;
+use crate::vector::*;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
@@ -33,7 +33,12 @@ impl Hittable for Sphere {
             let point = ray.point_at(t);
             let normal = normalize(point - self.center);
             let idx = 0;
-            return Some(HitRecord { t, normal, point, idx });
+            return Some(HitRecord {
+                t,
+                normal,
+                point,
+                idx,
+            });
         } else {
             return None;
         }

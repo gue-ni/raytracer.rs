@@ -22,14 +22,7 @@ jobs:
       run: cargo test --verbose
     - name: Run app
       run: cargo run
-    - name: Debug
-      run: |
-        ls -la
-        tree
-        pwd 
-        
-
-
+    
     - uses: actions/upload-artifact@v3
       with:
         name: render-artifact

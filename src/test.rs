@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test {
-    use crate::vector::*;
-    use crate::ray::*;
     use crate::geometry::*;
+    use crate::ray::*;
+    use crate::vector::*;
 
     #[test]
     fn test_sphere_hit() {

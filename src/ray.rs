@@ -1,6 +1,6 @@
-use crate::vector::*;
-use crate::geometry::*;
 use crate::common::*;
+use crate::geometry::*;
+use crate::vector::*;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Ray {
