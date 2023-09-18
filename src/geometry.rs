@@ -1,11 +1,20 @@
 use crate::vector::*;
 use crate::common::*;
 use crate::ray::*;
+use std::vec
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f32,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Triangle(Vec3, Vec3, Vec3);
+
+#[derive(Debug, Copy, Clone)]
+pub struct Mesh {
+    triangles: Vec<Triangle>
 }
 
 pub trait Hittable {
@@ -37,6 +46,25 @@ impl Hittable for Sphere {
         } else {
             return None;
         }
+    }
+}
+
+impl Hittable for Triangle {
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+        // TODO
+        None
+    }
+}
+
+impl Hittable for Mesh {
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+        for triangle in self.triangles {
+            let hit_record = triangle.hit(ray, min_t, max_t);
+            if hit_record.is_some() {
+                return hit_record;
+            }
+        }
+        None
     }
 }
 
