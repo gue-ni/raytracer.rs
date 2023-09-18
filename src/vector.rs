@@ -261,9 +261,9 @@ mod tests {
     #[test]
     fn test_index()  {
         let v = Vec3::new(1.0, 2.0, 3.0);
-        assert_eq!(v.x == v[0]);
-        assert_eq!(v.y == v[1]);
-        assert_eq!(v.z == v[2]);
+        assert_eq!(v.x, v[0]);
+        assert_eq!(v.y, v[1]);
+        assert_eq!(v.z, v[2]);
     }
 
         
