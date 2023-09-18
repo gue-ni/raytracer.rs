@@ -13,7 +13,7 @@ pub struct Sphere {
 pub struct Triangle(Vec3, Vec3, Vec3);
 
 // convex polygon
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Mesh {
     triangles: Vec<Triangle>
 }
