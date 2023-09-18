@@ -1,7 +1,6 @@
 use crate::common::*;
-use crate::ray::*;
+use crate::ray::Ray;
 use crate::vector::*;
-use std::vec;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
@@ -59,17 +58,17 @@ impl Hittable for Triangle {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
         let v0v1 = self.1 - self.0;
         let v0v2 = self.2 - self.0;
-        let n = Vec3f::cross(v0v1, v0v2);
+        let normal = Vec3f::cross(v0v1, v0v2);
 
-        let ndot = Vec3f::dot(n, ray.direction);
+        let ndot = Vec3f::dot(normal, ray.direction);
         if f32::abs(ndot) < f32::EPSILON {
             return None;
         }
 
-        let d = -Vec3f::dot(n, self.0);
+        let d = -Vec3f::dot(normal, self.0);
 
-        let t = -(Vec3f::dot(n, ray.origin) + d) / ndot;
-        if t < 0.0 {
+        let t = -(Vec3f::dot(normal, ray.origin) + d) / ndot;
+        if t < min_t && t > max_t {
             return None;
         }
 
@@ -80,27 +79,27 @@ impl Hittable for Triangle {
         let edge0 = self.1 - self.0;
         let vp0 = point - self.0;
         c = Vec3f::cross(edge0, vp0);
-        if Vec3f::dot(n, c) < 0.0 {
+        if Vec3f::dot(normal, c) < 0.0 {
             return None;
         }
 
         let edge1 = self.2 - self.1;
         let vp1 = point - self.1;
         c = Vec3f::cross(edge1, vp1);
-        if Vec3f::dot(n, c) < 0.0 {
+        if Vec3f::dot(normal, c) < 0.0 {
             return None;
         }
 
         let edge2 = self.0 - self.2;
         let vp2 = point - self.2;
         c = Vec3f::cross(edge2, vp2);
-        if Vec3f::dot(n, c) < 0.0 {
+        if Vec3f::dot(normal, c) < 0.0 {
             return None;
         }
 
         Some(HitRecord {
             t: t,
-            normal: n,
+            normal: normal,
             point: point,
             idx: 0,
         })
@@ -145,13 +144,14 @@ mod test {
     #[test]
     fn test_triangle_hit() {
         let triangle = Triangle(
-            Vec3f::new(-0.5, 0.0, 0.0),
-            Vec3f::new(0.0, 1.0, 0.0),
-            Vec3f::new(0.5, 0.0, 0.0),
+            Vec3f::new(-0.5, 0.0, 5.0),
+            Vec3f::new(0.0, 1.0, 5.0),
+            Vec3f::new(0.5, 0.0, 5.0),
         );
-
-        let ray = Ray::new(Vec3f::new(0.0, 0.0, -1.0), Vec3f::new(0.0, 0.0, 1.0));
-
-        let hit = triangle.hit(&ray, 0.0, f32::INFINITY);
+        let ray = Ray::new(Vec3f::new(0.0, 0.5, 0.0), Vec3f::new(0.0, 0.0, 1.0));
+        let hit = triangle.hit(&ray, 0.0, f32::INFINITY).unwrap();
+        assert_eq!(hit.t, 5.0);
+        assert_eq!(hit.point, Vec3f::new(0.0, 0.5, 5.0));
+        assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
     }
 }

@@ -10,8 +10,6 @@ use crate::ray::*;
 mod common;
 use crate::common::*;
 
-mod test;
-
 use image::{ImageBuffer, Rgb};
 use std::vec;
 
@@ -79,9 +77,9 @@ pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
 
         let diffuse = light.color * f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
 
-        //let reflected = reflect(light_dir, hit.normal);
-        //let spec = f32::max(Vec3f::dot(incoming.direction, reflected), 0.0).powf(32.0);
-        //let specular = light.color * spec * 0.5;
+        let reflected = reflect(light_dir, hit.normal);
+        let spec = f32::max(Vec3f::dot(incoming.direction, reflected), 0.0).powf(32.0);
+        let specular = light.color * spec * 0.5;
 
         let ray = Ray::new(hit.point, light_dir);
 
@@ -91,7 +89,7 @@ pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
             Some(_) => 0.0,
         };
 
-        result = result + (ambient + (diffuse) * in_shadow) * albedo;
+        result = result + (ambient + (diffuse + specular) * in_shadow) * albedo;
     }
 
     result
@@ -113,9 +111,9 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec
             None => 1.0,
             Some(_) => 0.0,
         };
-        let l = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
 
-        result = result + (object.material.emissive * l * in_shadow);
+        let l = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
+        result = result + (object.material.emissive * l);
     }
 
     result
@@ -147,21 +145,42 @@ pub fn main() {
     const HEIGHT: u32 = 480;
     const SAMPLES: u32 = 1;
 
-    let material = Material {
-        albedo: Vec3f::new(0.0, 1.0, 0.0),
-        emissive: Vec3f::fill(0.0),
-    };
-
     let mut scene: Vec<Object> = Vec::new();
+
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 0.0, 3.0),
-            radius: 1.0,
+            radius: 0.5,
         },
-        material: material,
+        material: Material {
+            albedo: Vec3f::new(0.0, 1.0, 0.5),
+            emissive: Vec3f::fill(0.0),
+        },
     });
 
-    let r = 10000.0;
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(1.5, 0.0, 3.0),
+            radius: 0.5,
+        },
+        material: Material {
+            albedo: Vec3f::new(0.5, 1.0, 0.5),
+            emissive: Vec3f::fill(0.0),
+        },
+    });
+
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(-1.5, 0.0, 3.0),
+            radius: 0.5,
+        },
+        material: Material {
+            albedo: Vec3f::new(0.0, 1.0, 0.0),
+            emissive: Vec3f::fill(0.0),
+        },
+    });
+
+    let r = 100000.0;
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, r + 1.0, 3.0),

@@ -203,7 +203,10 @@ where
     }
 }
 
+#[allow(dead_code)]
 pub type Vec3f = Vec3T<f32>;
+
+#[allow(dead_code)]
 pub type Vec3i = Vec3T<i32>;
 
 #[cfg(test)]
