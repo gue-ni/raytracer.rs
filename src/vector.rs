@@ -105,10 +105,9 @@ impl Neg for Vec3 {
 impl IndexMut<usize> for Vec3 {
     fn index_mut(&mut self, i: usize) -> &mut Self {
         match i {
-            0 => x
-            1 => y
+            0 => x,
+            1 => y,
             2 => z
-            _ => z
         }
     }
 }
@@ -160,4 +159,14 @@ mod tests {
     fn test_dot() {
         assert_eq!(dot(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0, 0.0, 0.0)), 0.0);
     }
+
+    #[test]
+    fn test_index()  {
+        let v = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(v.x == v[0]);
+        assert_eq!(v.y == v[1]);
+        assert_eq!(v.z == v[2]);
+    }
+
+        
 }
