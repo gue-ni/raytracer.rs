@@ -105,15 +105,15 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) 
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
-pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
+pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {
     let mut direct_light = Vec3f::fill(0.0);
     let mut indirect_light = Vec3f::fill(0.0);
 
     // direct light contribution
-    for (i, object) in scene.iter().enumerate() {
+    for (idx, object) in scene.iter().enumerate() {
         
         // object is not illuminated by itself
-        if i == hit.idx {
+        if idx == hit.idx {
             continue;
         }
         
@@ -134,7 +134,7 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec
 
     let albedo = scene[hit.idx].material.albedo;
     
-    (direct_light + indirect_light) * albedo  / 3.14
+    (direct_light + indirect_light) * albedo / 3.14
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3f {
@@ -172,7 +172,7 @@ pub fn main() {
         },
         material: Material {
             albedo: Vec3f::new(0.0, 1.0, 0.5),
-            emissive: Vec3f::fill(0.0),
+            emissive: Vec3f::fill(2.0),
         },
     });
 
