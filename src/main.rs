@@ -13,6 +13,7 @@ use crate::common::*;
 use image::{ImageBuffer, Rgb};
 use std::vec;
 use std::f32::consts::PI;
+use rand;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
@@ -119,7 +120,7 @@ pub fn vector_on_sphere() -> Vec3f {
 
 pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
     let mut vec: Vec3f;
-    while true {
+    loop true {
         vec = vector_on_sphere();
         if Vec3f::dot(vec, normal) > 0.0 {
             break;
@@ -141,7 +142,7 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> V
     let cos_theta = Vec3f::dot(new_ray.direction, hit.normal);
     let brdf = material.albedo / PI;
 
-    let light = cast_ray(new_ray, scene, depth + 1);
+    let light = cast_ray(&new_ray, scene, depth + 1);
 
     emissive + (brdf * light * cos_theta / p)
 }
