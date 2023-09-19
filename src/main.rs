@@ -131,7 +131,7 @@ pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
     vec
 }
 
-pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {
+pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let albedo = material.albedo;
     let emissive = material.emissive;
@@ -144,7 +144,7 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> V
     let cos_theta = Vec3f::dot(new_ray.direction, hit.normal);
     let brdf = material.albedo / PI;
 
-    let light = cast_ray(&new_ray, scene, depth + 1);
+    let light = cast_ray(&new_ray, scene, depth - 1);
 
     emissive + (brdf * light * cos_theta / p)
 }
@@ -183,8 +183,7 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Ve
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
-    let max_depth = 5;
-    if depth == max_depth {
+    if depth == 0 {
         return Vec3f::fill(0.0);
     }
     
@@ -197,7 +196,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
             // choose rendering strategy
             //phong(&hit, scene, ray)
             //visualize_normal(&hit, scene, ray)
-            path_tracing2(&hit, scene, ray)
+            path_tracing2(&hit, scene, ray, depth)
         }
     };
 
@@ -272,7 +271,7 @@ pub fn main() {
             let ray = camera_ray(x, y, WIDTH, HEIGHT);
 
             for _ in 0..SAMPLES {
-                pixel = pixel + cast_ray(&ray, &scene, 0);
+                pixel = pixel + cast_ray(&ray, &scene, 5);
             }
 
             pixel = (pixel * (u8::MAX as f32)) / (SAMPLES as f32);
