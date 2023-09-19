@@ -36,6 +36,12 @@ pub struct Object {
     material: Material,
 }
 
+pub struct Options {
+    background: Vec3f,
+    width: u32,
+    height: u32
+}
+
 impl Hittable for Object {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
         self.geometry.hit(ray, min_t, max_t)
@@ -122,14 +128,14 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3f {
     let result = match ray.cast(scene) {
         None => {
-            let background = Vec3f::new(0.6, 0.6, 0.6);
+            let background = Vec3f::fill(1.0);
             background
         }
         Some(hit) => {
             // choose rendering strategy
-            phong(&hit, scene, ray)
+            //phong(&hit, scene, ray)
             //visualize_normal(&hit, scene, ray)
-            //path_tracing(&hit, scene, ray)
+            path_tracing(&hit, scene, ray)
         }
     };
 
