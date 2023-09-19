@@ -129,7 +129,7 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Ve
         let emissive = object.material.emissive;
         let diffuse = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
         
-        direct_light = direct_light + (emissive * diffuse * visible);
+        direct_light = direct_light + (emissive * diffuse);
     }
 
     let albedo = scene[hit.idx].material.albedo;
@@ -165,31 +165,10 @@ pub fn main() {
 
     let mut scene: Vec<Object> = Vec::new();
 
-    scene.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(0.0, 0.0, 3.0),
-            radius: 0.5,
-        },
-        material: Material {
-            albedo: Vec3f::new(0.0, 1.0, 0.5),
-            emissive: Vec3f::fill(2.0),
-        },
-    });
-
+    // right
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(1.5, 0.0, 3.0),
-            radius: 0.5,
-        },
-        material: Material {
-            albedo: Vec3f::new(0.5, 1.0, 0.5),
-            emissive: Vec3f::fill(0.0),
-        },
-    });
-
-    scene.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(-1.5, 0.0, 3.0),
             radius: 0.5,
         },
         material: Material {
@@ -197,7 +176,30 @@ pub fn main() {
             emissive: Vec3f::fill(0.0),
         },
     });
+    // middle
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(0.0, 0.0, 3.0),
+            radius: 0.5,
+        },
+        material: Material {
+            albedo: Vec3f::new(1.0, 0.0, 0.),
+            emissive: Vec3f::fill(3.0),
+        },
+    });
+    // left
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(-1.5, 0.0, 3.0),
+            radius: 0.5,
+        },
+        material: Material {
+            albedo: Vec3f::new(0.0, 0.0, 1.0),
+            emissive: Vec3f::fill(0.0),
+        },
+    });
 
+    /*
     let r = 100000.0;
     scene.push(Object {
         geometry: Sphere {
@@ -209,6 +211,7 @@ pub fn main() {
             emissive: Vec3f::fill(0.0),
         },
     });
+    */
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
