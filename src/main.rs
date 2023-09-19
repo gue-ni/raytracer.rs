@@ -13,7 +13,9 @@ use crate::common::*;
 use image::{ImageBuffer, Rgb};
 use std::vec;
 use std::f32::consts::PI;
-use rand;
+
+extern crate rand; 
+use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
@@ -109,18 +111,18 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) 
 
 pub fn vector_on_sphere() -> Vec3f {
     let mut rng = rand::thread_rng();
-    let min = -1.0;
-    let max = 1.0;
-    let x = rng.gen_range(min..max);
-    let y = rng.gen_range(min..max);
-    let z = rng.gen_range(min..max);
+
+    let r = 1.0;
+    let x = rng.gen_range(-r..r);
+    let y = rng.gen_range(-r..r);
+    let z = rng.gen_range(-r..r);
 
     Vec3f::normalize(Vec3f::new(x,y,z))
 }
 
 pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
     let mut vec: Vec3f;
-    loop true {
+    loop {
         vec = vector_on_sphere();
         if Vec3f::dot(vec, normal) > 0.0 {
             break;
