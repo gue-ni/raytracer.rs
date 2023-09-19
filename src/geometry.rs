@@ -159,7 +159,7 @@ mod test {
     fn test_mesh_hit() {
         let s = 0.5;
         let quad = Mesh {
-            triangle: vec![
+            triangles: vec![
                 Triangle(
                     Vec3f::new(-s, -s, -s), // bottom left
                     Vec3f::new(-s, s, -s),  // top left
