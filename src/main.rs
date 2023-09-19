@@ -12,6 +12,7 @@ use crate::common::*;
 
 use image::{ImageBuffer, Rgb};
 use std::vec;
+use std::f32::consts::PI;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
@@ -105,7 +106,48 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) 
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
-pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {
+pub fn vector_on_sphere() -> Vec3f {
+    let mut rng = rand::thread_rng();
+    let min = -1.0;
+    let max = 1.0;
+    let x = rng.gen_range(min..max);
+    let y = rng.gen_range(min..max);
+    let z = rng.gen_range(min..max);
+
+    Vec3f::normalize(Vec3f::new(x,y,z))
+}
+
+pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
+    let mut vec: Vec3f;
+    while true {
+        vec = vector_on_sphere();
+        if Vec3f::dot(vec, normal) > 0.0 {
+            break;
+        }
+    }
+    vec
+}
+
+pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {
+    let material = scene[hit.idx].material;
+    let albedo = material.albedo;
+    let emissive = material.emissive;
+
+    let random_vector = vector_in_hemisphere(hit.normal);
+    let new_ray = Ray::new(hit.point, random_vector);
+
+    let p = 1.0 / (2.0 * PI);
+    
+    let cos_theta = Vec3f::dot(new_ray.direction, hit.normal);
+    let brdf = material.albedo / PI;
+
+    let light = cast_ray(new_ray, scene, depth + 1);
+
+    emissive + (brdf * light * cos_theta / p)
+}
+
+
+pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {   
     let mut direct_light = Vec3f::fill(0.0);
     let mut indirect_light = Vec3f::fill(0.0);
 
@@ -129,7 +171,7 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Ve
         let emissive = object.material.emissive;
         let diffuse = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
         
-        direct_light = direct_light + (emissive * diffuse);
+        direct_light = direct_light + (emissive);
     }
 
     let albedo = scene[hit.idx].material.albedo;
@@ -137,7 +179,12 @@ pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Ve
     (direct_light + indirect_light) * albedo / 3.14
 }
 
-pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3f {
+pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
+    let max_depth = 5;
+    if depth == max_depth {
+        return Vec3f::fill(0.0);
+    }
+    
     let result = match ray.cast(scene) {
         None => {
             let background = Vec3f::fill(1.0);
@@ -147,7 +194,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Object>) -> Vec3f {
             // choose rendering strategy
             //phong(&hit, scene, ray)
             //visualize_normal(&hit, scene, ray)
-            path_tracing(&hit, scene, ray)
+            path_tracing2(&hit, scene, ray)
         }
     };
 
@@ -222,7 +269,7 @@ pub fn main() {
             let ray = camera_ray(x, y, WIDTH, HEIGHT);
 
             for _ in 0..SAMPLES {
-                pixel = pixel + cast_ray(&ray, &scene);
+                pixel = pixel + cast_ray(&ray, &scene, 0);
             }
 
             pixel = (pixel * (u8::MAX as f32)) / (SAMPLES as f32);
