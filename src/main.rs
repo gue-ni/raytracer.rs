@@ -230,6 +230,14 @@ pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
     }
 }
 
+// cook torrance
+pub fn path_tracing4(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
+    let material = scene[hit.idx].material;
+    let omega = uniform_sample_hemisphere(hit.normal);
+    let ray = Ray::new(hit.point, omega);
+    material.emissive + cast_ray(&ray, scene, depth - 1) 
+}
+
 pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, prob) = vector_in_hemisphere(hit.normal);
