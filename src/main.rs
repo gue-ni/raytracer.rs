@@ -38,12 +38,24 @@ pub enum RenderStrategy {
 #[derive(Debug, Copy, Clone)]
 pub struct Camera {
     position: Vec3f,
-    resolution: (u32, u32)
+    resolution: Vec2f,
 }
 
 impl Camera {
+
+    fn new(position: Vec3f, res: (u32, u32)) -> Self {
+        Camera {
+            position: position,
+            resolution: Vec2f::new(res.0 as f32, res.1 as f32),
+        }
+    }
+    
     fn ray(&self, pixel: (u32, u32)) -> Ray {
         // vec2 uv = (fragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
+
+        let uv = (pixel - self.resolution * 0.5) / self.resolution.y;
+
+        /*
         let fx = pixel.0 as f32;
         let fy = pixel.1 as f32;
         let rx = self.resolution.0 as f32;
@@ -51,9 +63,10 @@ impl Camera {
 
         let x = (fx - 0.5 * rx) / ry;
         let y = (fy - 0.5 * ry) / ry;
+        */
         
         let origin = self.position;
-        let target = Vec3f::new(x, y, 1.0);
+        let target = Vec3f::new(uv.x, uv.y, 1.0);
         
         Ray::new(origin, Vec3f::normalize(target - origin))        
     }
@@ -281,10 +294,7 @@ pub fn main() {
     const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
 
-    let camera = Camera {
-        position: Vec3f::new(0.0, 0.0, 0.0),
-        resolution: (WIDTH, HEIGHT),
-    };
+    let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
     let mut scene: Vec<Object> = Vec::new();
 
