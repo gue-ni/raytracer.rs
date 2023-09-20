@@ -52,11 +52,13 @@ impl Hittable for Object {
     }
 }
 
+
+
 // Bidirectional Scattering Distribution Function (BSDF) 
 pub trait BSDF {
     fn pdf(&self) -> f32;
     fn eval(&self) -> Vec3f;
-    fn sample(&self) -> (Vec3f, f32);
+    fn sample(&self, normal: Vec3f) -> (Vec3f, f32);
 }
 
 impl BSDF for Material {
@@ -68,8 +70,8 @@ impl BSDF for Material {
         self.albedo / PI
     }
 
-    fn sample(&self) -> (Vec3f, f32) {
-        vector_in_hemisphere()
+    fn sample(&self, normal: Vec3f) -> (Vec3f, f32) {
+        vector_in_hemisphere(normal)
     }
 }
 
