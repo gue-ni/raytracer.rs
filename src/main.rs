@@ -120,6 +120,16 @@ pub fn vector_on_sphere() -> Vec3f {
     Vec3f::normalize(Vec3f::new(x,y,z))
 }
 
+pub fn sample_hemisphere() -> Vec3f {
+    let x1 = rng.get_range(0.0..1.0);
+    let x2 = rng.get_range(0.0..1.0);
+    let cos_theta = x1;
+    let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
+    let cos_phi = f32::cos(2.0 * PI * x2);
+    let sin_phi = f32::sin(2.0 * PI * x2);
+    Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
+}
+
 pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
     let mut vec: Vec3f;
     loop {
