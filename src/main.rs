@@ -100,22 +100,6 @@ impl BSDF for Material {
     }
 }
 
-pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
-    let mut ray_target = Vec3f::new(
-        ((x as f32) / (x_res as f32)) * 2.0 - 1.0,
-        ((y as f32) / (y_res as f32)) * 2.0 - 1.0,
-        1.0,
-    );
-
-    let aspect_ratio = (x_res as f32) / (y_res as f32);
-    ray_target.y /= aspect_ratio;
-
-    let origin = Vec3f::new(0.0, 0.0, 0.0);
-    let direction = Vec3f::normalize(ray_target - origin);
-
-    Ray::new(origin, direction)
-}
-
 pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
     let light = Light {
         position: Vec3f::new(5.0, 10.0, 5.0),
@@ -338,19 +322,20 @@ pub fn main() {
         },
     });
 
-    /*
+    
     let r = 100000.0;
+    // ground
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, r + 1.0, 3.0),
             radius: r,
         },
         material: Material {
-            albedo: Vec3f::new(0.0, 0.6, 1.0),
+            albedo: Vec3f::fill(0.18),
             emissive: Vec3f::fill(0.0),
         },
     });
-    */
+    
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
@@ -358,7 +343,6 @@ pub fn main() {
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
             let mut pixel = Vec3f::new(0.0, 0.0, 0.0);
-            //let ray = camera_ray(x, y, WIDTH, HEIGHT);
             let ray = camera.ray((x,y));
 
             for _ in 0..SAMPLES {
