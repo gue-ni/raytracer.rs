@@ -73,7 +73,7 @@ impl BSDF for Material {
     fn sample(&self, normal: Vec3f) -> (Vec3f, f32) {
         let omega = uniform_sample_hemisphere(normal);
         let cos_theta = Vec3f::dot(normal, omega);
-        let brdf_multiplier = (cos_theta * self.eval()) /  self.pdf(); 
+        let brdf_multiplier = (self.eval() * cos_theta) /  self.pdf(); 
         (omega, brdf_multiplier)
     }
 }
