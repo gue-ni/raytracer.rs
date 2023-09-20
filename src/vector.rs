@@ -333,6 +333,23 @@ pub type Vec2f = Vec2T<f32>;
 #[allow(dead_code)]
 pub type Vec2i = Vec2T<i32>;
 
+#[allow(dead_code)]
+pub type Vec2u = Vec2T<u32>;
+
+impl From<(u32, u32)> for Vec2f
+{
+    fn from(item: (u32, u32)) -> Self {
+        Self { x: item.0 as f32, y: item.1 as f32 }
+    }
+}
+
+impl From<Vec2u> for Vec2f
+{
+    fn from(item: (u32, u32)) -> Self {
+        Self { x: item.x as f32, y: item.y as f32 }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::vector::*;
