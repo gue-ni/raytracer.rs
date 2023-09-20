@@ -49,6 +49,15 @@ where
     }
 }
 
+impl<T> From<(T, T, T)> for Vec3T<T> 
+where 
+    T: Number 
+{
+    fn from(item: (T, T, T)) -> Self {
+        Self { x: item.0, y: item.1, z: item.2 }
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec2T<T> {
     pub x: T,
