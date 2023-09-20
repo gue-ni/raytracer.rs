@@ -163,10 +163,11 @@ pub fn sample_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
     let x1 = rng.get_range(0.0..1.0);
     let x2 = rng.get_range(0.0..1.0);
+    let phi = 2.0 * PI * x2;
     let cos_theta = x1;
     let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
-    let cos_phi = f32::cos(2.0 * PI * x2);
-    let sin_phi = f32::sin(2.0 * PI * x2);
+    let cos_phi = f32::cos(phi);
+    let sin_phi = f32::sin(phi);
     Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
 */
@@ -202,6 +203,13 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
     let brdf = albedo / PI;
     let cos_theta = Vec3f::dot(hit.normal, omega);
     emissive + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
+}
+
+pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
+    let material = scene[hit.idx].material;
+    let (omega, brdf_multiplier) = material.sample(hit.normal);
+    let ray = Ray::new(hit.point, omega);
+    material.emissive + cast_ray(&ray, scene, depth - 1) * brdf_multiplier
 }
 
 pub fn path_tracing1(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {   
@@ -252,7 +260,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
             // choose rendering strategy
             //phong(&hit, scene, ray)
             //visualize_normal(&hit, scene, ray)
-            path_tracing3(&hit, scene, ray, depth)
+            path_tracing2(&hit, scene, ray, depth)
         }
     };
 
