@@ -14,6 +14,7 @@ use crate::common::*;
 use image::{ImageBuffer, Rgb};
 use std::vec;
 use std::f32::consts::PI;
+use std::path::Path;
 
 extern crate rand; 
 use rand::Rng;
