@@ -45,41 +45,6 @@ pub struct Light {
     color: Vec3f,
 }
 
-/*
-pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32 {
-    let a2     = a*a;
-    let NdotH  = f32::max(Vec3f::dot(N, H), 0.0);
-    let NdotH2 = NdotH*NdotH;
-    let nom    = a2;
-    let mut denom  = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom        = PI * denom * denom;
-    nom / denom
-}
-
-pub fn GeometrySchlickGGX(NdotV: f32, roughness: f32) -> f32 {
-    let r = (roughness + 1.0);
-    let k = (r*r) / 8.0;
-    let num   = NdotV;
-    let denom = NdotV * (1.0 - k) + k;
-    num / denom
-}
-
-pub fn GeometrySmith(N: Vec3f, V: Vec3f, L: Vec3f, roughness: f32) -> f32 {
-    let NdotV = f32::max(Vec3f::dot(N, V), 0.0);
-    let NdotL = f32::max(Vec3f::dot(N, L), 0.0);
-    let ggx2  = GeometrySchlickGGX(NdotV, roughness);
-    let ggx1  = GeometrySchlickGGX(NdotL, roughness);
-    ggx1 * ggx2
-}
-
-pub fn fresnelSchlick(cosTheta: f32, F0: Vec3f) -> Vec3f
-{
-    F0 + (Vec3f::fill(1.0) - F0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
-}
-*/
-
-// impl BSDF for PhysicalMaterial {}
-
 pub fn phong(hit: &HitRecord, scene: &Scene, incoming: &Ray) -> Vec3f {
     let light = Light {
         position: Vec3f::new(5.0, 10.0, 5.0),
@@ -166,41 +131,6 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     result
 }
 
-pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
-    incoming - normal * 2.0 * Vec3f::dot(incoming, normal)
-}
-
-// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
-pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
-    let mut cosi = Vec3f::dot(incoming, normal).clamp(-1.0, 1.0);
-    let mut etai = 1.0;
-    let mut etat = ior;
-    let mut n = normal;
-
-    if cosi < 0.0 {
-        cosi = -cosi;
-    } else {
-        let tmp = etai;
-        etai = etat;
-        etat = tmp;
-        n = -normal;
-    }
-
-    let eta = etai / etat;
-    let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
-
-    if k < 0.0 {
-        Vec3f::fill(0.0)
-    } else {
-        incoming * eta + n * (eta * cosi - k.sqrt())
-    }
-}
-
-pub fn fresnel(incoming: Vec3f, normal: Vec3f, ior: f32) -> f32 {
-    // TODO
-    0.0
-}
-
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
@@ -209,7 +139,7 @@ pub fn main() {
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
-    let mut scene: Vec<Object> = Vec::new();
+    let mut scene: Scene = Vec::new();
 
     // right
     scene.push(Object {

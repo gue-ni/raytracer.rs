@@ -1,6 +1,3 @@
-extern crate rand;
-use rand::Rng;
-
 use std::f32::consts::PI;
 
 use crate::common::*;
@@ -137,6 +134,7 @@ pub struct Material {
     pub emissive: Vec3f,
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct PhysicalMaterial {
     albedo: Vec3f,
     emissive: Vec3f,
@@ -146,60 +144,9 @@ pub struct PhysicalMaterial {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Object {
+pub struct Object<Mat: BSDF> {
     pub geometry: Sphere,
-    pub material: Material,
-}
-
-impl Hittable for Object {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
-        self.geometry.hit(ray, min_t, max_t)
-    }
-}
-
-fn vector_on_sphere() -> Vec3f {
-    let r = 1.0;
-    let mut rng = rand::thread_rng();
-    Vec3f::normalize(Vec3f::new(
-        rng.gen_range(-r..r),
-        rng.gen_range(-r..r),
-        rng.gen_range(-r..r),
-    ))
-}
-
-/*
-pub fn sample_hemisphere() -> Vec3f {
-    let mut rng = rand::thread_rng();
-    let x1 = rng.get_range(0.0..1.0);
-    let x2 = rng.get_range(0.0..1.0);
-    let phi = 2.0 * PI * x2;
-    let cos_theta = x1;
-    let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
-    let cos_phi = f32::cos(phi);
-    let sin_phi = f32::sin(phi);
-    Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
-}
-*/
-
-pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
-    let mut vec: Vec3f;
-    loop {
-        vec = vector_on_sphere();
-        if Vec3f::dot(vec, normal) > 0.0 {
-            break;
-        }
-    }
-    let prob = 1.0 / (2.0 * PI);
-    (vec, prob)
-}
-
-pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
-    loop {
-        let omega = vector_on_sphere();
-        if Vec3f::dot(omega, normal) > 0.0 {
-            break omega;
-        }
-    }
+    pub material: Mat,
 }
 
 // Bidirectional Scattering Distribution Function (BSDF)
@@ -226,7 +173,7 @@ impl BSDF for Material {
     }
 }
 
-pub type Scene = Vec<Object>;
+pub type Scene = Vec<Object<Material>>;
 
 #[cfg(test)]
 mod test {
