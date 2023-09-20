@@ -325,12 +325,20 @@ mod tests {
     }
 
     #[test]
-    fn test_math() {
+    fn test_math_Vec3() {
         let a = Vec3f::fill(1.0);
         let b = Vec3f::fill(3.0);
         assert_eq!(a + b, Vec3f::fill(4.0));
         assert_eq!(a - b, Vec3f::fill(-2.0));
         assert_eq!(b * 2.0, Vec3f::fill(6.0));
+    }
+
+    #[test]
+    fn test_math_Vec2() {
+        let a = Vec2f::fill(1.0);
+        let b = Vec2f::fill(3.0);
+        assert_eq!(a + b, Vec2f::fille(4.0));
+        assert_eq!(b * 2.0, Vec2f::fill(6.0));
     }
 
     #[test]
