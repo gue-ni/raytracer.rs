@@ -3,13 +3,13 @@ mod geometry;
 mod ray;
 mod common;
 
-/*
+
 use crate::vector::*;
 use crate::geometry::*;
 use crate::ray::*;
 use crate::common::*;
-*/
-use super::*;
+
+//use super::*;
 
 use image::{ImageBuffer, Rgb};
 use std::vec;
