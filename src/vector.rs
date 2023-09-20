@@ -345,7 +345,7 @@ impl From<(u32, u32)> for Vec2f
 
 impl From<Vec2u> for Vec2f
 {
-    fn from(item: (u32, u32)) -> Self {
+    fn from(item: Vec2u) -> Self {
         Self { x: item.x as f32, y: item.y as f32 }
     }
 }
