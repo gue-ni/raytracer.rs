@@ -52,6 +52,27 @@ impl Hittable for Object {
     }
 }
 
+// Bidirectional Scattering Distribution Function (BSDF) 
+pub trait BSDF {
+    fn pdf(&self) -> f32;
+    fn eval(&self) -> Vec3f;
+    fn sample(&self) -> (Vec3f, f32);
+}
+
+impl BSDF for Material {
+    fn pdf(&self) -> f32 {
+        1.0 / (2.0 * PI)
+    }
+
+    fn eval(&self) -> Vec3f {
+        self.albedo / PI
+    }
+
+    fn sample(&self) -> (Vec3f, f32) {
+        vector_in_hemisphere()
+    }
+}
+
 pub fn camera_ray(x: u32, y: u32, x_res: u32, y_res: u32) -> Ray {
     let mut ray_target = Vec3f::new(
         ((x as f32) / (x_res as f32)) * 2.0 - 1.0,
@@ -142,9 +163,7 @@ pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
             break;
         }
     }
-    
     let prob = 1.0 / (2.0 * PI);
-    
     (vec, prob)
 }
 
