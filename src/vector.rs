@@ -271,6 +271,16 @@ where
     }
 }
 
+impl<T> Add<T> for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn add(self, scalar: T) -> Self {
+        Self::new(self.x + scalar, self.y + scalar)
+    }
+}
+
 impl<T> Mul for Vec2T<T>
 where
     T: Number,
@@ -288,6 +298,26 @@ where
     type Output = Self;
     fn sub(self, other: Self) -> Self {
         Self::new(self.x - other.x, self.y - other.y)
+    }
+}
+
+impl<T> Add for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn add(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y)
+    }
+}
+
+impl<T> Div for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn div(self, other: Self) -> Self {
+        Self::new(self.x / other.x, self.y / other.y)
     }
 }
 
@@ -347,7 +377,8 @@ mod tests {
     fn test_math_Vec2() {
         let a = Vec2f::fill(1.0);
         let b = Vec2f::fill(3.0);
-        assert_eq!(a + b, Vec2f::fille(4.0));
+        assert_eq!(a + b, Vec2f::fill(4.0));
+        assert_eq!(a - b, Vec2f::fill(-2.0));
         assert_eq!(b * 2.0, Vec2f::fill(6.0));
     }
 
