@@ -338,11 +338,12 @@ pub fn main() {
         }
     }
 
-    let filename = Path::new(&format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES));
-
-    match buffer.save(&filename) {
+    let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
+    let path = Path::new(&filename);
+    
+    match buffer.save(&path) {
         Err(_) => panic!("Could not save file"),
-        Ok(_) => println!("Saved output to {:?}", filename),
+        Ok(_) => println!("Saved output to {:?}", path),
     };
 }
 
