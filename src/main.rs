@@ -71,7 +71,10 @@ impl BSDF for Material {
     }
 
     fn sample(&self, normal: Vec3f) -> (Vec3f, f32) {
-        vector_in_hemisphere(normal)
+        let omega = uniform_sample_hemisphere(normal);
+        let cos_theta = Vec3f::dot(normal, omega);
+        let brdf_multiplier = (cos_theta * self.eval()) /  self.pdf(); 
+        (omega, brdf_multiplier)
     }
 }
 
@@ -167,6 +170,15 @@ pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
     }
     let prob = 1.0 / (2.0 * PI);
     (vec, prob)
+}
+
+pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
+    loop {
+        let omega = vector_on_sphere();
+        if Vec3f::dot(omega, normal) > 0.0 {
+            break omega;
+        }
+    }
 }
 
 pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
