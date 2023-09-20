@@ -122,6 +122,7 @@ pub fn vector_on_sphere() -> Vec3f {
 }
 
 pub fn sample_hemisphere() -> Vec3f {
+    let mut rng = rand::thread_rng();
     let x1 = rng.get_range(0.0..1.0);
     let x2 = rng.get_range(0.0..1.0);
     let cos_theta = x1;
