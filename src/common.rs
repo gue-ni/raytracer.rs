@@ -1,5 +1,7 @@
 extern crate rand;
 use rand::Rng;
+
+#[allow(unused_imports)]
 use std::f32::consts::PI;
 
 use crate::vector::*;
@@ -111,17 +113,7 @@ pub fn sample_hemisphere() -> Vec3f {
 }
 */
 
-pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
-    let mut vec: Vec3f;
-    loop {
-        vec = vector_on_sphere();
-        if Vec3f::dot(vec, normal) > 0.0 {
-            break;
-        }
-    }
-    let prob = 1.0 / (2.0 * PI);
-    (vec, prob)
-}
+
 
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
     loop {

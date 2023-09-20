@@ -9,6 +9,13 @@ pub struct Sphere {
     pub radius: f32,
 }
 
+impl Sphere {
+    #[allow(dead_code)]
+    pub fn new(center: Vec3f, radius: f32) -> Self {
+        Sphere { center, radius }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 pub struct Triangle(pub Vec3f, pub Vec3f, pub Vec3f);
 
@@ -116,13 +123,6 @@ impl Hittable for Mesh {
             }
         }
         None
-    }
-}
-
-impl Sphere {
-    #[allow(dead_code)]
-    pub fn new(center: Vec3f, radius: f32) -> Self {
-        Sphere { center, radius }
     }
 }
 

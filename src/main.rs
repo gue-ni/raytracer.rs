@@ -10,8 +10,6 @@ use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
 
-//use super::*;
-
 use image::{ImageBuffer, Rgb};
 use std::f32::consts::PI;
 use std::path::Path;
@@ -95,7 +93,9 @@ pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
 
 pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
-    let (omega, prob) = vector_in_hemisphere(hit.normal);
+    let omega = uniform_sample_hemisphere(hit.normal);
+
+    let prob = 1.0 / (2.0 * PI);
     let ray = Ray::new(hit.point, omega);
     let brdf = material.albedo / PI;
     let cos_theta = Vec3f::dot(hit.normal, omega);
