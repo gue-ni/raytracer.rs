@@ -238,7 +238,7 @@ pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 2048;
+    const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
 
     let mut scene: Vec<Object> = Vec::new();
