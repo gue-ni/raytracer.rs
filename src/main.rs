@@ -110,14 +110,15 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) 
 }
 
 pub fn vector_on_sphere() -> Vec3f {
-    let mut rng = rand::thread_rng();
-
     let r = 1.0;
-    let x = rng.gen_range(-r..r);
-    let y = rng.gen_range(-r..r);
-    let z = rng.gen_range(-r..r);
-
-    Vec3f::normalize(Vec3f::new(x,y,z))
+    let mut rng = rand::thread_rng();
+    Vec3f::normalize(
+        Vec3f::new(
+            rng.gen_range(-r..r),
+            rng.gen_range(-r..r),
+            rng.gen_range(-r..r)
+        )
+    )
 }
 
 pub fn sample_hemisphere() -> Vec3f {
@@ -130,7 +131,7 @@ pub fn sample_hemisphere() -> Vec3f {
     Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
 
-pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
+pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
     let mut vec: Vec3f;
     loop {
         vec = vector_on_sphere();
@@ -138,7 +139,21 @@ pub fn vector_in_hemisphere(normal: Vec3f) -> Vec3f {
             break;
         }
     }
-    vec
+    
+    let prob = 1.0 / (2.0 * PI);
+    
+    (vec, prob)
+}
+
+pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
+    let material = scene[hit.idx].material;
+    let albedo = material.albedo;
+    let emissive = material.emissive;
+
+    let (omega, prob) = vector_in_hemisphere(hit.normal);
+    let ray = Ray::new(hit.point, omega);
+    
+    emissive + albedo / PI * cast_ray(&ray, scene, depth - 1) * Vec3f::dot(hit.normal, omega) / prob
 }
 
 pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
@@ -146,10 +161,8 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
     let albedo = material.albedo;
     let emissive = material.emissive;
 
-    let random_vector = vector_in_hemisphere(hit.normal);
+    let (random_vector, p) = vector_in_hemisphere(hit.normal);
     let new_ray = Ray::new(hit.point, random_vector);
-
-    let p = 1.0 / (2.0 * PI);
     
     let cos_theta = Vec3f::dot(new_ray.direction, hit.normal);
     let brdf = material.albedo / PI;
@@ -160,7 +173,7 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
 }
 
 
-pub fn path_tracing(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {   
+pub fn path_tracing1(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {   
     let mut direct_light = Vec3f::fill(0.0);
     let mut indirect_light = Vec3f::fill(0.0);
 
@@ -206,7 +219,7 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
             // choose rendering strategy
             //phong(&hit, scene, ray)
             //visualize_normal(&hit, scene, ray)
-            path_tracing2(&hit, scene, ray, depth)
+            path_tracing3(&hit, scene, ray, depth)
         }
     };
 
@@ -289,8 +302,17 @@ pub fn main() {
         }
     }
 
-    match buffer.save("output.png") {
+    let filename = "output.png";
+    match buffer.save(filename) {
         Err(_) => panic!("Could not save file"),
-        Ok(_) => println!("Saved file"),
+        Ok(_) => println!("Saved output to {}", filename),
     };
+}
+
+
+#[test]
+fn test_sample() {
+    let normal = Vec3f::new(0.0, 1.0, 0.0);
+    let sample = vector_in_hemisphere(normal);
+    assert!(Vec3f::dot(normal, sample) > 0.0);
 }
