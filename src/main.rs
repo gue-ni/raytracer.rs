@@ -53,7 +53,7 @@ impl Camera {
         let y = (fy - 0.5 * ry) / ry;
         
         let origin = self.position;
-        let target = Vec3::new(x, y, 1.0);
+        let target = Vec3f::new(x, y, 1.0);
         
         Ray::new(origin, Vec3f::normalize(target - origin))        
     }
@@ -67,8 +67,7 @@ pub struct Object {
 
 pub struct Options {
     background: Vec3f,
-    width: u32,
-    height: u32
+    resolution: (u32, u32),
 }
 
 impl Hittable for Object {
@@ -76,8 +75,6 @@ impl Hittable for Object {
         self.geometry.hit(ray, min_t, max_t)
     }
 }
-
-
 
 // Bidirectional Scattering Distribution Function (BSDF) 
 pub trait BSDF {
@@ -231,7 +228,7 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
 
     let light = cast_ray(&new_ray, scene, depth - 1);
 
-    emissive + (brdf * light * cos_theta / p)
+    emissive + brdf * light * cos_theta / p
 }
 
 
@@ -268,10 +265,11 @@ pub fn path_tracing1(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> V
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
-    let background = Vec3f::fill(0.0);
+    let black = Vec3f::fill(0.0);
+    let background = Vec3f::new(0.68, 0.87, 0.96); // light blue
 
     if depth == 0 {
-        return background;
+        return black;
     }
     
     let result = match ray.cast(scene) {
