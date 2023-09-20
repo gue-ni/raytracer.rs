@@ -240,7 +240,7 @@ pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
 pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     let mut cosi = Vec3f::dot(incoming, normal).clamp(-1.0, 1.0);
-    let mut etai = 1;
+    let mut etai = 1.0;
     let mut etat = ior;
     let mut n = normal;
 
@@ -259,7 +259,7 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     if k < 0.0 {
         Vec3f::fill(0.0)
     } else {
-        incoming * eta + n * (eta * cosi - k.sqrt());
+        incoming * eta + n * (eta * cosi - k.sqrt())
     }
 }
 
