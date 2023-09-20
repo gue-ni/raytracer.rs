@@ -1,10 +1,12 @@
 mod common;
 mod geometry;
+mod material;
 mod ray;
 mod vector;
 
 use crate::common::*;
 use crate::geometry::*;
+use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
 
@@ -14,9 +16,6 @@ use image::{ImageBuffer, Rgb};
 use std::f32::consts::PI;
 use std::path::Path;
 use std::vec;
-
-extern crate rand;
-use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Camera {

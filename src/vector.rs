@@ -252,6 +252,7 @@ where
         Self { x, y }
     }
 
+    #[allow(dead_code)]
     pub fn fill(v: T) -> Self {
         Self::new(v, v)
     }
