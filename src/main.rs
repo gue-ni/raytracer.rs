@@ -58,7 +58,7 @@ impl Hittable for Object {
 pub trait BSDF {
     fn pdf(&self) -> f32;
     fn eval(&self) -> Vec3f;
-    fn sample(&self, normal: Vec3f) -> (Vec3f, f32);
+    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f);
 }
 
 impl BSDF for Material {
@@ -70,7 +70,7 @@ impl BSDF for Material {
         self.albedo / PI
     }
 
-    fn sample(&self, normal: Vec3f) -> (Vec3f, f32) {
+    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f) {
         let omega = uniform_sample_hemisphere(normal);
         let cos_theta = Vec3f::dot(normal, omega);
         let brdf_multiplier = (self.eval() * cos_theta) /  self.pdf(); 
