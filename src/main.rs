@@ -279,7 +279,7 @@ pub fn main() {
             radius: 0.5,
         },
         material: Material {
-            albedo: Vec3f::new(0.0, 1.0, 0.0),
+            albedo: Vec3f::new(1.0, 0.0, 0.0),
             emissive: Vec3f::fill(0.0),
         },
     });
@@ -287,10 +287,10 @@ pub fn main() {
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 0.0, 3.0),
-            radius: 1.0,
+            radius: 0.75,
         },
         material: Material {
-            albedo: Vec3f::new(1.0, 0.0, 0.),
+            albedo: Vec3f::new(0.0, 1.0, 0.),
             emissive: Vec3f::fill(0.0),
         },
     });
@@ -298,14 +298,13 @@ pub fn main() {
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(-1.5, 0.0, 3.0),
-            radius: 0.75,
+            radius: 0.5,
         },
         material: Material {
             albedo: Vec3f::new(0.0, 0.0, 1.0),
             emissive: Vec3f::fill(0.0),
         },
     });
-
     
     let r = 100000.0;
     // ground
@@ -326,7 +325,7 @@ pub fn main() {
 
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
-            let mut pixel = Vec3f::new(0.0, 0.0, 0.0);
+            let mut pixel = Vec3f::fill(0.0);
             let ray = camera.ray((x,y));
 
             for _ in 0..SAMPLES {
@@ -338,7 +337,8 @@ pub fn main() {
         }
     }
 
-    let filename = "output.png";
+    let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
+
     match buffer.save(filename) {
         Err(_) => panic!("Could not save file"),
         Ok(_) => println!("Saved output to {}", filename),
