@@ -55,16 +55,6 @@ impl Camera {
 
         let coord = Vec2f::new(pixel.0 as f32, pixel.1 as f32);
         let uv = (coord - self.resolution * 0.5) / self.resolution.y;
-
-        /*
-        let fx = pixel.0 as f32;
-        let fy = pixel.1 as f32;
-        let rx = self.resolution.0 as f32;
-        let ry = self.resolution.1 as f32;
-
-        let x = (fx - 0.5 * rx) / ry;
-        let y = (fy - 0.5 * ry) / ry;
-        */
         
         let origin = self.position;
         let target = Vec3f::new(uv.x, uv.y, 1.0);
@@ -275,7 +265,7 @@ pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 32;
+    const SAMPLES: u32 = 256;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
@@ -297,18 +287,18 @@ pub fn main() {
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 0.0, 3.0),
-            radius: 0.5,
+            radius: 1.0,
         },
         material: Material {
             albedo: Vec3f::new(1.0, 0.0, 0.),
-            emissive: Vec3f::fill(1.0),
+            emissive: Vec3f::fill(0.0),
         },
     });
     // left
     scene.push(Object {
         geometry: Sphere {
             center: Vec3f::new(-1.5, 0.0, 3.0),
-            radius: 0.5,
+            radius: 0.75,
         },
         material: Material {
             albedo: Vec3f::new(0.0, 0.0, 1.0),
