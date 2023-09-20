@@ -155,10 +155,9 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
 
     let (omega, prob) = vector_in_hemisphere(hit.normal);
     let ray = Ray::new(hit.point, omega);
-
     let brdf = albedo / PI;
-    
-    emissive + brdf * cast_ray(&ray, scene, depth - 1) * Vec3f::dot(hit.normal, omega) / prob
+    let cos_theta = Vec3f::dot(hit.normal, omega);
+    emissive + brdf * cast_ray(&ray, scene, depth - 1) * cos_theta / prob
 }
 
 pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
@@ -211,13 +210,14 @@ pub fn path_tracing1(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> V
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
+    let background = Vec3f::fill(0.0);
+
     if depth == 0 {
-        return Vec3f::fill(0.0);
+        return background;
     }
     
     let result = match ray.cast(scene) {
         None => {
-            let background = Vec3f::fill(1.0);
             background
         }
         Some(hit) => {
@@ -261,7 +261,7 @@ pub fn main() {
         },
         material: Material {
             albedo: Vec3f::new(1.0, 0.0, 0.),
-            emissive: Vec3f::fill(3.0),
+            emissive: Vec3f::fill(1.0),
         },
     });
     // left
