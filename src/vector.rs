@@ -30,13 +30,13 @@ pub trait Number:
 impl Number for f32 {}
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vec3T<T> {
+pub struct Vec3<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-impl<T> Vec3T<T>
+impl<T> Vec3<T>
 where
     T: Number,
 {
@@ -49,7 +49,7 @@ where
     }
 }
 
-impl<T> From<(T, T, T)> for Vec3T<T>
+impl<T> From<(T, T, T)> for Vec3<T>
 where
     T: Number,
 {
@@ -62,7 +62,7 @@ where
     }
 }
 
-impl<T> Add for Vec3T<T>
+impl<T> Add for Vec3<T>
 where
     T: Number,
 {
@@ -72,7 +72,7 @@ where
     }
 }
 
-impl<T> Mul<T> for Vec3T<T>
+impl<T> Mul<T> for Vec3<T>
 where
     T: Number,
 {
@@ -82,7 +82,7 @@ where
     }
 }
 
-impl<T> Div<T> for Vec3T<T>
+impl<T> Div<T> for Vec3<T>
 where
     T: Number,
 {
@@ -92,7 +92,7 @@ where
     }
 }
 
-impl<T> Sub<T> for Vec3T<T>
+impl<T> Sub<T> for Vec3<T>
 where
     T: Number,
 {
@@ -102,7 +102,7 @@ where
     }
 }
 
-impl<T> Sub for Vec3T<T>
+impl<T> Sub for Vec3<T>
 where
     T: Number,
 {
@@ -112,7 +112,7 @@ where
     }
 }
 
-impl<T> Mul for Vec3T<T>
+impl<T> Mul for Vec3<T>
 where
     T: Number,
 {
@@ -122,7 +122,7 @@ where
     }
 }
 
-impl<T> Div for Vec3T<T>
+impl<T> Div for Vec3<T>
 where
     T: Number,
 {
@@ -132,7 +132,7 @@ where
     }
 }
 
-impl<T> Neg for Vec3T<T>
+impl<T> Neg for Vec3<T>
 where
     T: Number,
 {
@@ -142,7 +142,7 @@ where
     }
 }
 
-impl<T> Index<usize> for Vec3T<T> {
+impl<T> Index<usize> for Vec3<T> {
     type Output = T;
     fn index(&self, i: usize) -> &T {
         match i {
@@ -154,7 +154,7 @@ impl<T> Index<usize> for Vec3T<T> {
     }
 }
 
-impl<T> IndexMut<usize> for Vec3T<T> {
+impl<T> IndexMut<usize> for Vec3<T> {
     fn index_mut(&mut self, i: usize) -> &mut T {
         match i {
             0 => &mut self.x,
@@ -173,7 +173,7 @@ where
     fn normalize(v: Self) -> Self;
 }
 
-impl<T> Magnitude<T> for Vec3T<T>
+impl<T> Magnitude<T> for Vec3<T>
 where
     T: Number + SquareRoot,
 {
@@ -190,7 +190,7 @@ pub trait Dot<T> {
     fn dot(a: Self, b: Self) -> T;
 }
 
-impl<T> Dot<T> for Vec3T<T>
+impl<T> Dot<T> for Vec3<T>
 where
     T: Number,
 {
@@ -203,7 +203,7 @@ pub trait Cross<T> {
     fn cross(a: Self, b: Self) -> Self;
 }
 
-impl<T> Cross<T> for Vec3T<T>
+impl<T> Cross<T> for Vec3<T>
 where
     T: Number,
 {
@@ -220,7 +220,7 @@ pub trait Lerp<T> {
     fn lerp(a: Self, b: Self, t: T) -> Self;
 }
 
-impl<T> Lerp<T> for Vec3T<T>
+impl<T> Lerp<T> for Vec3<T>
 where
     T: Number,
 {
@@ -229,7 +229,7 @@ where
     }
 }
 
-impl<T> Lerp<T> for Vec2T<T>
+impl<T> Lerp<T> for Vec2<T>
 where
     T: Number,
 {
@@ -239,12 +239,12 @@ where
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vec2T<T> {
+pub struct Vec2<T> {
     pub x: T,
     pub y: T,
 }
 
-impl<T> Vec2T<T>
+impl<T> Vec2<T>
 where
     T: Number,
 {
@@ -258,7 +258,7 @@ where
     }
 }
 
-impl<T> From<(T, T)> for Vec2T<T>
+impl<T> From<(T, T)> for Vec2<T>
 where
     T: Number,
 {
@@ -270,7 +270,7 @@ where
     }
 }
 
-impl<T> Div<T> for Vec2T<T>
+impl<T> Div<T> for Vec2<T>
 where
     T: Number,
 {
@@ -280,7 +280,7 @@ where
     }
 }
 
-impl<T> Sub<T> for Vec2T<T>
+impl<T> Sub<T> for Vec2<T>
 where
     T: Number,
 {
@@ -290,7 +290,7 @@ where
     }
 }
 
-impl<T> Mul<T> for Vec2T<T>
+impl<T> Mul<T> for Vec2<T>
 where
     T: Number,
 {
@@ -300,7 +300,7 @@ where
     }
 }
 
-impl<T> Add<T> for Vec2T<T>
+impl<T> Add<T> for Vec2<T>
 where
     T: Number,
 {
@@ -310,7 +310,7 @@ where
     }
 }
 
-impl<T> Mul for Vec2T<T>
+impl<T> Mul for Vec2<T>
 where
     T: Number,
 {
@@ -320,7 +320,7 @@ where
     }
 }
 
-impl<T> Sub for Vec2T<T>
+impl<T> Sub for Vec2<T>
 where
     T: Number,
 {
@@ -330,7 +330,7 @@ where
     }
 }
 
-impl<T> Add for Vec2T<T>
+impl<T> Add for Vec2<T>
 where
     T: Number,
 {
@@ -340,7 +340,7 @@ where
     }
 }
 
-impl<T> Div for Vec2T<T>
+impl<T> Div for Vec2<T>
 where
     T: Number,
 {
@@ -351,19 +351,19 @@ where
 }
 
 #[allow(dead_code)]
-pub type Vec3f = Vec3T<f32>;
+pub type Vec3f = Vec3<f32>;
 
 #[allow(dead_code)]
-pub type Vec3i = Vec3T<i32>;
+pub type Vec3i = Vec3<i32>;
 
 #[allow(dead_code)]
-pub type Vec2f = Vec2T<f32>;
+pub type Vec2f = Vec2<f32>;
 
 #[allow(dead_code)]
-pub type Vec2i = Vec2T<i32>;
+pub type Vec2i = Vec2<i32>;
 
 #[allow(dead_code)]
-pub type Vec2u = Vec2T<u32>;
+pub type Vec2u = Vec2<u32>;
 
 impl From<(u32, u32)> for Vec2f {
     fn from(item: (u32, u32)) -> Self {

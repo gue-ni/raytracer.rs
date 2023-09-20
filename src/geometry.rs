@@ -26,8 +26,8 @@ pub struct Mesh {
 }
 
 pub enum Geometry {
-    SPHERE(Sphere),
     MESH(Mesh),
+    SPHERE(Sphere),
 }
 
 pub trait Hittable {
