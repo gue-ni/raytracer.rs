@@ -238,7 +238,8 @@ pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 1;
+    const SAMPLES: u32 = 2048;
+    const BOUNCES: u32 = 3;
 
     let mut scene: Vec<Object> = Vec::new();
 
@@ -299,7 +300,7 @@ pub fn main() {
             let ray = camera_ray(x, y, WIDTH, HEIGHT);
 
             for _ in 0..SAMPLES {
-                pixel = pixel + cast_ray(&ray, &scene, 5);
+                pixel = pixel + cast_ray(&ray, &scene, BOUNCES);
             }
 
             pixel = (pixel * (u8::MAX as f32)) / (SAMPLES as f32);
