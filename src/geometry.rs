@@ -25,6 +25,11 @@ pub struct Mesh {
     triangles: Vec<Triangle>,
 }
 
+pub enum Geometry {
+    SPHERE(Sphere),
+    MESH(Mesh),
+}
+
 pub trait Hittable {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
 }
@@ -126,13 +131,22 @@ impl Hittable for Mesh {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Object<Mat: BSDF> {
-    pub geometry: Sphere,
-    pub material: Mat,
+impl Hittable for Geometry {
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+        match self {
+            Geometry::MESH(obj) => obj.hit(ray, min_t, max_t),
+            Geometry::SPHERE(obj) => obj.hit(ray, min_t, max_t),
+        }
+    }
 }
 
-pub type Scene = Vec<Object<Material>>;
+#[derive(Debug, Copy, Clone)]
+pub struct Object<Material: BSDF> {
+    pub geometry: Sphere,
+    pub material: Material,
+}
+
+pub type Scene = Vec<Object<DiffuseMaterial>>;
 
 #[cfg(test)]
 mod test {

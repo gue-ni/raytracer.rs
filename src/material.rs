@@ -11,12 +11,12 @@ pub trait BSDF {
 
 // lambertian
 #[derive(Debug, Copy, Clone)]
-pub struct Material {
+pub struct DiffuseMaterial {
     pub albedo: Vec3f,
     pub emissive: Vec3f,
 }
 
-impl BSDF for Material {
+impl BSDF for DiffuseMaterial {
     fn pdf(&self) -> f32 {
         1.0 / (2.0 * PI)
     }
@@ -35,7 +35,7 @@ impl BSDF for Material {
 
 #[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
-pub struct PhysicalMaterial {
+pub struct PhysicalDiffuseMaterial {
     albedo: Vec3f,
     emissive: Vec3f,
     roughness: f32,

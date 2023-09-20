@@ -146,7 +146,7 @@ pub fn main() {
             center: Vec3f::new(1.5, 0.0, 3.0),
             radius: 0.5,
         },
-        material: Material {
+        material: DiffuseMaterial {
             albedo: Vec3f::new(1.0, 0.0, 0.0),
             emissive: Vec3f::fill(0.0),
         },
@@ -157,7 +157,7 @@ pub fn main() {
             center: Vec3f::new(0.0, 0.0, 3.0),
             radius: 0.75,
         },
-        material: Material {
+        material: DiffuseMaterial {
             albedo: Vec3f::new(0.0, 1.0, 0.),
             emissive: Vec3f::fill(0.0),
         },
@@ -168,7 +168,7 @@ pub fn main() {
             center: Vec3f::new(-1.5, 0.0, 3.0),
             radius: 0.5,
         },
-        material: Material {
+        material: DiffuseMaterial {
             albedo: Vec3f::new(0.0, 0.0, 1.0),
             emissive: Vec3f::fill(0.0),
         },
@@ -181,7 +181,7 @@ pub fn main() {
             center: Vec3f::new(0.0, r + 1.0, 3.0),
             radius: r,
         },
-        material: Material {
+        material: DiffuseMaterial {
             albedo: Vec3f::fill(0.18),
             emissive: Vec3f::fill(0.0),
         },
