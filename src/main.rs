@@ -19,6 +19,7 @@ use std::path::Path;
 extern crate rand; 
 use rand::Rng;
 
+// https://en.wikipedia.org/wiki/Wavefront_.obj_file#Basic_materials
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
     albedo: Vec3f,
@@ -195,14 +196,11 @@ pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
 
 pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
-    let albedo = material.albedo;
-    let emissive = material.emissive;
-
     let (omega, prob) = vector_in_hemisphere(hit.normal);
     let ray = Ray::new(hit.point, omega);
-    let brdf = albedo / PI;
+    let brdf = material.albedo / PI;
     let cos_theta = Vec3f::dot(hit.normal, omega);
-    emissive + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
+    material.emissive + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
 }
 
 pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
@@ -210,38 +208,6 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
     let (omega, brdf_multiplier) = material.sample(hit.normal);
     let ray = Ray::new(hit.point, omega);
     material.emissive + cast_ray(&ray, scene, depth - 1) * brdf_multiplier
-}
-
-pub fn path_tracing1(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {   
-    let mut direct_light = Vec3f::fill(0.0);
-    let mut indirect_light = Vec3f::fill(0.0);
-
-    // direct light contribution
-    for (idx, object) in scene.iter().enumerate() {
-        
-        // object is not illuminated by itself
-        if idx == hit.idx {
-            continue;
-        }
-        
-        let light_dir = Vec3f::normalize(hit.point - object.geometry.center);
-
-        let shadow_ray = Ray::new(hit.point, light_dir);
-        
-        let visible = match shadow_ray.cast(scene) {
-            None => 1.0,
-            Some(_) => 0.0
-        };
-
-        let emissive = object.material.emissive;
-        let diffuse = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
-        
-        direct_light = direct_light + (emissive);
-    }
-
-    let albedo = scene[hit.idx].material.albedo;
-    
-    (direct_light + indirect_light) * albedo / 3.14
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
@@ -269,6 +235,37 @@ pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
 
 pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
     incoming - normal * 2.0 * Vec3f::dot(incoming, normal)
+}
+
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
+pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
+    let mut cosi = Vec3f::dot(incoming, normal).clamp(-1.0, 1.0);
+    let mut etai = 1;
+    let mut etat = ior;
+    let mut n = normal;
+
+    if cosi < 0.0 { 
+        cosi = -cosi; 
+    } else { 
+        let tmp = etai;
+        etai = etat;
+        etat = tmp;
+        n = -normal; 
+    }
+    
+    let eta = etai / etat;
+    let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
+    
+    if k < 0.0 {
+        Vec3f::fill(0.0)
+    } else {
+        incoming * eta + n * (eta * cosi - k.sqrt());
+    }
+}
+
+pub fn fresnel(incoming: Vec3f, normal: Vec3f, ior: f32) -> f32 {
+    // TODO
+    0.0
 }
 
 pub fn main() {
