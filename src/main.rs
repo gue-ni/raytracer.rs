@@ -53,7 +53,7 @@ impl Camera {
     fn ray(&self, pixel: (u32, u32)) -> Ray {
         // vec2 uv = (fragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
 
-        let uv = (pixel - self.resolution * 0.5) / self.resolution.y;
+        let uv = (Vec2f::new(pixel.0 as f32, pixel.1 as f32) - self.resolution * 0.5) / self.resolution.y;
 
         /*
         let fx = pixel.0 as f32;
