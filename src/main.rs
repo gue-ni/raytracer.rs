@@ -137,7 +137,7 @@ pub fn GeometrySmith(N: Vec3f, V: Vec3f, L: Vec3f, roughness: f32) -> f32 {
 
 pub fn fresnelSchlick(cosTheta: f32, F0: Vec3f) -> Vec3f
 {
-    F0 + (F0 - 1.0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
+    F0 + (Vec3f::fill(1.0) - F0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
 }
 
 // impl BSDF for PhysicalMaterial {}
