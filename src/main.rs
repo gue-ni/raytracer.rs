@@ -53,7 +53,8 @@ impl Camera {
     fn ray(&self, pixel: (u32, u32)) -> Ray {
         // vec2 uv = (fragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
 
-        let uv = (Vec2f::new(pixel.0 as f32, pixel.1 as f32) - self.resolution * 0.5) / self.resolution.y;
+        let coord = Vec2f::new(pixel.0 as f32, pixel.1 as f32);
+        let uv = (coord - self.resolution * 0.5) / self.resolution.y;
 
         /*
         let fx = pixel.0 as f32;
@@ -209,25 +210,8 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
     let ray = Ray::new(hit.point, omega);
     let brdf = albedo / PI;
     let cos_theta = Vec3f::dot(hit.normal, omega);
-    emissive + brdf * cast_ray(&ray, scene, depth - 1) * cos_theta / prob
+    emissive + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
 }
-
-pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
-    let material = scene[hit.idx].material;
-    let albedo = material.albedo;
-    let emissive = material.emissive;
-
-    let (random_vector, p) = vector_in_hemisphere(hit.normal);
-    let new_ray = Ray::new(hit.point, random_vector);
-    
-    let cos_theta = Vec3f::dot(new_ray.direction, hit.normal);
-    let brdf = material.albedo / PI;
-
-    let light = cast_ray(&new_ray, scene, depth - 1);
-
-    emissive + brdf * light * cos_theta / p
-}
-
 
 pub fn path_tracing1(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {   
     let mut direct_light = Vec3f::fill(0.0);
