@@ -19,6 +19,7 @@ use std::path::Path;
 extern crate rand; 
 use rand::Rng;
 
+// lambertian
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
     albedo: Vec3f,
@@ -30,6 +31,7 @@ pub struct PhysicalMaterial {
     emissive: Vec3f,
     roughness: f32,
     metallic: f32,
+    ao: f32
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -106,6 +108,19 @@ impl BSDF for Material {
         (omega, brdf_multiplier)
     }
 }
+
+pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32
+{
+    let a2     = a*a;
+    let NdotH  = f32::max(Vec3f::dot(N, H), 0.0);
+    let NdotH2 = NdotH*NdotH;
+    let nom    = a2;
+    let mut denom  = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom        = PI * denom * denom;
+    nom / denom
+}
+
+// impl BSDF for PhysicalMaterial {}
 
 pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
     let light = Light {
