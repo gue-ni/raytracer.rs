@@ -261,6 +261,16 @@ where
     }
 }
 
+impl<T> Mul<T> for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn mul(self, scalar: T) -> Self {
+        Self::new(self.x * scalar, self.y * scalar)
+    }
+}
+
 impl<T> Mul for Vec2T<T>
 where
     T: Number,
