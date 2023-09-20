@@ -36,6 +36,31 @@ pub enum RenderStrategy {
 }
 
 #[derive(Debug, Copy, Clone)]
+pub struct Camera {
+    position: Vec3f,
+    resolution: (u32, u32)
+}
+
+impl Camera {
+    fn ray(&self, pixel: (u32, u32)) -> Ray {
+        //     vec2 uv = (fragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
+
+        let fx = pixel.0 as f32;
+        let fy = pixel.1 as f32;
+        let rx = self.resolution.0 as f32;
+        let ry = self.resolution.1 as f32;
+
+        let x = (fx - 0.5 * rx) / ry;
+        let y = (fy - 0.5 * ry) / ry;
+        
+        let origin = self.position;
+        let direction = Vec3::normalize(Vec3::new(x, y, 1.0));
+        
+        Ray::new(origin, direction)
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
 pub struct Object {
     geometry: Sphere,
     material: Material,
@@ -275,6 +300,11 @@ pub fn main() {
     const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
 
+    let camera = Camera {
+        position: Vec3f::new(0.0, 0.0, 0.0),
+        resolution: (WIDTH, HEIGHT),
+    };
+
     let mut scene: Vec<Object> = Vec::new();
 
     // right
@@ -331,7 +361,8 @@ pub fn main() {
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
             let mut pixel = Vec3f::new(0.0, 0.0, 0.0);
-            let ray = camera_ray(x, y, WIDTH, HEIGHT);
+            //let ray = camera_ray(x, y, WIDTH, HEIGHT);
+            let ray = camera.ray(x,y);
 
             for _ in 0..SAMPLES {
                 pixel = pixel + cast_ray(&ray, &scene, BOUNCES);
