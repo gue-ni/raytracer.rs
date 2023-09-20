@@ -19,11 +19,17 @@ use std::path::Path;
 extern crate rand; 
 use rand::Rng;
 
-// https://en.wikipedia.org/wiki/Wavefront_.obj_file#Basic_materials
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
     albedo: Vec3f,
     emissive: Vec3f,
+}
+
+pub struct PhysicalMaterial {
+    albedo: Vec3f,
+    emissive: Vec3f,
+    roughness: f32,
+    metallic: f32,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -48,19 +54,14 @@ impl Camera {
     fn new(position: Vec3f, res: (u32, u32)) -> Self {
         Camera {
             position: position,
-            resolution: Vec2f::new(res.0 as f32, res.1 as f32),
+            resolution: Vec2f::from(res),
         }
     }
     
     fn ray(&self, pixel: (u32, u32)) -> Ray {
-        // vec2 uv = (fragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
-
-        let coord = Vec2f::new(pixel.0 as f32, pixel.1 as f32);
-        let uv = (coord - self.resolution * 0.5) / self.resolution.y;
-        
+        let uv = (Vec2f::from(pixel) - self.resolution * 0.5) / self.resolution.y;        
         let origin = self.position;
         let target = Vec3f::new(uv.x, uv.y, 1.0);
-        
         Ray::new(origin, Vec3f::normalize(target - origin))        
     }
 }
