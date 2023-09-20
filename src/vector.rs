@@ -33,7 +33,7 @@ impl Number for f32 {}
 pub struct Vec3T<T> {
     pub x: T,
     pub y: T,
-    pub z: T,
+    pub z: T
 }
 
 impl<T> Vec3T<T>
@@ -46,6 +46,25 @@ where
 
     pub fn fill(v: T) -> Self {
         Self::new(v, v, v)
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Vec2T<T> {
+    pub x: T,
+    pub y: T
+}
+
+impl<T> Vec2T<T>
+where
+    T: Number,
+{
+    pub fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+
+    pub fn fill(v: T) -> Self {
+        Self::new(v, v)
     }
 }
 
