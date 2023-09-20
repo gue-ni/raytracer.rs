@@ -121,6 +121,7 @@ pub fn vector_on_sphere() -> Vec3f {
     )
 }
 
+/*
 pub fn sample_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
     let x1 = rng.get_range(0.0..1.0);
@@ -131,6 +132,7 @@ pub fn sample_hemisphere() -> Vec3f {
     let sin_phi = f32::sin(2.0 * PI * x2);
     Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
+*/
 
 pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
     let mut vec: Vec3f;
