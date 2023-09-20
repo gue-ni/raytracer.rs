@@ -281,6 +281,16 @@ where
     }
 }
 
+impl<T> Sub for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn sub(self, other: Self) -> Self {
+        Self::new(self.x - other.x, self.y - other.y)
+    }
+}
+
 #[allow(dead_code)]
 pub type Vec3f = Vec3T<f32>;
 
