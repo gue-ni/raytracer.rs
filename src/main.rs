@@ -342,7 +342,7 @@ pub fn main() {
 
     match buffer.save(&filename) {
         Err(_) => panic!("Could not save file"),
-        Ok(_) => println!("Saved output to {}", filename),
+        Ok(_) => println!("Saved output to {:?}", filename),
     };
 }
 
