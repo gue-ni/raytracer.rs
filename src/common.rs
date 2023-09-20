@@ -113,8 +113,6 @@ pub fn sample_hemisphere() -> Vec3f {
 }
 */
 
-
-
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
     loop {
         let omega = vector_on_sphere();
