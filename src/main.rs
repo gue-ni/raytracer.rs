@@ -337,9 +337,9 @@ pub fn main() {
         }
     }
 
-    let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
+    let filename = Path::new(&format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES));
 
-    match buffer.save(filename) {
+    match buffer.save(&filename) {
         Err(_) => panic!("Could not save file"),
         Ok(_) => println!("Saved output to {}", filename),
     };
