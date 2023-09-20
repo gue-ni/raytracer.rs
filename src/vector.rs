@@ -33,7 +33,7 @@ impl Number for f32 {}
 pub struct Vec3T<T> {
     pub x: T,
     pub y: T,
-    pub z: T
+    pub z: T,
 }
 
 impl<T> Vec3T<T>
@@ -49,12 +49,16 @@ where
     }
 }
 
-impl<T> From<(T, T, T)> for Vec3T<T> 
-where 
-    T: Number 
+impl<T> From<(T, T, T)> for Vec3T<T>
+where
+    T: Number,
 {
     fn from(item: (T, T, T)) -> Self {
-        Self { x: item.0, y: item.1, z: item.2 }
+        Self {
+            x: item.0,
+            y: item.1,
+            z: item.2,
+        }
     }
 }
 
@@ -220,24 +224,24 @@ impl<T> Lerp<T> for Vec3T<T>
 where
     T: Number,
 {
-        fn lerp(a: Self, b: Self, t: T) -> Self {
-            a + (b - a) * t
-        }
+    fn lerp(a: Self, b: Self, t: T) -> Self {
+        a + (b - a) * t
+    }
 }
 
 impl<T> Lerp<T> for Vec2T<T>
 where
     T: Number,
 {
-        fn lerp(a: Self, b: Self, t: T) -> Self {
-            a + (b - a) * t
-        }
+    fn lerp(a: Self, b: Self, t: T) -> Self {
+        a + (b - a) * t
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec2T<T> {
     pub x: T,
-    pub y: T
+    pub y: T,
 }
 
 impl<T> Vec2T<T>
@@ -253,12 +257,15 @@ where
     }
 }
 
-impl<T> From<(T, T)> for Vec2T<T> 
-where 
-    T: Number 
+impl<T> From<(T, T)> for Vec2T<T>
+where
+    T: Number,
 {
     fn from(item: (T, T)) -> Self {
-        Self { x: item.0, y: item.1 }
+        Self {
+            x: item.0,
+            y: item.1,
+        }
     }
 }
 
@@ -357,17 +364,21 @@ pub type Vec2i = Vec2T<i32>;
 #[allow(dead_code)]
 pub type Vec2u = Vec2T<u32>;
 
-impl From<(u32, u32)> for Vec2f
-{
+impl From<(u32, u32)> for Vec2f {
     fn from(item: (u32, u32)) -> Self {
-        Self { x: item.0 as f32, y: item.1 as f32 }
+        Self {
+            x: item.0 as f32,
+            y: item.1 as f32,
+        }
     }
 }
 
-impl From<Vec2u> for Vec2f
-{
+impl From<Vec2u> for Vec2f {
     fn from(item: Vec2u) -> Self {
-        Self { x: item.x as f32, y: item.y as f32 }
+        Self {
+            x: item.x as f32,
+            y: item.y as f32,
+        }
     }
 }
 

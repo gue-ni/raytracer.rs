@@ -1,49 +1,22 @@
-mod vector;
+mod common;
 mod geometry;
 mod ray;
-mod common;
+mod vector;
 
-
-use crate::vector::*;
+use crate::common::*;
 use crate::geometry::*;
 use crate::ray::*;
-use crate::common::*;
+use crate::vector::*;
 
 //use super::*;
 
 use image::{ImageBuffer, Rgb};
-use std::vec;
 use std::f32::consts::PI;
 use std::path::Path;
+use std::vec;
 
-extern crate rand; 
+extern crate rand;
 use rand::Rng;
-
-// lambertian
-#[derive(Debug, Copy, Clone)]
-pub struct Material {
-    albedo: Vec3f,
-    emissive: Vec3f,
-}
-
-pub struct PhysicalMaterial {
-    albedo: Vec3f,
-    emissive: Vec3f,
-    roughness: f32,
-    metallic: f32,
-    ao: f32
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Light {
-    position: Vec3f,
-    color: Vec3f,
-}
-
-pub enum RenderStrategy {
-    Phong,
-    PathTracing,
-}
 
 #[derive(Debug, Copy, Clone)]
 pub struct Camera {
@@ -52,63 +25,27 @@ pub struct Camera {
 }
 
 impl Camera {
-
     fn new(position: Vec3f, res: (u32, u32)) -> Self {
         Camera {
             position: position,
             resolution: Vec2f::from(res),
         }
     }
-    
+
     fn ray(&self, pixel: (u32, u32)) -> Ray {
-        let uv = (Vec2f::from(pixel) - self.resolution * 0.5) / self.resolution.y;        
+        let uv = (Vec2f::from(pixel) - self.resolution * 0.5) / self.resolution.y;
         let origin = self.position;
         let target = Vec3f::new(uv.x, uv.y, 1.0);
-        Ray::new(origin, Vec3f::normalize(target - origin))        
+        Ray::new(origin, Vec3f::normalize(target - origin))
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Object {
-    geometry: Sphere,
-    material: Material,
+pub struct Light {
+    position: Vec3f,
+    color: Vec3f,
 }
 
-pub struct Options {
-    background: Vec3f,
-    resolution: (u32, u32),
-}
-
-impl Hittable for Object {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
-        self.geometry.hit(ray, min_t, max_t)
-    }
-}
-
-// Bidirectional Scattering Distribution Function (BSDF) 
-pub trait BSDF {
-    fn pdf(&self) -> f32;
-    fn eval(&self) -> Vec3f;
-    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f);
-}
-
-impl BSDF for Material {
-    fn pdf(&self) -> f32 {
-        1.0 / (2.0 * PI)
-    }
-
-    fn eval(&self) -> Vec3f {
-        self.albedo / PI
-    }
-
-    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f) {
-        let omega = uniform_sample_hemisphere(normal);
-        let cos_theta = Vec3f::dot(normal, omega);
-        let brdf_multiplier = (self.eval() * cos_theta) /  self.pdf(); 
-        (omega, brdf_multiplier)
-    }
-}
-
+/*
 pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32 {
     let a2     = a*a;
     let NdotH  = f32::max(Vec3f::dot(N, H), 0.0);
@@ -139,10 +76,11 @@ pub fn fresnelSchlick(cosTheta: f32, F0: Vec3f) -> Vec3f
 {
     F0 + (Vec3f::fill(1.0) - F0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
 }
+*/
 
 // impl BSDF for PhysicalMaterial {}
 
-pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
+pub fn phong(hit: &HitRecord, scene: &Scene, incoming: &Ray) -> Vec3f {
     let light = Light {
         position: Vec3f::new(5.0, 10.0, 5.0),
         color: Vec3f::fill(1.0),
@@ -179,66 +117,19 @@ pub fn phong(hit: &HitRecord, scene: &Vec<Object>, incoming: &Ray) -> Vec3f {
     result
 }
 
-pub fn visualize_normal(hit: &HitRecord, _scene: &Vec<Object>, _incoming: &Ray) -> Vec3f {
+pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray) -> Vec3f {
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
-pub fn vector_on_sphere() -> Vec3f {
-    let r = 1.0;
-    let mut rng = rand::thread_rng();
-    Vec3f::normalize(
-        Vec3f::new(
-            rng.gen_range(-r..r),
-            rng.gen_range(-r..r),
-            rng.gen_range(-r..r)
-        )
-    )
-}
-
-/*
-pub fn sample_hemisphere() -> Vec3f {
-    let mut rng = rand::thread_rng();
-    let x1 = rng.get_range(0.0..1.0);
-    let x2 = rng.get_range(0.0..1.0);
-    let phi = 2.0 * PI * x2;
-    let cos_theta = x1;
-    let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
-    let cos_phi = f32::cos(phi);
-    let sin_phi = f32::sin(phi);
-    Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
-}
-*/
-
-pub fn vector_in_hemisphere(normal: Vec3f) -> (Vec3f, f32) {
-    let mut vec: Vec3f;
-    loop {
-        vec = vector_on_sphere();
-        if Vec3f::dot(vec, normal) > 0.0 {
-            break;
-        }
-    }
-    let prob = 1.0 / (2.0 * PI);
-    (vec, prob)
-}
-
-pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
-    loop {
-        let omega = vector_on_sphere();
-        if Vec3f::dot(omega, normal) > 0.0 {
-            break omega;
-        }
-    }
-}
-
 // cook torrance
-pub fn path_tracing4(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
+pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let omega = uniform_sample_hemisphere(hit.normal);
     let ray = Ray::new(hit.point, omega);
-    material.emissive + cast_ray(&ray, scene, depth - 1) 
+    material.emissive + cast_ray(&ray, scene, depth - 1)
 }
 
-pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
+pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, prob) = vector_in_hemisphere(hit.normal);
     let ray = Ray::new(hit.point, omega);
@@ -247,25 +138,23 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, dept
     material.emissive + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
 }
 
-pub fn path_tracing2(hit: &HitRecord, scene: &Vec<Object>, _incoming: &Ray, depth: u32) -> Vec3f {
+pub fn path_tracing2(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, brdf_multiplier) = material.sample(hit.normal);
     let ray = Ray::new(hit.point, omega);
     material.emissive + cast_ray(&ray, scene, depth - 1) * brdf_multiplier
 }
 
-pub fn cast_ray(ray: &Ray, scene: &Vec<Object>, depth: u32) -> Vec3f {
+pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     let black = Vec3f::fill(0.0);
     let background = Vec3f::new(0.68, 0.87, 0.96); // light blue
 
     if depth == 0 {
         return black;
     }
-    
+
     let result = match ray.cast(scene) {
-        None => {
-            background
-        }
+        None => background,
         Some(hit) => {
             // choose rendering strategy
             //phong(&hit, scene, ray)
@@ -288,18 +177,18 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     let mut etat = ior;
     let mut n = normal;
 
-    if cosi < 0.0 { 
-        cosi = -cosi; 
-    } else { 
+    if cosi < 0.0 {
+        cosi = -cosi;
+    } else {
         let tmp = etai;
         etai = etat;
         etat = tmp;
-        n = -normal; 
+        n = -normal;
     }
-    
+
     let eta = etai / etat;
     let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
-    
+
     if k < 0.0 {
         Vec3f::fill(0.0)
     } else {
@@ -315,7 +204,7 @@ pub fn fresnel(incoming: Vec3f, normal: Vec3f, ior: f32) -> f32 {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 256;
+    const SAMPLES: u32 = 1;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
@@ -355,7 +244,7 @@ pub fn main() {
             emissive: Vec3f::fill(0.0),
         },
     });
-    
+
     let r = 100000.0;
     // ground
     scene.push(Object {
@@ -368,7 +257,6 @@ pub fn main() {
             emissive: Vec3f::fill(0.0),
         },
     });
-    
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
@@ -376,7 +264,7 @@ pub fn main() {
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
             let mut pixel = Vec3f::fill(0.0);
-            let ray = camera.ray((x,y));
+            let ray = camera.ray((x, y));
 
             for _ in 0..SAMPLES {
                 pixel = pixel + cast_ray(&ray, &scene, BOUNCES);
@@ -387,15 +275,14 @@ pub fn main() {
         }
     }
 
-    let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
+    let filename = format!("img/render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
     let path = Path::new(&filename);
-    
+
     match buffer.save(&path) {
         Err(_) => panic!("Could not save file"),
         Ok(_) => println!("Saved output to {:?}", path),
     };
 }
-
 
 #[test]
 fn test_sample() {}
