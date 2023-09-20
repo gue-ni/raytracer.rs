@@ -212,6 +212,27 @@ where
     }
 }
 
+pub trait Lerp<T> {
+    fn lerp(a: Self, b: Self, t: T) -> Self;
+}
+
+impl<T> Lerp<T> for Vec3T<T>
+where
+    T: Number,
+{
+        fn lerp(a: Self, b: Self, t: T) -> Self {
+            a + (b - a) * t
+        }
+}
+
+impl<T> Lerp<T> for Vec2T<T>
+where
+    T: Number,
+{
+        fn lerp(a: Self, b: Self, t: T) -> Self {
+            a + (b - a) * t
+        }
+}
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec2T<T> {
