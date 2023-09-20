@@ -58,25 +58,6 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vec2T<T> {
-    pub x: T,
-    pub y: T
-}
-
-impl<T> Vec2T<T>
-where
-    T: Number,
-{
-    pub fn new(x: T, y: T) -> Self {
-        Self { x, y }
-    }
-
-    pub fn fill(v: T) -> Self {
-        Self::new(v, v)
-    }
-}
-
 impl<T> Add for Vec3T<T>
 where
     T: Number,
@@ -231,11 +212,76 @@ where
     }
 }
 
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Vec2T<T> {
+    pub x: T,
+    pub y: T
+}
+
+impl<T> Vec2T<T>
+where
+    T: Number,
+{
+    pub fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+
+    pub fn fill(v: T) -> Self {
+        Self::new(v, v)
+    }
+}
+
+impl<T> From<(T, T)> for Vec2T<T> 
+where 
+    T: Number 
+{
+    fn from(item: (T, T)) -> Self {
+        Self { x: item.0, y: item.1 }
+    }
+}
+
+impl<T> Div<T> for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn div(self, scalar: T) -> Self {
+        Self::new(self.x / scalar, self.y / scalar)
+    }
+}
+
+impl<T> Sub<T> for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn sub(self, scalar: T) -> Self {
+        Self::new(self.x - scalar, self.y - scalar)
+    }
+}
+
+impl<T> Mul for Vec2T<T>
+where
+    T: Number,
+{
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
+        Self::new(self.x * other.x, self.y * other.y)
+    }
+}
+
 #[allow(dead_code)]
 pub type Vec3f = Vec3T<f32>;
 
 #[allow(dead_code)]
 pub type Vec3i = Vec3T<i32>;
+
+#[allow(dead_code)]
+pub type Vec2f = Vec2T<f32>;
+
+#[allow(dead_code)]
+pub type Vec2i = Vec2T<i32>;
 
 #[cfg(test)]
 mod tests {
