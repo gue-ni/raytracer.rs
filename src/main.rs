@@ -109,8 +109,7 @@ impl BSDF for Material {
     }
 }
 
-pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32
-{
+pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32 {
     let a2     = a*a;
     let NdotH  = f32::max(Vec3f::dot(N, H), 0.0);
     let NdotH2 = NdotH*NdotH;
@@ -118,6 +117,22 @@ pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32
     let mut denom  = (NdotH2 * (a2 - 1.0) + 1.0);
     denom        = PI * denom * denom;
     nom / denom
+}
+
+pub fn GeometrySchlickGGX(NdotV: f32, roughness: f32) -> f32 {
+    let r = (roughness + 1.0);
+    let k = (r*r) / 8.0;
+    let num   = NdotV;
+    let denom = NdotV * (1.0 - k) + k;
+    num / denom
+}
+
+pub fn GeometrySmith(N: Vec3f, V: Vec3f, L: Vec3f, roughness: f32) -> f32 {
+    let NdotV = f32::max(Vec3f::dot(N, V), 0.0);
+    let NdotL = f32::max(Vec3f::dot(N, L), 0.0);
+    let ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    let ggx1  = GeometrySchlickGGX(NdotL, roughness);
+    ggx1 * ggx2
 }
 
 // impl BSDF for PhysicalMaterial {}
