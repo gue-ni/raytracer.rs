@@ -2,7 +2,7 @@
 
 ## Examples Renders
 
-![](./img/render-640x480-s2048-b3.png)
+![](./img/render-640x480-s2048-b5.png)
 
 ## Links
 
