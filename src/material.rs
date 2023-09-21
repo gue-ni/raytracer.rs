@@ -49,7 +49,7 @@ impl BSDF for Material {
     fn emittance(&self) -> Vec3f {
         match self {
             Material::Physical { emittance, albedo, .. } => *albedo * *emittance,
-            Material::Diffuse  { emissive }     => *emissive,
+            Material::Diffuse  { emissive, .. }     => *emissive,
             _ => Vec3f::fill(0.0)
         }
     }
