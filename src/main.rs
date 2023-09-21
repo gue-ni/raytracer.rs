@@ -74,7 +74,6 @@ pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
 pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let omega = uniform_sample_hemisphere(hit.normal);
-
     let prob = 1.0 / (2.0 * PI);
     let ray = Ray::new(hit.point, omega);
     let brdf = material.albedo / PI;
@@ -90,11 +89,10 @@ pub fn path_tracing2(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-    let black = Vec3f::fill(0.0);
     let background = Vec3f::new(0.68, 0.87, 0.96) * 0.1; // light blue
 
     if depth == 0 {
-        return black;
+        return Vec3f::fill(0.0);
     }
 
     match ray.cast(scene) {
