@@ -51,16 +51,15 @@ impl Material {
 }
 
 impl BSDF for Material {
-    fn sample(&self, normal: Vec3f, _wo: Vec3f) -> (Vec3f, f32) {
+    fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
         match self {
             Material::Specular => {
-                let pdf = 1.0 / (2.0 * PI);
-                let wi = reflect(_wo, normal);
-                (wi, pdf)
+                let wi = reflect(-wo, normal);
+                (wi, 1.0)
             }
             Material::Physical { roughness, .. } => {
                 let pdf = 1.0 / (2.0 * PI);
-                let reflected = reflect(_wo, normal);
+                let reflected = reflect(-wo, normal);
                 let random = uniform_sample_hemisphere(normal);
                 let wi = Vec3f::lerp(reflected, random, *roughness);
                 (wi, pdf)
@@ -77,7 +76,7 @@ impl BSDF for Material {
         match self {
             Material::Diffuse { albedo, .. } => *albedo / PI,
             Material::Physical { albedo, .. } => *albedo / PI,
-            _ => Vec3f::new(0.0, 1.0, 0.0),
+            _ => Vec3f::fill(1.0),
         }
     }
 

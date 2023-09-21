@@ -14,11 +14,6 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
 }
 
 #[allow(dead_code)]
-pub fn whitted(hit: &HitRecord, scene: &Scene, incoming: &Ray, _depth: u32) -> Vec3f {
-    Vec3f::fill(0.0)
-}
-
-#[allow(dead_code)]
 fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
     let emittance = material.emittance();
@@ -57,7 +52,7 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     }
 }
 
-pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 
@@ -89,7 +84,7 @@ pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> Rgb
 }
 
 #[allow(dead_code)]
-pub fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 
@@ -110,4 +105,9 @@ pub fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> 
     }
 
     image
+}
+
+
+pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+  render_v1(camera, scene, samples, bounces)
 }

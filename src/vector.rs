@@ -238,7 +238,7 @@ where
 
 pub trait Cross<T> {
     fn cross(a: Self, b: Self) -> Self;
-}
+    }
 
 impl<T> Cross<T> for Vec3<T>
 where
@@ -251,6 +251,10 @@ where
             a.x * b.y - a.y * b.x,
         )
     }
+
+    
+
+
 }
 
 pub trait Lerp<T> {

@@ -14,18 +14,10 @@ use crate::ray::*;
 use crate::renderer::*;
 use crate::vector::*;
 
-use image::RgbImage;
 use std::path::Path;
 use std::time::Instant;
-use std::vec;
-
-extern crate rand;
-use rand::Rng;
 
 pub fn main() {
-    let wall = Material::diffuse(Vec3f::fill(1.0));
-    let light = Material::emissive(Vec3f::fill(1.0), 5.0);
-    let light_2 = Material::emissive(Vec3f::fill(1.0), 1.0);
 
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
@@ -37,16 +29,18 @@ pub fn main() {
     // middle
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, 4.0), 1.0),
-        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
+        material: Material::physical(Vec3f::new(1.0, 0.0, 0.0), 0.25),
     });
     // left
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(-1.75, 0.0, 4.0), 0.5),
-        material: Material::diffuse(Vec3f::new(0.0, 0.0, 1.0)),
+        material: Material::Specular,
+        //material: Material::diffuse(Vec3f::new(0.0, 0.0, 1.0)),
     });
 
     // light
     /*
+    let light = Material::emissive(Vec3f::fill(1.0), 5.0);
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.3),
         material: light,
@@ -57,9 +51,13 @@ pub fn main() {
     let s = 1.0;
     let w = 4.0;
 
+    let wall = Material::diffuse(Vec3f::fill(1.0));
+    let light = Material::emissive(Vec3f::fill(1.0), 0.5);
+
+
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(r + w), 5.0), r),
-        material: light_2,
+        material: light,
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, r + s, 5.0), r),
@@ -80,8 +78,8 @@ pub fn main() {
 
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 32;
-    const BOUNCES: u32 = 3;
+    const SAMPLES: u32 = 256;
+    const BOUNCES: u32 = 5;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
@@ -91,11 +89,14 @@ pub fn main() {
 
     let elapsed = now.elapsed();
 
-    println!("{}x{}, samples: {}, bounces: {}", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    println!(
+        "{}x{}, samples: {}, bounces: {}",
+        WIDTH, HEIGHT, SAMPLES, BOUNCES
+    );
     println!("Elapsed time: {:.2?}", elapsed);
 
-    //let filename = format!("img/render/render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
-    let filename = format!("img/render/render.png");
+    let filename = format!("img/render/render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    //let filename = format!("img/render/render.png");
     let path = Path::new(&filename);
 
     match image.save(&path) {

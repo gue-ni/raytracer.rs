@@ -121,3 +121,17 @@ pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::common::*;
+
+    #[test]
+    fn test_reflect() {
+        let normal = Vec3f::new(0.0, 1.0, 0.0);
+        let incoming = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
+        let outgoing = reflect(incoming, normal);
+        assert_eq!(Vec3f::dot(incoming, outgoing), 0.0);
+        assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
+    }
+}
