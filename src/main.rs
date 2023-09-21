@@ -101,14 +101,9 @@ pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth:
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     match ray.cast(scene) {
+        Some(hit) if depth > 0 => naive_path_tracing_rr(&hit, scene, ray, depth),
         None => scene.background,
-        Some(hit) => {
-            if depth > 0 {
-                naive_path_tracing_rr(&hit, scene, ray, depth)
-            } else {
-                Vec3f::fill(0.0)
-            }
-        }
+        _ => Vec3f::fill(0.0),
     }
 }
 
