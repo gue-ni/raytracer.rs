@@ -50,7 +50,7 @@ impl BSDF for DiffuseMaterial {
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
     Diffuse { emissive: Vec3f, albedo: Vec3f },
-    Physical {  emissive: Vec3f, albedo: Vec3f, roughness: f32 },
+    Physical {  emittance: f32, albedo: Vec3f, roughness: f32 },
 }
 
 impl BxDF for Material {
@@ -69,8 +69,8 @@ impl BxDF for Material {
     
     fn emittance(&self) -> Vec3f {
         match self {
+            Material::Physical { emittance, albedo .. } => *albedo * *emittance,
             Material::Diffuse { emissive, .. } => *emissive,
-            _ => Vec3f::fill(0.0)
         }
     }
 }
