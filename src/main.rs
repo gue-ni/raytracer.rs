@@ -77,7 +77,7 @@ pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
 }
 */
 
-pub fn path_tracing3(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+pub fn naive_path_tracing_2(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let wo = -incoming.direction;
     let (wi, pdf) = material.sample_f(hit.normal, wo);
@@ -88,7 +88,7 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32)
 }
 
 
-pub fn path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
+pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, brdf_multiplier) = material.sample(hit.normal);
     let ray = Ray::new(hit.point, omega);
@@ -96,7 +96,7 @@ pub fn path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32)
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-    let background = Vec3f::new(0.68, 0.87, 0.96) * 0.1; // light blue
+    let background = Vec3f::new(0.68, 0.87, 0.96); // light blue
 
     if depth == 0 {
         return Vec3f::fill(0.0);
@@ -104,14 +104,14 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
     match ray.cast(scene) {
         None => background,
-        Some(hit) => path_tracing3(&hit, scene, ray, depth),
+        Some(hit) => naive_path_tracing_2(&hit, scene, ray, depth),
     }
 }
 
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 64;
+    const SAMPLES: u32 = 100;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
@@ -195,9 +195,9 @@ pub fn main() {
             center: Vec3f::new(0.0, -(r+w), 5.0),
             radius: r,
         },
-        material: Material::Diffuse {
-            albedo: Vec3f::fill(0.18),
-            emissive: Vec3f::fill(1.0) * 1.0,
+        material: Material::Physical {
+            albedo: Vec3f::fill(1.0),
+            emittance: 2.0,
         }
     });
     
@@ -224,7 +224,7 @@ pub fn main() {
     let elapsed = now.elapsed();
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
+    let filename = format!("render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
     let path = Path::new(&filename);
 
     match buffer.save(&path) {
