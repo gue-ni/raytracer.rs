@@ -1,22 +1,22 @@
+mod camera;
 mod common;
 mod geometry;
 mod material;
 mod ray;
 mod vector;
-mod camera;
 
+use crate::camera::*;
 use crate::common::*;
 use crate::geometry::*;
 use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
-use crate::camera::*;
 
 use image::{ImageBuffer, Rgb};
 use std::f32::consts::PI;
 use std::path::Path;
-use std::vec;
 use std::time::Instant;
+use std::vec;
 
 extern crate rand;
 use rand::Rng;
@@ -80,7 +80,7 @@ pub fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, dep
     if rng.gen_range(0.0..1.0) >= rr_prob {
         return emittance;
     }
-        
+
     let wo = -incoming.direction;
     let (wi, pdf) = material.sample_f(hit.normal, wo);
     let ray = Ray::new(hit.point, wi);
@@ -110,14 +110,14 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 2048;
+    const SAMPLES: u32 = 4;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
-     scene.objects.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, -0.5, 4.0),
             radius: 0.25,
@@ -165,61 +165,61 @@ pub fn main() {
     let r = 100000.0;
     let s = 1.0;
     let w = 4.0;
-    
+
     let wall = Material::Diffuse {
         albedo: Vec3f::fill(0.75),
         emissive: Vec3f::fill(0.0),
     };
 
     let room_center = Vec3f::new(0.0, 0.0, 5.0);
-    
+
     // ground
     scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, r + s, 5.0),
             radius: r,
         },
-        material: wall
+        material: wall,
     });
     scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(-(r + w), 0.0, 5.0),
             radius: r,
         },
-        material: wall
+        material: wall,
     });
     scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new((r + w), 0.0, 5.0),
             radius: r,
         },
-        material: wall
+        material: wall,
     });
     scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 0.0, 5.0 + (r + w)),
             radius: r,
         },
-        material: wall
+        material: wall,
     });
     scene.objects.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(0.0, -(r+w), 5.0),
+            center: Vec3f::new(0.0, -(r + w), 5.0),
             radius: r,
         },
         material: Material::Diffuse {
             albedo: Vec3f::fill(1.0),
             emissive: Vec3f::fill(1.0),
-        }
-    });    
+        },
+    });
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
 
     let now = Instant::now();
-    
-    for x in 0..WIDTH {
-        for y in 0..HEIGHT {
+
+    for y in 0..HEIGHT {
+        for x in 0..WIDTH {
             let mut pixel = Vec3f::fill(0.0);
             let ray = camera.ray((x, y));
 
@@ -233,6 +233,10 @@ pub fn main() {
     }
 
     let elapsed = now.elapsed();
+    println!(
+        "{}x{}, samples: {}, bounces: {}",
+        WIDTH, HEIGHT, SAMPLES, BOUNCES
+    );
     println!("Elapsed time: {:.2?}", elapsed);
 
     let filename = format!("render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);

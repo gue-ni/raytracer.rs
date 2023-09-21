@@ -25,11 +25,6 @@ pub struct Mesh {
     triangles: Vec<Triangle>,
 }
 
-pub enum Geometry {
-    MESH(Mesh),
-    SPHERE(Sphere),
-}
-
 pub trait Hittable {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
 }
@@ -157,7 +152,7 @@ impl Scene {
     pub fn new(background: Vec3f) -> Self {
         Self {
             objects: Vec::new(),
-            background
+            background,
         }
     }
 
