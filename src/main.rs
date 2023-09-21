@@ -105,7 +105,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
     match ray.cast(scene) {
         None => background,
-        Some(hit) => visualize_normal(&hit, scene, ray, depth),
+        Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
     }
 }
 
