@@ -141,12 +141,12 @@ impl Hittable for Geometry {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Object<Material: BSDF> {
+pub struct Object {
     pub geometry: Sphere,
     pub material: Material,
 }
 
-pub type Scene = Vec<Object<DiffuseMaterial>>;
+pub type Scene = Vec<Object>;
 
 #[cfg(test)]
 mod test {
