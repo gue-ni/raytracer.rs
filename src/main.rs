@@ -82,7 +82,7 @@ pub fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, dep
     }
 
     let wo = -incoming.direction;
-    let (wi, pdf) = material.sample_f(hit.normal, wo);
+    let (wi, pdf) = material.sample(hit.normal, wo);
     let ray = Ray::new(hit.point, wi);
     let bsdf = material.bsdf(hit.normal, wo, wi);
     let cos_theta = Vec3f::dot(hit.normal, wi);
@@ -92,7 +92,7 @@ pub fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, dep
 pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
     let wo = -incoming.direction;
-    let (wi, pdf) = material.sample_f(hit.normal, wo);
+    let (wi, pdf) = material.sample(hit.normal, wo);
     let ray = Ray::new(hit.point, wi);
     let bsdf = material.bsdf(hit.normal, wo, wi);
     let cos_theta = Vec3f::dot(hit.normal, wi);
@@ -130,10 +130,7 @@ pub fn main() {
 
     // right
     scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(1.5, 0.0, 4.0),
-            radius: 0.5,
-        },
+        geometry: Sphere::new(Vec3f::new(1.5, 0.0, 4.0), 0.5),
         material: Material::Diffuse {
             albedo: Vec3f::new(1.0, 0.0, 0.0),
             emissive: Vec3f::fill(0.0),

@@ -5,7 +5,7 @@ use std::f32::consts::PI;
 // Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
     // return outgoing vector and pdf
-    fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
+    fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
     //
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
     // return emittance * albedo
@@ -42,7 +42,7 @@ impl Material {
 }
 
 impl BSDF for Material {
-    fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
+    fn sample(&self, normal: Vec3f, _wo: Vec3f) -> (Vec3f, f32) {
         match self {
             _ => {
                 let omega = uniform_sample_hemisphere(normal);
@@ -52,7 +52,7 @@ impl BSDF for Material {
         }
     }
 
-    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
+    fn bsdf(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
         match self {
             Material::Diffuse { albedo, .. } => *albedo / PI,
             _ => Vec3f::new(0.0, 1.0, 0.0),

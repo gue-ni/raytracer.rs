@@ -126,22 +126,11 @@ impl Hittable for Mesh {
     }
 }
 
-impl Hittable for Geometry {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
-        match self {
-            Geometry::MESH(obj) => obj.hit(ray, min_t, max_t),
-            Geometry::SPHERE(obj) => obj.hit(ray, min_t, max_t),
-        }
-    }
-}
-
 #[derive(Debug, Copy, Clone)]
 pub struct Object {
     pub geometry: Sphere,
     pub material: Material,
 }
-
-//pub type Scene = Vec<Object>;
 
 pub struct Scene {
     pub objects: Vec<Object>,
