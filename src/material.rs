@@ -49,7 +49,7 @@ pub struct PhysicalMaterial {
 }
 
 #[derive(Debug, Copy, Clone)]
-enum Material {
+pub enum Material {
     Diffuse { emissive: Vec3f, albedo: Vec3f },
     Physical {  emissive: Vec3f, albedo: Vec3f, roughness: f32 },
 }
@@ -63,24 +63,29 @@ impl BSDF for Material {
 
     fn eval(&self) -> Vec3f {
         match self {
-            Material::Diffuse { albedo } => {
-                *albedo / PI 
-            },
+            Material::Diffuse { albedo, .. } => *albedo / PI,
             _ => Vec3f::fill(0.0)
         }
     }
 
     fn emissive(&self) -> Vec3f {
        match self {
-            Material::Diffuse { emissive } => {
-                *emissive
-            },
+            Material::Diffuse { emissive, .. } => *emissive,
             _ => Vec3f::fill(0.0),
         }
     } 
 
     fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f) {
-        (Vec3f::fill(0.0), Vec3f::fill(0.0))
+        match self {
+            Material::Diffuse { .. } => {
+                let omega = uniform_sample_hemisphere(normal);
+                let cos_theta = Vec3f::dot(normal, omega);
+                let brdf_multiplier = (self.eval() * cos_theta) / self.pdf();
+                (omega, brdf_multiplier)
+            },
+            _ => (Vec3f::fill(0.0), Vec3f::fill(0.0))
+        }
+        
     }
 }
 
