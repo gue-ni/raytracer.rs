@@ -55,9 +55,14 @@ pub enum Material {
 
 impl BxDF for Material {
     fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
-        let omega = uniform_sample_hemisphere(normal);
-        let pdf = 1.0 / (2.0 * PI);
-        (omega, pdf)
+        match self {
+            _ => {
+                let omega = uniform_sample_hemisphere(normal);
+                let pdf = 1.0 / (2.0 * PI);
+                (omega, pdf)
+            }
+        }
+        
     }
      
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
