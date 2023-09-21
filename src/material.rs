@@ -16,7 +16,6 @@ pub trait BSDF {
 pub enum Material {
     Diffuse { albedo: Vec3f, emittance: f32 },
     Physical { albedo: Vec3f, emittance: f32, roughness: f32 },
-    Specular
 }
 
 impl Material {
@@ -43,7 +42,7 @@ impl BSDF for Material {
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
         match self {
             Material::Diffuse { albedo, .. } => *albedo / PI,
-            _ => Vec3f::fill(0.0)
+            _ => Vec3f::new(0.0, 1.0, 0.0)
         }
     }
     
