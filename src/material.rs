@@ -14,7 +14,7 @@ pub trait BSDF {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
-    Diffuse { albedo: Vec3f, emittance: f32 },
+    Diffuse { albedo: Vec3f, emissive: Vec3f },
     Physical { albedo: Vec3f, emittance: f32, roughness: f32 },
 }
 
@@ -24,7 +24,7 @@ impl Material {
     }
 
     pub fn emissive(color: Vec3f, intensity: f32) -> Self {
-        Material::Diffuse { albedo: color, emittance: intensity }
+        Material::Diffuse { albedo: color, emissive: Vec3f::fill(intensity) }
     }
 }
 
@@ -49,7 +49,7 @@ impl BSDF for Material {
     fn emittance(&self) -> Vec3f {
         match self {
             Material::Physical { emittance, albedo, .. } => *albedo * *emittance,
-            Material::Diffuse  { emittance, albedo }     => *albedo * *emittance,
+            Material::Diffuse  { emissive }     => *emissive,
             _ => Vec3f::fill(0.0)
         }
     }
