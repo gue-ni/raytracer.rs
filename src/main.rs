@@ -66,6 +66,7 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray) -> Vec
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
+/*
 // cook torrance
 pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
@@ -83,7 +84,7 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
     let cos_theta = Vec3f::dot(hit.normal, omega);
     material.emissive() + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
 }
-
+*/
 pub fn path_tracing2(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, brdf_multiplier) = material.sample(hit.normal);
