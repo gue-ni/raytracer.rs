@@ -17,6 +17,8 @@ use std::f32::consts::PI;
 use std::path::Path;
 use std::vec;
 
+/*
+
 pub struct Light {
     position: Vec3f,
     color: Vec3f,
@@ -58,6 +60,7 @@ pub fn phong(hit: &HitRecord, scene: &Scene, incoming: &Ray) -> Vec3f {
 
     result
 }
+*/
 
 pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray) -> Vec3f {
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
@@ -68,7 +71,7 @@ pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
     let material = scene[hit.idx].material;
     let omega = uniform_sample_hemisphere(hit.normal);
     let ray = Ray::new(hit.point, omega);
-    material.emissive + cast_ray(&ray, scene, depth - 1)
+    material.emissive() + cast_ray(&ray, scene, depth - 1)
 }
 
 pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
@@ -78,7 +81,7 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
     let ray = Ray::new(hit.point, omega);
     let brdf = material.albedo / PI;
     let cos_theta = Vec3f::dot(hit.normal, omega);
-    material.emissive + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
+    material.emissive() + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
 }
 
 pub fn path_tracing2(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
@@ -117,7 +120,7 @@ pub fn main() {
             center: Vec3f::new(1.5, 0.0, 4.0),
             radius: 0.5,
         },
-        material: DiffuseMaterial {
+        material: Material::Diffuse {
             albedo: Vec3f::new(1.0, 0.0, 0.0),
             emissive: Vec3f::fill(0.0),
         },
@@ -128,7 +131,7 @@ pub fn main() {
             center: Vec3f::new(0.0, 0.0, 4.0),
             radius: 0.75,
         },
-        material: DiffuseMaterial {
+        material: Material::Diffuse {
             albedo: Vec3f::new(0.0, 1.0, 0.),
             emissive: Vec3f::fill(0.0),
         },
@@ -139,7 +142,7 @@ pub fn main() {
             center: Vec3f::new(-1.5, 0.0, 5.0),
             radius: 0.5,
         },
-        material: DiffuseMaterial {
+        material: Material::Diffuse {
             albedo: Vec3f::new(0.0, 0.0, 1.0),
             emissive: Vec3f::fill(0.0),
         },
@@ -149,7 +152,7 @@ pub fn main() {
     let s = 1.0;
     let w = 4.0;
     
-    let wall = DiffuseMaterial {
+    let wall = Material::Diffuse {
         albedo: Vec3f::fill(0.75),
         emissive: Vec3f::fill(0.0),
     };
@@ -188,7 +191,7 @@ pub fn main() {
             center: Vec3f::new(0.0, -(r+w), 5.0),
             radius: r,
         },
-        material: DiffuseMaterial {
+        material: Material::Diffuse {
             albedo: Vec3f::fill(0.18),
             emissive: Vec3f::fill(1.0) * 1.0,
         }
