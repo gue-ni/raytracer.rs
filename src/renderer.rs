@@ -4,6 +4,7 @@ use crate::geometry::*;
 use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
+
 use image::{Rgb, RgbImage};
 extern crate rand;
 use rand::Rng;
@@ -107,7 +108,6 @@ fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
     image
 }
 
-
 pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-  render_v1(camera, scene, samples, bounces)
+    render_v1(camera, scene, samples, bounces)
 }

@@ -1,24 +1,8 @@
-mod camera;
-mod common;
-mod geometry;
-mod material;
-mod ray;
-mod renderer;
-mod vector;
-
-use crate::camera::*;
-use crate::common::*;
-use crate::geometry::*;
-use crate::material::*;
-use crate::ray::*;
-use crate::renderer::*;
-use crate::vector::*;
-
+use raytracer::*;
 use std::path::Path;
 use std::time::Instant;
 
 pub fn main() {
-
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
     // right
@@ -53,7 +37,6 @@ pub fn main() {
 
     let wall = Material::diffuse(Vec3f::fill(1.0));
     let light = Material::emissive(Vec3f::fill(1.0), 0.5);
-
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(r + w), 5.0), r),
@@ -95,7 +78,10 @@ pub fn main() {
     );
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename = format!("img/render/render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    let filename = format!(
+        "img/render/render-{}x{}-s{}-b{}.png",
+        WIDTH, HEIGHT, SAMPLES, BOUNCES
+    );
     //let filename = format!("img/render/render.png");
     let path = Path::new(&filename);
 
