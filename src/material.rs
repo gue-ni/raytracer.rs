@@ -20,7 +20,7 @@ pub enum Material {
 
 impl Material {
     pub fn diffuse(color: Vec3f) -> Self {
-        Material::Diffuse { albedo: color, emittance: 0.0 }
+        Material::Diffuse { albedo: color, emissive: Vec3::fill(0.0) }
     }
 
     pub fn emissive(color: Vec3f, intensity: f32) -> Self {
