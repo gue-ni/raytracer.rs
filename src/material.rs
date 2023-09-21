@@ -35,10 +35,16 @@ impl BSDF for DiffuseMaterial {
 
 #[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
-pub struct PhysicalDiffuseMaterial {
+pub struct PhysicalMaterial {
     albedo: Vec3f,
     emissive: Vec3f,
     roughness: f32,
     metallic: f32,
     ao: f32,
+}
+
+#[derive(Debug, Copy, Clone)]
+enum Material {
+    diffuse(DiffuseMaterial),
+    physical(PhysicalMaterial),
 }
