@@ -160,6 +160,8 @@ pub fn main() {
         albedo: Vec3f::fill(0.75),
         emissive: Vec3f::fill(0.0),
     };
+
+    let room_center = Vec3f::new(0.0, 0.0, 5.0);
     
     // ground
     scene.push(Object {
@@ -198,6 +200,7 @@ pub fn main() {
         material: Material::Physical {
             albedo: Vec3f::fill(1.0),
             emittance: 2.0,
+            roughness: 0.0,
         }
     });
     
