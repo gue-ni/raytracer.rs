@@ -11,8 +11,11 @@ pub trait BSDF {
 }
 
 pub trait BxDF {
+    // return outgoing vector and pdf
     fn sample(&self, normal: Vec3f, incoming: Vec3f) -> (Vec3f, f32);
+    // 
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f32;
+    // return emittance * albedo
     fn emittance(&self) -> Vec3f;
 }
 
@@ -48,6 +51,25 @@ impl BSDF for DiffuseMaterial {
 pub enum Material {
     Diffuse { emissive: Vec3f, albedo: Vec3f },
     Physical {  emissive: Vec3f, albedo: Vec3f, roughness: f32 },
+}
+
+impl BxDF for Material {
+    fn sample(&self, normal: Vec3f, incoming: Vec3f) -> (Vec3f, f32) {
+        let omega = uniform_sample_hemisphere(normal);
+        let pdf = 1.0 / (2.0 * PI);
+        (omega, pdf)
+    }
+     
+    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f32 {
+        0.0
+    }
+    
+    fn emittance(&self) -> Vec3f {
+        match self {
+            Material::Diffuse { albedo, emissive } => emissive,
+            _ => Vec3f::fill(0.0)
+        }
+    }
 }
 
 impl BSDF for Material {
