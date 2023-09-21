@@ -118,14 +118,13 @@ pub fn main() {
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
     scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(0.0, -0.5, 4.0),
-            radius: 0.25,
-        },
-        material: Material::Diffuse {
-            albedo: Vec3f::fill(1.0),
-            emissive: Vec3f::fill(3.0),
-        },
+        geometry: Sphere::new(
+            Vec3f::new(0.0, -0.5, 4.0),
+             0.25,
+        ),
+        material: Material::diffuse(
+            Vec3f::fill(1.0)
+        ),
     });
 
     // right
