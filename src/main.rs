@@ -194,7 +194,10 @@ pub fn main() {
             center: Vec3f::new(0.0, -(r+w), 5.0),
             radius: r,
         },
-        material: wall
+        material: Material::Diffuse {
+            albedo: Vec3f::fill(1.0),
+            emissive: Vec3f::fill(1.0),
+        }
     });    
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
