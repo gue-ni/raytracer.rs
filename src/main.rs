@@ -86,7 +86,7 @@ pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
     material.emissive() + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
 }
 */
-pub fn path_tracing2(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
+pub fn path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, brdf_multiplier) = material.sample(hit.normal);
     let ray = Ray::new(hit.point, omega);
@@ -102,7 +102,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
     match ray.cast(scene) {
         None => background,
-        Some(hit) => path_tracing2(&hit, scene, ray, depth),
+        Some(hit) => path_tracing(&hit, scene, ray, depth),
     }
 }
 
