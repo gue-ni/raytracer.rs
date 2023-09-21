@@ -16,6 +16,7 @@ use image::{ImageBuffer, Rgb};
 use std::f32::consts::PI;
 use std::path::Path;
 use std::vec;
+use std::time::Instant;
 
 /*
 
@@ -202,6 +203,8 @@ pub fn main() {
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
 
+    let now = Instant::now();
+    
     for x in 0..WIDTH {
         for y in 0..HEIGHT {
             let mut pixel = Vec3f::fill(0.0);
@@ -215,6 +218,9 @@ pub fn main() {
             buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
         }
     }
+
+    let elapsed = now.elapsed();
+    println!("Elapsed time: {:.2?}", elapsed);
 
     let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
     let path = Path::new(&filename);
