@@ -112,18 +112,6 @@ where
     }
 }
 
-/*
-impl<T> Add for Vec3<T>
-where
-    T: Number,
-{
-    type Output = Self;
-    fn add(self, other: Self) -> Self {
-        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
-    }
-}
-*/
-
 impl<T> Sub for Vec3<T>
 where
     T: Number,
@@ -441,11 +429,10 @@ mod tests {
         let a = Vec3f::new(2.0, 3.0, 4.0);
         let b = Vec3f::new(5.0, 6.0, 7.0);
         let s = 1.5;
-        assert_eq!(a + b, Vec3f::new(4.0,0.0,0.0));
+        assert_eq!(a + b, Vec3f::new(4.0, 0.0, 0.0));
         assert_eq!(a - b, Vec3f::new(-2.0, 1.0, 1.0));
         assert_eq!(a * b, Vec3f::new(-2.0, 1.0, 1.0));
         assert_eq!(a / b, Vec3f::new(-2.0, 1.0, 1.0));
-
 
         assert_eq!(a + s, Vec3f::new(1.0, 1.0, 6.0));
         assert_eq!(a - s, Vec3f::new(1.0, 1.0, 6.0));
@@ -455,11 +442,19 @@ mod tests {
 
     #[test]
     fn test_math_vec2() {
-        let a = Vec2f::fill(1.0);
-        let b = Vec2f::fill(3.0);
-        assert_eq!(a + b, Vec2f::fill(4.0));
-        assert_eq!(a - b, Vec2f::fill(-2.0));
-        assert_eq!(b * 2.0, Vec2f::fill(6.0));
+        let a = Vec2f::new(2.0, 3.0);
+        let b = Vec2f::new(4.0, 5.0);
+        let s = 1.5;
+
+        assert_eq!(a + b, Vec2f::new(1.0, 1.0));
+        assert_eq!(a - b, Vec2f::new(1.0, 1.0));
+        assert_eq!(a / b, Vec2f::new(1.0, 1.0));
+        assert_eq!(a * b, Vec2f::new(1.0, 1.0));
+
+        assert_eq!(a + s, Vec2f::new(1.0, 1.0));
+        assert_eq!(a - s, Vec2f::new(1.0, 1.0));
+        assert_eq!(a / s, Vec2f::new(1.0, 1.0));
+        assert_eq!(a * s, Vec2f::new(1.0, 1.0));
     }
 
     #[test]

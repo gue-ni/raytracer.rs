@@ -12,7 +12,7 @@ use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
 
-use image::{ImageBuffer, Rgb};
+use image::{ImageBuffer, Rgb, RgbImage};
 use std::path::Path;
 use std::time::Instant;
 use std::vec;
@@ -106,14 +106,30 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     }
 }
 
+pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+    let width = camera.resolution.x as u32;
+    let height = camera.resolution.y as u32;
+
+    let mut image = RgbImage::new(camera.resolution.x as u32, camera.resolution.y as u32);
+
+    for y in 0..height {
+        for x in 0..width {
+            let mut pixel = Vec3f::fill(0.0);
+            let ray = camera.ray((x, y));
+
+            for _ in 0..samples {
+                pixel = pixel + cast_ray(&ray, &scene, bounces);
+            }
+
+            pixel = (pixel * (u8::MAX as f32)) / (samples as f32);
+            image.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
+        }
+    }
+
+    image
+}
+
 pub fn main() {
-    const WIDTH: u32 = 640;
-    const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 1048;
-    const BOUNCES: u32 = 3;
-
-    let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
-
     let wall = Material::diffuse(Vec3f::fill(1.0));
     let light = Material::emissive(Vec3f::fill(1.0), 5.0);
     let light_2 = Material::emissive(Vec3f::fill(1.0), 1.0);
@@ -171,34 +187,25 @@ pub fn main() {
         material: wall,
     });
 
-    let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
-    let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
+    const WIDTH: u32 = 640;
+    const HEIGHT: u32 = 480;
+    const SAMPLES: u32 = 32;
+    const BOUNCES: u32 = 3;
+
+    let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
     let now = Instant::now();
-
-    for y in 0..HEIGHT {
-        for x in 0..WIDTH {
-            let mut pixel = Vec3f::fill(0.0);
-            let ray = camera.ray((x, y));
-
-            for _ in 0..SAMPLES {
-                pixel = pixel + cast_ray(&ray, &scene, BOUNCES);
-            }
-
-            pixel = (pixel * (u8::MAX as f32)) / (SAMPLES as f32);
-            buffer.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
-        }
-    }
-
+    let buffer = render(&camera, &scene, SAMPLES, BOUNCES);
     let elapsed = now.elapsed();
+
     println!(
         "{}x{}, samples: {}, bounces: {}",
         WIDTH, HEIGHT, SAMPLES, BOUNCES
     );
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename = format!("render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
-    //let filename = format!("render.png");
+    //let filename = format!("img/render/render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    let filename = format!("img/render/render.png");
     let path = Path::new(&filename);
 
     match buffer.save(&path) {
