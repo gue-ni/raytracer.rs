@@ -100,22 +100,22 @@ pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth:
 }
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-    let background = Vec3f::new(0.68, 0.87, 0.96); // light blue
-
-    if depth == 0 {
-        return Vec3f::fill(0.0);
-    }
-
     match ray.cast(scene) {
         None => scene.background,
-        Some(hit) => naive_path_tracing_rr(&hit, scene, ray, depth),
+        Some(hit) => {
+            if depth > 0 {
+                naive_path_tracing_rr(&hit, scene, ray, depth)
+            } else {
+                Vec3f::fill(0.0)
+            }
+        }
     }
 }
 
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 50;
+    const SAMPLES: u32 = 256;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
@@ -124,7 +124,7 @@ pub fn main() {
 
      scene.objects.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(0.0, 1.5, 5.0),
+            center: Vec3f::new(0.0, -0.5, 4.0),
             radius: 0.25,
         },
         material: Material::Diffuse {
