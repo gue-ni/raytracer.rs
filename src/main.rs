@@ -130,7 +130,7 @@ pub fn main() {
         },
         material: DiffuseMaterial {
             albedo: Vec3f::new(0.0, 1.0, 0.),
-            emissive: Vec3f::fill(1.0),
+            emissive: Vec3f::fill(0.0),
         },
     });
     // left
@@ -190,7 +190,7 @@ pub fn main() {
         },
         material: DiffuseMaterial {
             albedo: Vec3f::fill(0.18),
-            emissive: Vec3f::fill(2.0),
+            emissive: Vec3f::fill(1.0) * 1.0,
         }
     });
     
