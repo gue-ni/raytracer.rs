@@ -176,6 +176,23 @@ pub fn main() {
         },
         material: wall
     });
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(0.0, 0.0, 5.0 + (r + w)),
+            radius: r,
+        },
+        material: wall
+    });
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(0.0, -(r+w), 5.0),
+            radius: r,
+        },
+        material: DiffuseMaterial {
+            albedo: Vec3f::fill(0.18),
+            emissive: Vec3f::fill(2.0),
+        }
+    });
     
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
