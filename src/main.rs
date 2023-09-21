@@ -204,7 +204,7 @@ pub fn main() {
         }
     }
 
-    let filename = format!("img/render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
+    let filename = format!("render-{}x{}-{}.png", WIDTH, HEIGHT, SAMPLES);
     let path = Path::new(&filename);
 
     match buffer.save(&path) {
