@@ -67,15 +67,9 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
-/*
-// cook torrance
-pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
-    let material = scene[hit.idx].material;
-    let omega = uniform_sample_hemisphere(hit.normal);
-    let ray = Ray::new(hit.point, omega);
-    material.emissive() + cast_ray(&ray, scene, depth - 1)
+pub fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+    Vec3f::fill(1.0)
 }
-*/
 
 pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
@@ -86,15 +80,6 @@ pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth:
     let cos_theta = Vec3f::dot(hit.normal, wi);
     material.emittance() + cast_ray(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
 }
-
-/*
-pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
-    let material = scene[hit.idx].material;
-    let (omega, brdf_multiplier) = material.sample(hit.normal);
-    let ray = Ray::new(hit.point, omega);
-    material.emissive() + cast_ray(&ray, scene, depth - 1) * brdf_multiplier
-}
-*/
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     let background = Vec3f::new(0.68, 0.87, 0.96); // light blue
@@ -112,12 +97,23 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 100;
+    const SAMPLES: u32 = 50;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
     let mut scene: Scene = Vec::new();
+
+     scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(0.0, 1.5, 5.0),
+            radius: 0.25,
+        },
+        material: Material::Diffuse {
+            albedo: Vec3f::fill(1.0),
+            emissive: Vec3f::fill(3.0),
+        },
+    });
 
     // right
     scene.push(Object {
@@ -198,11 +194,7 @@ pub fn main() {
             center: Vec3f::new(0.0, -(r+w), 5.0),
             radius: r,
         },
-        material: Material::Physical {
-            albedo: Vec3f::fill(1.0),
-            emittance: 2.0,
-            roughness: 0.0,
-        }
+        material: wall
     });
     
 
