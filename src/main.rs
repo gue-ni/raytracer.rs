@@ -3,6 +3,7 @@ mod geometry;
 mod material;
 mod ray;
 mod vector;
+mod camera;
 
 use crate::common::*;
 use crate::geometry::*;
