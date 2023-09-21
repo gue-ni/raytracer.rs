@@ -19,47 +19,19 @@ pub trait BxDF {
     fn emittance(&self) -> Vec3f;
 }
 
-// lambertian
-#[derive(Debug, Copy, Clone)]
-pub struct DiffuseMaterial {
-    pub albedo: Vec3f,
-    pub emissive: Vec3f,
-}
-
-impl BSDF for DiffuseMaterial {
-    fn pdf(&self) -> f32 {
-        1.0 / (2.0 * PI)
-    }
-
-    fn eval(&self) -> Vec3f {
-        self.albedo / PI
-    }
-
-    fn emissive(&self) -> Vec3f {
-        self.emissive 
-    }
-
-    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f) {
-        let omega = uniform_sample_hemisphere(normal);
-        let cos_theta = Vec3f::dot(normal, omega);
-        let brdf_multiplier = (self.eval() * cos_theta) / self.pdf();
-        (omega, brdf_multiplier)
-    }
-}
-
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
     Diffuse { albedo: Vec3f, emissive: Vec3f },
     Physical { albedo: Vec3f, emittance: f32, roughness: f32 },
-    Mirror
+    Specular
 }
 
 impl Material {
-    fn diffuse(color: Vec3f) -> Self {
+    pub fn diffuse(color: Vec3f) -> Self {
         Material::Diffuse { albedo: color, emissive: Vec3f::fill(0.0) }
     }
 
-    fn emissive(color: Vec3f, intensity: f32) -> Self {
+    pub fn emissive(color: Vec3f, intensity: f32) -> Self {
         Material::Diffuse { albedo: color, emissive: Vec3f::fill(intensity) }
     }
 }
