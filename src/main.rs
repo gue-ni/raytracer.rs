@@ -117,22 +117,16 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         return black;
     }
 
-    let result = match ray.cast(scene) {
+    match ray.cast(scene) {
         None => background,
-        Some(hit) => {
-            // choose rendering strategy
-            //phong(&hit, scene, ray)
-            //visualize_normal(&hit, scene, ray)
-            path_tracing2(&hit, scene, ray, depth)
-        }
-    };
-
-    result
+        Some(hit) => path_tracing2(&hit, scene, ray, depth),
+    }
 }
 
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
+    const RESOLUTION = (WIDTH, HEIGHT);
     const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
 
@@ -165,7 +159,7 @@ pub fn main() {
     // left
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(-1.5, 0.0, 3.0),
+            center: Vec3f::new(-1.5, 0.0, 4.0),
             radius: 0.5,
         },
         material: DiffuseMaterial {
