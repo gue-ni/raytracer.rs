@@ -72,7 +72,7 @@ pub fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, dep
 }
 
 pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
-    let material = scene[hit.idx].material;
+    let material = scene.objects[hit.idx].material;
     let wo = -incoming.direction;
     let (wi, pdf) = material.sample_f(hit.normal, wo);
     let ray = Ray::new(hit.point, wi);
@@ -89,7 +89,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     }
 
     match ray.cast(scene) {
-        None => background,
+        None => scene.background,
         Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
     }
 }
@@ -102,9 +102,9 @@ pub fn main() {
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
-    let mut scene: Scene = Vec::new();
+    let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
-     scene.push(Object {
+     scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 1.5, 5.0),
             radius: 0.25,
@@ -116,7 +116,7 @@ pub fn main() {
     });
 
     // right
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(1.5, 0.0, 4.0),
             radius: 0.5,
@@ -127,7 +127,7 @@ pub fn main() {
         },
     });
     // middle
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 0.0, 4.0),
             radius: 0.75,
@@ -138,7 +138,7 @@ pub fn main() {
         },
     });
     // left
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(-1.5, 0.0, 5.0),
             radius: 0.5,
@@ -161,44 +161,41 @@ pub fn main() {
     let room_center = Vec3f::new(0.0, 0.0, 5.0);
     
     // ground
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, r + s, 5.0),
             radius: r,
         },
         material: wall
     });
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(-(r + w), 0.0, 5.0),
             radius: r,
         },
         material: wall
     });
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new((r + w), 0.0, 5.0),
             radius: r,
         },
         material: wall
     });
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, 0.0, 5.0 + (r + w)),
             radius: r,
         },
         material: wall
     });
-    scene.push(Object {
+    scene.objects.push(Object {
         geometry: Sphere {
             center: Vec3f::new(0.0, -(r+w), 5.0),
             radius: r,
         },
         material: wall
-    });
-    
-
-    
+    });    
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
