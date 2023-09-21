@@ -77,7 +77,7 @@ pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
 }
 */
 
-pub fn naive_path_tracing_2(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let wo = -incoming.direction;
     let (wi, pdf) = material.sample_f(hit.normal, wo);
@@ -87,13 +87,14 @@ pub fn naive_path_tracing_2(hit: &HitRecord, scene: &Scene, incoming: &Ray, dept
     material.emittance() + cast_ray(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
 }
 
-
+/*
 pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, brdf_multiplier) = material.sample(hit.normal);
     let ray = Ray::new(hit.point, omega);
     material.emissive() + cast_ray(&ray, scene, depth - 1) * brdf_multiplier
 }
+*/
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     let background = Vec3f::new(0.68, 0.87, 0.96); // light blue
@@ -104,7 +105,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
     match ray.cast(scene) {
         None => background,
-        Some(hit) => naive_path_tracing_2(&hit, scene, ray, depth),
+        Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
     }
 }
 
