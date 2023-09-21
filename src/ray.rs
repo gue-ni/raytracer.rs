@@ -1,5 +1,3 @@
-use crate::common::*;
-use crate::geometry::*;
 use crate::vector::*;
 
 #[derive(Debug, Copy, Clone)]
@@ -15,26 +13,5 @@ impl Ray {
 
     pub fn point_at(&self, t: f32) -> Vec3f {
         self.origin + self.direction * t
-    }
-
-    pub fn cast(&self, scene: &Scene) -> Option<HitRecord> {
-        let mut closest = HitRecord::new();
-        closest.t = f32::INFINITY;
-
-        for (i, object) in scene.objects.iter().enumerate() {
-            match object.geometry.hit(self, 0.0, closest.t) {
-                None => {}
-                Some(hit) => {
-                    closest = hit;
-                    closest.idx = i;
-                }
-            }
-        }
-
-        if closest.t < f32::INFINITY {
-            Some(closest)
-        } else {
-            None
-        }
     }
 }

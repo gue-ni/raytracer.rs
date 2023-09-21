@@ -6,24 +6,6 @@ use std::f32::consts::PI;
 
 use crate::vector::*;
 
-pub struct HitRecord {
-    pub t: f32,
-    pub normal: Vec3f,
-    pub point: Vec3f,
-    pub idx: usize,
-}
-
-impl HitRecord {
-    pub fn new() -> Self {
-        HitRecord {
-            t: f32::INFINITY,
-            normal: Vec3f::fill(0.0),
-            point: Vec3f::fill(0.0),
-            idx: 0,
-        }
-    }
-}
-
 #[allow(dead_code)]
 pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
     incoming - normal * 2.0 * Vec3f::dot(incoming, normal)
@@ -56,44 +38,39 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     }
 }
 
-/*
-pub fn DistributionGGX(N: Vec3f, H: Vec3f, a: f32) -> f32 {
-    let a2     = a*a;
-    let NdotH  = f32::max(Vec3f::dot(N, H), 0.0);
-    let NdotH2 = NdotH*NdotH;
-    let nom    = a2;
-    let mut denom  = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom        = PI * denom * denom;
+pub fn distribution_ggx(N: Vec3f, H: Vec3f, a: f32) -> f32 {
+    let a2 = a * a;
+    let NdotH = f32::max(Vec3f::dot(N, H), 0.0);
+    let NdotH2 = NdotH * NdotH;
+    let nom = a2;
+    let mut denom = NdotH2 * (a2 - 1.0) + 1.0;
+    denom = PI * denom * denom;
     nom / denom
 }
-
-pub fn GeometrySchlickGGX(NdotV: f32, roughness: f32) -> f32 {
-    let r = (roughness + 1.0);
-    let k = (r*r) / 8.0;
-    let num   = NdotV;
+pub fn geometry_schlick_ggx(NdotV: f32, roughness: f32) -> f32 {
+    let r = roughness + 1.0;
+    let k = (r * r) / 8.0;
+    let num = NdotV;
     let denom = NdotV * (1.0 - k) + k;
     num / denom
 }
 
-pub fn GeometrySmith(N: Vec3f, V: Vec3f, L: Vec3f, roughness: f32) -> f32 {
+pub fn geometry_smith(N: Vec3f, V: Vec3f, L: Vec3f, roughness: f32) -> f32 {
     let NdotV = f32::max(Vec3f::dot(N, V), 0.0);
     let NdotL = f32::max(Vec3f::dot(N, L), 0.0);
-    let ggx2  = GeometrySchlickGGX(NdotV, roughness);
-    let ggx1  = GeometrySchlickGGX(NdotL, roughness);
+    let ggx2 = geometry_schlick_ggx(NdotV, roughness);
+    let ggx1 = geometry_schlick_ggx(NdotL, roughness);
     ggx1 * ggx2
 }
 
-pub fn fresnelSchlick(cosTheta: f32, F0: Vec3f) -> Vec3f
-{
+pub fn fresnel_schlick(cosTheta: f32, F0: Vec3f) -> Vec3f {
     F0 + (Vec3f::fill(1.0) - F0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
 }
-*/
 
-/*
 pub fn sample_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
-    let x1 = rng.get_range(0.0..1.0);
-    let x2 = rng.get_range(0.0..1.0);
+    let x1 = rng.gen_range(0.0..1.0);
+    let x2 = rng.gen_range(0.0..1.0);
     let phi = 2.0 * PI * x2;
     let cos_theta = x1;
     let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
@@ -101,7 +78,6 @@ pub fn sample_hemisphere() -> Vec3f {
     let sin_phi = f32::sin(phi);
     Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
-*/
 
 fn vector_on_sphere() -> Vec3f {
     let r = 1.0;

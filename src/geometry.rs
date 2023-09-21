@@ -1,7 +1,24 @@
-use crate::common::*;
 use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
+
+pub struct HitRecord {
+    pub t: f32,
+    pub normal: Vec3f,
+    pub point: Vec3f,
+    pub idx: usize,
+}
+
+impl HitRecord {
+    pub fn new() -> Self {
+        HitRecord {
+            t: f32::INFINITY,
+            normal: Vec3f::fill(0.0),
+            point: Vec3f::fill(0.0),
+            idx: 0,
+        }
+    }
+}
 
 #[derive(Debug, Copy, Clone)]
 pub struct Sphere {
@@ -147,6 +164,29 @@ impl Scene {
 
     pub fn add(&mut self, object: Object) {
         self.objects.push(object);
+    }
+}
+
+impl Hittable for Scene {
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+        let mut closest = HitRecord::new();
+        closest.t = max_t;
+
+        for (i, object) in self.objects.iter().enumerate() {
+            match object.geometry.hit(ray, min_t, closest.t) {
+                None => {}
+                Some(hit) => {
+                    closest = hit;
+                    closest.idx = i;
+                }
+            }
+        }
+
+        if closest.t < max_t {
+            Some(closest)
+        } else {
+            None
+        }
     }
 }
 

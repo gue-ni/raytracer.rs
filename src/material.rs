@@ -6,9 +6,9 @@ use std::f32::consts::PI;
 pub trait BSDF {
     // return outgoing vector and pdf
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
-    //
+    // return color of hit
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
-    // return emittance * albedo
+    // return emittance
     fn emittance(&self) -> Vec3f;
 }
 

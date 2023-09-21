@@ -7,19 +7,21 @@ pub fn main() {
 
     // right
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(1.75, 0.0, 4.0), 0.5),
+        geometry: Sphere::new(Vec3f::new(1.75, 0.5, 4.0), 0.5),
         material: Material::diffuse(Vec3f::new(0.0, 1.0, 0.0)),
     });
     // middle
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, 4.0), 1.0),
-        material: Material::physical(Vec3f::new(1.0, 0.0, 0.0), 0.25),
+        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
+        //material: Material::physical(Vec3f::new(0.0, 1.0, 0.0), 0.25),
+        //material: Material::Specular,
     });
     // left
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-1.75, 0.0, 4.0), 0.5),
-        material: Material::Specular,
+        geometry: Sphere::new(Vec3f::new(-1.75, 0.5, 4.0), 0.5),
         //material: Material::diffuse(Vec3f::new(0.0, 0.0, 1.0)),
+        material: Material::Specular,
     });
 
     // light
@@ -61,15 +63,13 @@ pub fn main() {
 
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 256;
+    const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 5;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
     let now = Instant::now();
-
     let image = render(&camera, &scene, SAMPLES, BOUNCES);
-
     let elapsed = now.elapsed();
 
     println!(
@@ -78,15 +78,16 @@ pub fn main() {
     );
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename = format!(
+    let filename1 = format!(
         "img/render/render-{}x{}-s{}-b{}.png",
         WIDTH, HEIGHT, SAMPLES, BOUNCES
     );
-    //let filename = format!("img/render/render.png");
-    let path = Path::new(&filename);
+    let filename2 = format!("render.png");
+
+    let path = Path::new(&filename2);
 
     match image.save(&path) {
-        Err(_) => panic!("Could not save file"),
+        Err(_) => panic!("Could not save file {:?}", path),
         Ok(_) => println!("Saved output to {:?}", path),
     };
 }
