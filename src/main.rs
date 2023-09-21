@@ -124,8 +124,7 @@ pub fn main() {
             center: Vec3f::new(1.5, 0.0, 4.0),
             radius: 0.5,
         },
-        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
-        },
+        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0))
     });
     // middle
     scene.push(Object {
@@ -143,7 +142,6 @@ pub fn main() {
         },
         material: Material::diffuse(Vec3f::new(1.0, 0.0, 1.0)),
     });
-
     // light
      scene.push(Object {
         geometry: Sphere {
