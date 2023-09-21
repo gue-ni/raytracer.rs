@@ -51,6 +51,17 @@ impl BSDF for DiffuseMaterial {
 pub enum Material {
     Diffuse { albedo: Vec3f, emissive: Vec3f },
     Physical { albedo: Vec3f, emittance: f32, roughness: f32 },
+    Mirror
+}
+
+impl Material {
+    fn diffuse(color: Vec3f) -> Self {
+        Material::Diffuse { albedo: color, emissive: Vec3f::fill(0.0) }
+    }
+
+    fn emissive(color: Vec3f, intensity: f32) -> Self {
+        Material::Diffuse { albedo: color, emissive: Vec3f::fill(intensity) }
+    }
 }
 
 impl BxDF for Material {
