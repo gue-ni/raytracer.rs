@@ -160,6 +160,7 @@ impl Scene {
             background
         }
     }
+}
 
 #[cfg(test)]
 mod test {
