@@ -87,8 +87,8 @@ pub fn main() {
     let path = Path::new(&filename2);
 
     match image.save(&path) {
-        Err(_) => panic!("Could not save file {:?}", path),
         Ok(_) => println!("Saved output to {:?}", path),
+        Err(_) => panic!("Could not save file {:?}", path),
     };
 }
 
