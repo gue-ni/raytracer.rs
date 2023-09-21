@@ -146,7 +146,20 @@ pub struct Object {
     pub material: Material,
 }
 
-pub type Scene = Vec<Object>;
+//pub type Scene = Vec<Object>;
+
+pub struct Scene {
+    objects: Vec<Object>,
+    background: Vec3f,
+}
+
+impl Scene {
+    fn new(background: Vec3f) -> Self {
+        Self {
+            objects: Vec::new(),
+            background
+        }
+    }
 
 #[cfg(test)]
 mod test {
