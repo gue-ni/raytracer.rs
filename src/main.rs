@@ -102,7 +102,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 }
 
 pub fn main() {
-    const WIDTH: u32 = 480;
+    const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
     const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
@@ -150,7 +150,7 @@ pub fn main() {
     let w = 4.0;
     
     let wall = DiffuseMaterial {
-        albedo: Vec3f::fill(0.18),
+        albedo: Vec3f::fill(1.0),
         emissive: Vec3f::fill(0.0),
     };
     
