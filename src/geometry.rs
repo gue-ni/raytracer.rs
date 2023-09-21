@@ -145,11 +145,9 @@ impl Scene {
         }
     }
 
-    /*
-    fn add(&mut self, object: Object) {
+    pub fn add(&mut self, object: Object) {
         self.objects.push(object);
     }
-    */
 }
 
 #[cfg(test)]

@@ -13,7 +13,6 @@ use crate::ray::*;
 use crate::vector::*;
 
 use image::{ImageBuffer, Rgb};
-use std::f32::consts::PI;
 use std::path::Path;
 use std::time::Instant;
 use std::vec;
@@ -101,7 +100,7 @@ pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth:
 
 pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     match ray.cast(scene) {
-        Some(hit) if depth > 0 => naive_path_tracing(&hit, scene, ray, depth),
+        Some(hit) if depth > 0 => naive_path_tracing_rr(&hit, scene, ray, depth),
         Some(_) => Vec3f::fill(0.0),
         None => scene.background,
     }
@@ -110,103 +109,66 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 4;
+    const SAMPLES: u32 = 1048;
     const BOUNCES: u32 = 3;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
+    let wall = Material::diffuse(Vec3f::fill(1.0));
+    let light = Material::emissive(Vec3f::fill(1.0), 5.0);
+    let light_2 = Material::emissive(Vec3f::fill(1.0), 1.0);
+
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
-    scene.objects.push(Object {
-        geometry: Sphere::new(
-            Vec3f::new(0.0, -0.5, 4.0),
-             0.25,
-        ),
-        material: Material::diffuse(
-            Vec3f::fill(1.0)
-        ),
-    });
-
     // right
-    scene.objects.push(Object {
-        geometry: Sphere::new(Vec3f::new(1.5, 0.0, 4.0), 0.5),
-        material: Material::Diffuse {
-            albedo: Vec3f::new(1.0, 0.0, 0.0),
-            emissive: Vec3f::fill(0.0),
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(1.75, 0.0, 4.0), 0.5),
+        material: Material::diffuse(Vec3f::new(0.0, 1.0, 0.0)),
     });
     // middle
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(0.0, 0.0, 4.0),
-            radius: 0.75,
-        },
-        material: Material::Diffuse {
-            albedo: Vec3f::new(0.0, 1.0, 0.),
-            emissive: Vec3f::fill(0.0),
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, 0.0, 4.0), 1.0),
+        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
     });
     // left
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(-1.5, 0.0, 5.0),
-            radius: 0.5,
-        },
-        material: Material::Diffuse {
-            albedo: Vec3f::new(0.0, 0.0, 1.0),
-            emissive: Vec3f::fill(0.0),
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(-1.75, 0.0, 4.0), 0.5),
+        material: Material::diffuse(Vec3f::new(0.0, 0.0, 1.0)),
     });
+
+    // light
+    /*
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.3),
+        material: light,
+    });
+    */
 
     let r = 100000.0;
     let s = 1.0;
     let w = 4.0;
 
-    let wall = Material::Diffuse {
-        albedo: Vec3f::fill(0.75),
-        emissive: Vec3f::fill(0.0),
-    };
-
     let room_center = Vec3f::new(0.0, 0.0, 5.0);
 
-    // ground
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(0.0, r + s, 5.0),
-            radius: r,
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, -(r + w), 5.0), r),
+        material: light_2,
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, r + s, 5.0), r),
         material: wall,
     });
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(-(r + w), 0.0, 5.0),
-            radius: r,
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(-(r + w), 0.0, 5.0), r),
         material: wall,
     });
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new((r + w), 0.0, 5.0),
-            radius: r,
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(r + w, 0.0, 5.0), r),
         material: wall,
     });
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(0.0, 0.0, 5.0 + (r + w)),
-            radius: r,
-        },
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, 0.0, 5.0 + (r + w)), r),
         material: wall,
-    });
-    scene.objects.push(Object {
-        geometry: Sphere {
-            center: Vec3f::new(0.0, -(r + w), 5.0),
-            radius: r,
-        },
-        material: Material::Diffuse {
-            albedo: Vec3f::fill(1.0),
-            emissive: Vec3f::fill(1.0),
-        },
     });
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
@@ -236,6 +198,7 @@ pub fn main() {
     println!("Elapsed time: {:.2?}", elapsed);
 
     let filename = format!("render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    //let filename = format!("render.png");
     let path = Path::new(&filename);
 
     match buffer.save(&path) {
