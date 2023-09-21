@@ -150,7 +150,7 @@ pub fn main() {
     let w = 4.0;
     
     let wall = DiffuseMaterial {
-        albedo: Vec3f::fill(1.0),
+        albedo: Vec3f::fill(0.75),
         emissive: Vec3f::fill(0.0),
     };
     
