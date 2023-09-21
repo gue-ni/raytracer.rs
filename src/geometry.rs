@@ -149,8 +149,8 @@ pub struct Object {
 //pub type Scene = Vec<Object>;
 
 pub struct Scene {
-    objects: Vec<Object>,
-    background: Vec3f,
+    pub objects: Vec<Object>,
+    pub background: Vec3f, // background color
 }
 
 impl Scene {
