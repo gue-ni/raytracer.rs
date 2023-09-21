@@ -102,7 +102,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 }
 
 pub fn main() {
-    const WIDTH: u32 = 640;
+    const WIDTH: u32 = 480;
     const HEIGHT: u32 = 480;
     const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
@@ -146,17 +146,35 @@ pub fn main() {
     });
 
     let r = 100000.0;
+    let s = 1.0;
+    let gm = DiffuseMaterial {
+        albedo: Vec3f::fill(0.18),
+        emissive: Vec3f::fill(0.0),
+    };
+    
     // ground
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(0.0, r + 1.0, 3.0),
+            center: Vec3f::new(0.0, r + s, 3.0),
             radius: r,
         },
-        material: DiffuseMaterial {
-            albedo: Vec3f::fill(0.18),
-            emissive: Vec3f::fill(0.0),
-        },
+        material: gm
     });
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(-(r + s), 0.0, 3.0),
+            radius: r,
+        },
+        material: gm
+    });
+    scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new((r + s), 0.0, 3.0),
+            radius: r,
+        },
+        material: gm
+    });
+    
 
     let pixels = vec![0; 3 * WIDTH as usize * HEIGHT as usize];
     let mut buffer = ImageBuffer::from_raw(WIDTH, HEIGHT, pixels).unwrap();
