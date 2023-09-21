@@ -4,13 +4,6 @@ use std::f32::consts::PI;
 
 // Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
-    fn pdf(&self) -> f32;
-    fn eval(&self) -> Vec3f;
-    fn emissive(&self) -> Vec3f;
-    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f);
-}
-
-pub trait BxDF {
     // return outgoing vector and pdf
     fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
     // 
@@ -36,7 +29,7 @@ impl Material {
     }
 }
 
-impl BxDF for Material {
+impl BSDF for Material {
     fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
         match self {
             _ => {
@@ -60,41 +53,6 @@ impl BxDF for Material {
             Material::Diffuse  { emittance, albedo }     => *albedo * *emittance,
             _ => Vec3f::fill(0.0)
         }
-    }
-}
-
-impl BSDF for Material {
-    fn pdf(&self) -> f32 {
-        match self {
-           _ => 1.0 / (2.0 * PI)
-        }
-    }
-
-    fn eval(&self) -> Vec3f {
-        match self {
-            Material::Diffuse { albedo, .. } => *albedo / PI,
-            _ => Vec3f::fill(0.0)
-        }
-    }
-
-    fn emissive(&self) -> Vec3f {
-       match self {
-            Material::Diffuse { emittance, albedo } => *albedo * *emissive,
-            _ => Vec3f::fill(0.0),
-        }
-    } 
-
-    fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f) {
-        match self {
-            Material::Diffuse { .. } => {
-                let omega = uniform_sample_hemisphere(normal);
-                let cos_theta = Vec3f::dot(normal, omega);
-                let brdf_multiplier = (self.eval() * cos_theta) / self.pdf();
-                (omega, brdf_multiplier)
-            },
-            _ => (Vec3f::fill(0.0), Vec3f::fill(0.0))
-        }
-        
     }
 }
 
