@@ -63,7 +63,7 @@ pub fn phong(hit: &HitRecord, scene: &Scene, incoming: &Ray) -> Vec3f {
 }
 */
 
-pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray) -> Vec3f {
+pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
@@ -105,7 +105,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
     match ray.cast(scene) {
         None => background,
-        Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
+        Some(hit) => visualize_normal(&hit, scene, ray, depth),
     }
 }
 
