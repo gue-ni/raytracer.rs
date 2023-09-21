@@ -9,33 +9,12 @@ use crate::geometry::*;
 use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
+use crate::camera::*;
 
 use image::{ImageBuffer, Rgb};
 use std::f32::consts::PI;
 use std::path::Path;
 use std::vec;
-
-#[derive(Debug, Copy, Clone)]
-pub struct Camera {
-    position: Vec3f,
-    resolution: Vec2f,
-}
-
-impl Camera {
-    fn new(position: Vec3f, res: (u32, u32)) -> Self {
-        Camera {
-            position: position,
-            resolution: Vec2f::from(res),
-        }
-    }
-
-    fn ray(&self, pixel: (u32, u32)) -> Ray {
-        let uv = (Vec2f::from(pixel) - self.resolution * 0.5) / self.resolution.y;
-        let origin = self.position;
-        let target = Vec3f::new(uv.x, uv.y, 1.0);
-        Ray::new(origin, Vec3f::normalize(target - origin))
-    }
-}
 
 pub struct Light {
     position: Vec3f,
@@ -126,7 +105,6 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 pub fn main() {
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const RESOLUTION = (WIDTH, HEIGHT);
     const SAMPLES: u32 = 32;
     const BOUNCES: u32 = 3;
 
