@@ -124,9 +124,7 @@ pub fn main() {
             center: Vec3f::new(1.5, 0.0, 4.0),
             radius: 0.5,
         },
-        material: Material::Diffuse {
-            albedo: Vec3f::new(1.0, 0.0, 0.0),
-            emissive: Vec3f::fill(0.0),
+        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
         },
     });
     // middle
@@ -135,10 +133,7 @@ pub fn main() {
             center: Vec3f::new(0.0, 0.0, 4.0),
             radius: 0.75,
         },
-        material: Material::Diffuse {
-            albedo: Vec3f::new(0.0, 1.0, 0.),
-            emissive: Vec3f::fill(0.0),
-        },
+        material: Material::diffuse(Vec3f::new(1.0, 1.0, 0.0)),
     });
     // left
     scene.push(Object {
@@ -146,32 +141,23 @@ pub fn main() {
             center: Vec3f::new(-1.5, 0.0, 5.0),
             radius: 0.5,
         },
-        material: Material::Diffuse {
-            albedo: Vec3f::new(0.0, 0.0, 1.0),
-            emissive: Vec3f::fill(0.0),
-        },
+        material: Material::diffuse(Vec3f::new(1.0, 0.0, 1.0)),
     });
 
     // light
      scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(0, 2.0, 5.0),
+            center: Vec3f::new(0.0, 2.0, 5.0),
             radius: 0.2,
         },
-        material: Material::Diffuse {
-            albedo: Vec3f::fill(1.0),
-            emissive: Vec3f::fill(2.0),
-        },
+        material: Material::emissive(Vec3f::fill(1.0), 3.0)
     });
 
     let r = 100000.0;
     let s = 1.0;
     let w = 4.0;
     
-    let wall = Material::Diffuse {
-        albedo: Vec3f::fill(0.75),
-        emissive: Vec3f::fill(0.0),
-    };
+    let wall = Material::diffuse(Vec3f::fill(0.75));
 
     let room_center = Vec3f::new(0.0, 0.0, 5.0);
     
