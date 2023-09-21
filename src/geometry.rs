@@ -143,6 +143,20 @@ impl Hittable for Mesh {
     }
 }
 
+pub enum Geometry {
+    MESH(Mesh),
+    SPHERE(Sphere),
+}
+
+impl Hittable for Geometry {
+    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+        match self {
+            Geometry::MESH(g) => g.hit(ray, min_t, max_t),
+            Geometry::SPHERE(g) => g.hit(ray, min_t, max_t),
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 pub struct Object {
     pub geometry: Sphere,
