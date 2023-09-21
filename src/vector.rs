@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
 pub trait SquareRoot {
     fn sqrt(self) -> Self;
@@ -23,11 +23,12 @@ pub trait Number:
     + Sub<Output = Self>
     + Mul<Output = Self>
     + Div<Output = Self>
-    + Neg<Output = Self> //+ AddAssign<Output = Self>
+    + Neg<Output = Self>
 {
 }
 
 impl Number for f32 {}
+impl Number for i32 {}
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3<T> {
@@ -142,6 +143,19 @@ where
     type Output = Self;
     fn mul(self, other: Self) -> Self {
         Self::new(self.x * other.x, self.y * other.y, self.z * other.z)
+    }
+}
+
+impl<T> MulAssign for Vec3<T>
+where
+    T: Number,
+{
+    fn mul_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
+        };
     }
 }
 
