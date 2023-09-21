@@ -21,18 +21,18 @@ pub trait BxDF {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
-    Diffuse { albedo: Vec3f, emissive: Vec3f },
+    Diffuse { albedo: Vec3f, emittance: f32 },
     Physical { albedo: Vec3f, emittance: f32, roughness: f32 },
     Specular
 }
 
 impl Material {
     pub fn diffuse(color: Vec3f) -> Self {
-        Material::Diffuse { albedo: color, emissive: Vec3f::fill(0.0) }
+        Material::Diffuse { albedo: color, emittance: 0.0 }
     }
 
     pub fn emissive(color: Vec3f, intensity: f32) -> Self {
-        Material::Diffuse { albedo: color, emissive: Vec3f::fill(intensity) }
+        Material::Diffuse { albedo: color, emittance: intensity }
     }
 }
 
@@ -45,7 +45,6 @@ impl BxDF for Material {
                 (omega, pdf)
             }
         }
-        
     }
      
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
@@ -58,7 +57,8 @@ impl BxDF for Material {
     fn emittance(&self) -> Vec3f {
         match self {
             Material::Physical { emittance, albedo, .. } => *albedo * *emittance,
-            Material::Diffuse { emissive, .. } => *emissive,
+            Material::Diffuse  { emittance, albedo }     => *albedo * *emittance,
+            _ => Vec3f::fill(0.0)
         }
     }
 }
@@ -79,7 +79,7 @@ impl BSDF for Material {
 
     fn emissive(&self) -> Vec3f {
        match self {
-            Material::Diffuse { emissive, .. } => *emissive,
+            Material::Diffuse { emittance, albedo } => *albedo * *emissive,
             _ => Vec3f::fill(0.0),
         }
     } 
