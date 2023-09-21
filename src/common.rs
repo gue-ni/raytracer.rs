@@ -89,15 +89,6 @@ pub fn fresnelSchlick(cosTheta: f32, F0: Vec3f) -> Vec3f
 }
 */
 
-fn vector_on_sphere() -> Vec3f {
-    let r = 1.0;
-    let mut rng = rand::thread_rng();
-    Vec3f::normalize(Vec3f::new(
-        rng.gen_range(-r..r),
-        rng.gen_range(-r..r),
-        rng.gen_range(-r..r),
-    ))
-}
 
 /*
 pub fn sample_hemisphere() -> Vec3f {
@@ -112,6 +103,12 @@ pub fn sample_hemisphere() -> Vec3f {
     Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
 */
+
+fn vector_on_sphere() -> Vec3f {
+    let r = 1.0;
+    let mut rng = rand::thread_rng();
+    Vec3f::normalize(Vec3f::new(rng.gen_range(-r..r), rng.gen_range(-r..r), rng.gen_range(-r..r)))
+}
 
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
     loop {
