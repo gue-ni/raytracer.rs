@@ -76,16 +76,16 @@ pub fn path_tracing4(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32
     material.emissive() + cast_ray(&ray, scene, depth - 1)
 }
 
-pub fn path_tracing3(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
+pub fn path_tracing3(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
-    let omega = uniform_sample_hemisphere(hit.normal);
-    let prob = 1.0 / (2.0 * PI);
+    let (omega, pdf) = material.sample(hit.normal);
     let ray = Ray::new(hit.point, omega);
-    let brdf = material.albedo / PI;
+    let brdf = material.bsdf(hit.normal, -incoming.direction, omega);
     let cos_theta = Vec3f::dot(hit.normal, omega);
-    material.emissive() + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / prob
+    material.emittance() + cast_ray(&ray, scene, depth - 1) * brdf * cos_theta / pdf
 }
 */
+
 pub fn path_tracing(hit: &HitRecord, scene: &Scene, _incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene[hit.idx].material;
     let (omega, brdf_multiplier) = material.sample(hit.normal);
