@@ -152,6 +152,18 @@ pub fn main() {
         },
     });
 
+    // light
+     scene.push(Object {
+        geometry: Sphere {
+            center: Vec3f::new(0, 2.0, 5.0),
+            radius: 0.2,
+        },
+        material: Material::Diffuse {
+            albedo: Vec3f::fill(1.0),
+            emissive: Vec3f::fill(2.0),
+        },
+    });
+
     let r = 100000.0;
     let s = 1.0;
     let w = 4.0;
@@ -197,11 +209,7 @@ pub fn main() {
             center: Vec3f::new(0.0, -(r+w), 5.0),
             radius: r,
         },
-        material: Material::Physical {
-            albedo: Vec3f::fill(1.0),
-            emittance: 2.0,
-            roughness: 0.0,
-        }
+        material: wall
     });
     
 
