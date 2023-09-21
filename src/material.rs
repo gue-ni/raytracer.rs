@@ -10,10 +10,9 @@ pub trait BSDF {
     fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f);
 }
 
-
 pub trait BxDF {
     fn sample(&self, normal: Vec3f, incoming: Vec3f) -> (Vec3f, f32);
-    fn bxdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f32;
+    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f32;
     fn emittance(&self) -> Vec3f;
 }
 
@@ -43,16 +42,6 @@ impl BSDF for DiffuseMaterial {
         let brdf_multiplier = (self.eval() * cos_theta) / self.pdf();
         (omega, brdf_multiplier)
     }
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Copy, Clone)]
-pub struct PhysicalMaterial {
-    albedo: Vec3f,
-    emissive: Vec3f,
-    roughness: f32,
-    metallic: f32,
-    ao: f32,
 }
 
 #[derive(Debug, Copy, Clone)]
