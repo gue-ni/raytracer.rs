@@ -114,7 +114,7 @@ pub fn main() {
     // right
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(1.5, 0.0, 3.0),
+            center: Vec3f::new(1.5, 0.0, 4.0),
             radius: 0.5,
         },
         material: DiffuseMaterial {
@@ -125,7 +125,7 @@ pub fn main() {
     // middle
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(0.0, 0.0, 3.0),
+            center: Vec3f::new(0.0, 0.0, 4.0),
             radius: 0.75,
         },
         material: DiffuseMaterial {
@@ -136,7 +136,7 @@ pub fn main() {
     // left
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(-1.5, 0.0, 4.0),
+            center: Vec3f::new(-1.5, 0.0, 5.0),
             radius: 0.5,
         },
         material: DiffuseMaterial {
@@ -147,7 +147,9 @@ pub fn main() {
 
     let r = 100000.0;
     let s = 1.0;
-    let gm = DiffuseMaterial {
+    let w = 4.0;
+    
+    let wall = DiffuseMaterial {
         albedo: Vec3f::fill(0.18),
         emissive: Vec3f::fill(0.0),
     };
@@ -155,24 +157,24 @@ pub fn main() {
     // ground
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(0.0, r + s, 3.0),
+            center: Vec3f::new(0.0, r + s, 5.0),
             radius: r,
         },
-        material: gm
+        material: wall
     });
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new(-(r + s), 0.0, 3.0),
+            center: Vec3f::new(-(r + w), 0.0, 5.0),
             radius: r,
         },
-        material: gm
+        material: wall
     });
     scene.push(Object {
         geometry: Sphere {
-            center: Vec3f::new((r + s), 0.0, 3.0),
+            center: Vec3f::new((r + w), 0.0, 5.0),
             radius: r,
         },
-        material: gm
+        material: wall
     });
     
 
