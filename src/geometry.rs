@@ -154,12 +154,18 @@ pub struct Scene {
 }
 
 impl Scene {
-    fn new(background: Vec3f) -> Self {
+    pub fn new(background: Vec3f) -> Self {
         Self {
             objects: Vec::new(),
             background
         }
     }
+
+    /*
+    fn add(&mut self, object: Object) {
+        self.objects.push(object);
+    }
+    */
 }
 
 #[cfg(test)]
