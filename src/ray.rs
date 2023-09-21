@@ -21,7 +21,7 @@ impl Ray {
         let mut closest = HitRecord::new();
         closest.t = f32::INFINITY;
 
-        for (i, object) in scene.iter().enumerate() {
+        for (i, object) in scene.objects.iter().enumerate() {
             match object.geometry.hit(self, 0.0, closest.t) {
                 None => {}
                 Some(hit) => {
