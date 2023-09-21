@@ -18,6 +18,9 @@ use std::path::Path;
 use std::vec;
 use std::time::Instant;
 
+extern crate rand;
+use rand::Rng;
+
 /*
 
 pub struct Light {
@@ -68,7 +71,22 @@ pub fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth
 }
 
 pub fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
-    Vec3f::fill(1.0)
+    let material = scene.objects[hit.idx].material;
+    let emittance = material.emittance();
+
+    // russian roulette
+    let rr_prob = 0.7;
+    let mut rng = rand::thread_rng();
+    if rng.gen_range(0.0..1.0) >= rr_prob {
+        return emittance;
+    }
+        
+    let wo = -incoming.direction;
+    let (wi, pdf) = material.sample_f(hit.normal, wo);
+    let ray = Ray::new(hit.point, wi);
+    let bsdf = material.bsdf(hit.normal, wo, wi);
+    let cos_theta = Vec3f::dot(hit.normal, wi);
+    emittance + cast_ray(&ray, scene, depth - 1) * bsdf * cos_theta / (pdf * rr_prob)
 }
 
 pub fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
@@ -90,7 +108,7 @@ pub fn cast_ray(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
     match ray.cast(scene) {
         None => scene.background,
-        Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
+        Some(hit) => naive_path_tracing_rr(&hit, scene, ray, depth),
     }
 }
 
