@@ -12,7 +12,7 @@ use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
 
-use image::{ImageBuffer, Rgb, RgbImage};
+use image::{Rgb, Rgb32FImage, RgbImage};
 use std::path::Path;
 use std::time::Instant;
 use std::vec;
@@ -110,6 +110,39 @@ pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> Rgb
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 
+    let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
+
+    for s in 0..samples {
+        for y in 0..height {
+            for x in 0..width {
+                let ray = camera.ray((x, y));
+                let sample = cast_ray(&ray, &scene, bounces);
+
+                framebuffer[(y * width + x) as usize] += sample;
+            }
+        }
+
+        if s % 5 == 0 {
+            println!("Progress: {:3.1?} %", s as f32 / samples as f32 * 100.0);
+        }
+    }
+
+    let mut image = RgbImage::new(width, height);
+    for y in 0..height {
+        for x in 0..width {
+            let index = (y * width + x) as usize;
+            let pixel = framebuffer[index] * (u8::MAX as f32) / (samples as f32);
+            image.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
+        }
+    }
+
+    image
+}
+
+pub fn render1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+    let width = camera.resolution.x as u32;
+    let height = camera.resolution.y as u32;
+
     let mut image = RgbImage::new(camera.resolution.x as u32, camera.resolution.y as u32);
 
     for y in 0..height {
@@ -118,7 +151,7 @@ pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> Rgb
             let ray = camera.ray((x, y));
 
             for _ in 0..samples {
-                pixel = pixel + cast_ray(&ray, &scene, bounces);
+                pixel += cast_ray(&ray, &scene, bounces);
             }
 
             pixel = (pixel * (u8::MAX as f32)) / (samples as f32);
