@@ -6,6 +6,7 @@ use std::f32::consts::PI;
 pub trait BSDF {
     fn pdf(&self) -> f32;
     fn eval(&self) -> Vec3f;
+    fn emissive(&self) -> Vec3f;
     fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f);
 }
 
@@ -23,6 +24,10 @@ impl BSDF for DiffuseMaterial {
 
     fn eval(&self) -> Vec3f {
         self.albedo / PI
+    }
+
+    fn emissive(&self) -> Vec3f {
+        self.emissive 
     }
 
     fn sample(&self, normal: Vec3f) -> (Vec3f, Vec3f) {
@@ -45,6 +50,15 @@ pub struct PhysicalMaterial {
 
 #[derive(Debug, Copy, Clone)]
 enum Material {
-    diffuse(DiffuseMaterial),
-    physical(PhysicalMaterial),
+    Diffuse { emissive: Vec3f, albedo: Vec3f },
+    Physical {  emissive: Vec3f, albedo: Vec3f, roughness: f32 },
 }
+
+impl BSDF for Material {
+    fn pdf(&self) -> f32 {
+        match self {
+            
+        }
+    }
+}
+
