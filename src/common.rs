@@ -115,10 +115,11 @@ pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
 }
 
 pub fn from_hex(color: u32) -> Vec3f {
+    assert!(color < 0xffffff);
     let r = (color & 0xff0000) >> 16;
     let g = (color & 0x00ff00) >> 8;
     let b = (color & 0x0000ff) >> 0;
-    Vec3f::new(r as f32, g as f32, b as f32) / 255.0
+    Vec3f::new(r as f32, g as f32, b as f32) / (u8::MAX as f32) 
 }
 
 #[cfg(test)]

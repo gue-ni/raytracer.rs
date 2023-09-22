@@ -23,8 +23,8 @@ pub fn main() {
 
     // light
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.2),
-        material: Material::emissive(from_hex(0xffffff), 0.25),
+        geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.3),
+        material: Material::emissive(from_hex(0xffffff), 3.0),
     });
 
     let r = 100000.0;
