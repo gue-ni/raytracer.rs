@@ -40,7 +40,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
             let diffuse = light_color * cos_theta;
             let specular = Vec3f::fill(0.0);
 
-            (ambient + diffuse) + material.albedo
+            (ambient + diffuse + specular) * material.albedo
         }
     }
 }
