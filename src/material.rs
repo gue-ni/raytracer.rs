@@ -18,6 +18,8 @@ pub enum MaterialType {
     Specular,
     /// Physically-based Material
     Physical,
+    /// Refractive
+    Transparent,
 }
 
 #[derive(Debug, Copy, Clone)]
