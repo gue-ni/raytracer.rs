@@ -36,9 +36,9 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     }
 }
 
-pub fn distribution_ggx(N: Vec3f, H: Vec3f, a: f32) -> f32 {
+pub fn distribution_ggx(n: Vec3f, h: Vec3f, a: f32) -> f32 {
     let a2 = a * a;
-    let NdotH = f32::max(Vec3f::dot(N, H), 0.0);
+    let NdotH = f32::max(Vec3f::dot(n, h), 0.0);
     let NdotH2 = NdotH * NdotH;
     let nom = a2;
     let mut denom = NdotH2 * (a2 - 1.0) + 1.0;

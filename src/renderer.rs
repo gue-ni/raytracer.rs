@@ -9,6 +9,7 @@ use image::{Rgb, RgbImage};
 extern crate rand;
 use rand::Rng;
 
+#[allow(dead_code)]
 fn luma(color: Vec3f) -> f32 {
     Vec3f::dot(color, Vec3f::new(0.2126, 0.7152, 0.0722))
 }
@@ -22,15 +23,15 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
 fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
 
-    let light_pos = Vec3f::new(0.0, -3.0, 4.0);
+    let light_pos = Vec3f::new(0.0, -3.5, 4.0);
     let light_intensity = 1.0;
     let light_color = Vec3f::fill(1.0) * light_intensity;
     let light_dir = Vec3f::normalize(light_pos - hit.point);
 
     let ray = Ray::new(hit.point, light_dir);
     let _shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
-        Some(_) => 0.0,
-        None => 1.0,
+        Some(_) => 1.0,
+        None => 0.0,
     };
 
     match material.material {
@@ -55,7 +56,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
             let specular =
                 light_color * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha) * ks;
 
-            (ambient + (diffuse + specular)) * material.albedo
+            (ambient + (diffuse + specular) * _shadow) * material.albedo
         }
     }
 }
@@ -122,7 +123,12 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
         }
 
         if s % 5 == 0 {
-            println!("Progress: {:3.1?} %", s as f32 / samples as f32 * 100.0);
+            println!(
+                "Progress: {:3.1?} % ({}/{})",
+                s as f32 / samples as f32 * 100.0,
+                s,
+                samples
+            );
         }
     }
 

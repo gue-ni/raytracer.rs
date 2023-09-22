@@ -13,40 +13,39 @@ fn parse(string: &String) -> u32 {
 pub fn main() {
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
+    let z = 5.0;
+
     // right
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(1.75, 0.5, 4.0), 0.5),
+        geometry: Sphere::new(Vec3f::new(1.75, 0.5, z), 0.5),
         material: Material::diffuse(Vec3f::fill(0.999)),
     });
     // middle
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, 0.0, 4.0), 1.0),
+        geometry: Sphere::new(Vec3f::new(0.0, 0.0, z), 1.0),
         material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
     });
     // left
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-1.75, 0.5, 4.0), 0.5),
+        geometry: Sphere::new(Vec3f::new(-1.75, 0.5, z), 0.5),
         material: Material::specular(Vec3f::fill(0.999)),
     });
-
-    /*
     // light
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.3),
-        material: Material::emissive(from_hex(0xffffff), 3.0),
+        geometry: Sphere::new(Vec3f::new(0.0, -2.0, z), 0.5),
+        material: Material::emissive(from_hex(0xffffff), 12.0),
     });
-    */
 
     let r = 100000.0;
     let s = 1.0;
     let w = 4.0;
 
-    let wall = Material::diffuse(Vec3f::fill(0.75));
+    let wall = Material::diffuse(Vec3f::fill(0.99));
     let light = Material::emissive(Vec3f::fill(1.0), 0.5);
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(r + w), 5.0), r),
-        material: light,
+        material: wall,
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, r + s, 5.0), r),
