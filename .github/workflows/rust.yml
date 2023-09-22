@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Run app
-      run: cargo run --release -- 640 480 4096 5
+      run: cargo run --release -- 640 480 512 5
     
     - uses: actions/upload-artifact@v3
       with:
