@@ -59,13 +59,7 @@ pub fn main() {
         geometry: Sphere::new(Vec3f::new(-2.5, 2.25, z), 0.75),
         material: Material::specular(Vec3f::fill(0.999)),
     });
-    // light
-    /*
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -2.0, z), 0.5),
-        material: Material::emissive(from_hex(0xffffff), 12.0),
-    });
-    */
+
 
     let aspect_ratio = (width as f32) / (height as f32);
     let r = 100000.0;
@@ -74,12 +68,21 @@ pub fn main() {
     let h = 3.0;
     let w = h * aspect_ratio;
 
+    // light
+    let light_radius = 5.0;
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, -(h + light_radius * 0.97), z), light_radius),
+        material: Material::emissive(from_hex(0xffffff), 12.0),
+    });
+
+
+
     let wall = Material::diffuse(Vec3f::fill(0.99));
-    let _light = Material::emissive(Vec3f::fill(1.0), 0.5);
+    let _light = Material::emissive(Vec3f::fill(1.0), 1.0);
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(r + h), z), r),
-        material: _light,
+        material: wall,
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, r + h, z), r),
@@ -111,26 +114,13 @@ pub fn main() {
 
     println!("Elapsed time: {:.2?}", elapsed);
 
+    let mut filename = String::from("render.png");
+    save_image(&image, &filename);
+
     let timestamp = get_sys_time_in_secs();
-    let filename1 = format!(
+    filename = format!(
         "img/render/render-{}-{}x{}-s{}-b{}.png",
         timestamp, width, height, samples, bounces
     );
-
-    save_image(&image, &filename1);
-
-    let f2 = String::from("render.png");
-    save_image(&image, &f2);
-
-    /*
-    let path = Path::new(&filename1);
-
-    match image.save(&path) {
-        Ok(_) => println!("Saved output to {:?}", path),
-        Err(_) => panic!("Could not save file {:?}", path),
-    };
-    */
+    save_image(&image, &filename);
 }
-
-#[test]
-fn test_sample() {}
