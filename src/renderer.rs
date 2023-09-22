@@ -18,6 +18,28 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
+
+fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+    let material = scene.objects[hit.idx].material;
+
+    let light_pos = Vec3f::new(0.0, -3.0, 5.0);
+    let light_intensity = 1.0;
+    let light_color = Vec3f::fill(1.0) * light_intensity;
+    let light_dir = Vec3f::normalize(light_pos - hit.point);
+
+    match material.material {
+        MaterialType::Specular => {
+            let reflected = reflect(incoming.direction, hit.normal);
+            let ray = Ray::new(hit.point, reflected);
+            trace(&ray, scene, depth - 1)
+        },
+        _ => {
+            let cos_theta = Vec3f::dot(hit.normal, light_dir);
+            material.albedo * cos_theta
+        }
+    }
+}
+
 #[allow(dead_code)]
 fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
@@ -55,7 +77,7 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
 
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     match scene.hit(ray, 0.0, f32::INFINITY) {
-        Some(hit) if depth > 0 => naive_path_tracing(&hit, scene, ray, depth),
+        Some(hit) if depth > 0 => ray_tracing(&hit, scene, ray, depth),
         Some(_) => Vec3f::fill(0.0),
         None => scene.background,
     }
