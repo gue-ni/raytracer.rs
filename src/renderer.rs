@@ -21,8 +21,8 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
 #[allow(dead_code)]
 fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
-    let emittance = material.emittance();
-    let albedo = material.albedo();
+    let emittance = material.albedo * material.emittance;
+    let albedo = material.albedo;
 
     // russian roulette
     //let rr_prob = 0.7;
@@ -44,12 +44,13 @@ fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: 
 #[allow(dead_code)]
 fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
+    let emittance = material.albedo * material.emittance;
     let wo = -incoming.direction;
     let (wi, pdf) = material.sample(hit.normal, wo);
     let ray = Ray::new(hit.point, wi);
     let bsdf = material.bsdf(hit.normal, wo, wi);
     let cos_theta = Vec3f::dot(hit.normal, wi);
-    material.emittance() + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
+    emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
 }
 
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
