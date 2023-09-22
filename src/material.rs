@@ -1,4 +1,5 @@
 use crate::common::*;
+use crate::geometry::*;
 use crate::onb::Onb;
 use crate::vector::*;
 use std::f32::consts::PI;
@@ -29,6 +30,10 @@ pub struct Material {
     pub emittance: f32,
     pub roughness: f32,
     pub material: MaterialType,
+}
+
+pub trait Renderable {
+    fn surface(&self, hit: &HitRecord) -> Material;
 }
 
 impl Material {
@@ -66,6 +71,12 @@ impl Material {
             roughness: 0.0,
             material: MaterialType::Specular,
         }
+    }
+}
+
+impl Renderable for Scene {
+    fn surface(&self, hit: &HitRecord) -> Material {
+        self.objects[hit.idx].material
     }
 }
 

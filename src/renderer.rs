@@ -86,8 +86,13 @@ fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: 
 }
 
 #[allow(dead_code)]
-fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
-    let material = scene.objects[hit.idx].material;
+fn naive_path_tracing<S: Hittable + Renderable>(
+    hit: &HitRecord,
+    scene: &S,
+    incoming: &Ray,
+    depth: u32,
+) -> Vec3f {
+    let material = scene.surface(hit);
     let emittance = material.albedo * material.emittance;
     let wo = -incoming.direction;
     let (wi, pdf) = material.sample(hit.normal, wo);
@@ -97,11 +102,12 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
     emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
 }
 
-fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
+fn trace<S: Hittable + Renderable>(ray: &Ray, scene: &S, depth: u32) -> Vec3f {
     if depth > 0 {
         match scene.hit(ray, 0.0, f32::INFINITY) {
             Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
-            None => scene.background,
+            //None => scene.background,
+            None => Vec3f::fill(0.0),
         }
     } else {
         Vec3f::fill(0.0)
@@ -109,7 +115,12 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 }
 
 // maybe call callback with copy of framebuffer every n samples?
-fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+fn render_v1<S: Hittable + Renderable>(
+    camera: &Camera,
+    scene: &S,
+    samples: u32,
+    bounces: u32,
+) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 

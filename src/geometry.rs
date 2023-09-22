@@ -42,12 +42,13 @@ pub struct Mesh {
     triangles: Vec<Triangle>,
 }
 
+#[derive(Debug, Clone)]
 pub enum Geometry {
     MESH(Mesh),
     SPHERE(Sphere),
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Object {
     pub geometry: Sphere,
     pub material: Material,
