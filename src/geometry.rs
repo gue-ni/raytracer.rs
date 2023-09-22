@@ -65,7 +65,7 @@ impl Hittable for Sphere {
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
-            let normal = Vec3f::normalize(point - self.center);
+            let normal = (point - self.center) / self.radius;
             let idx = 0;
             return Some(HitRecord {
                 t,
