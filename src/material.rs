@@ -1,5 +1,6 @@
 use crate::common::*;
 use crate::vector::*;
+use crate::onb::Onb;
 use std::f32::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
