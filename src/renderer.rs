@@ -108,6 +108,7 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     }
 }
 
+// maybe call callback with copy of framebuffer every n samples?
 fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;

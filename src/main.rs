@@ -2,12 +2,32 @@ use raytracer::*;
 use std::env;
 use std::path::Path;
 use std::time::Instant;
+use image::RgbImage;
+
+use std::time::{SystemTime};
+
+fn get_sys_time_in_secs() -> u64 {
+    match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(n) => n.as_secs(),
+        Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+    }
+}
 
 fn parse(string: &String) -> u32 {
     match string.parse::<u32>() {
         Ok(val) => val,
         Err(_) => panic!("Could not parse {:?}", string),
     }
+}
+
+fn save_image(image: &RgbImage, filename: &String) {
+    let path = Path::new(filename);
+    match image.save(&path) {
+        Ok(_) => println!("Saved image to {:?}", path),
+        Err(_) => panic!("Could not save image {:?}", path),
+    };
+
+
 }
 
 pub fn main() {
@@ -93,15 +113,22 @@ pub fn main() {
 
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename1 = format!("render-{}x{}-s{}-b{}.png", width, height, samples, bounces);
-    let _filename2 = "render.png".to_string();
+    let timestamp = get_sys_time_in_secs();
+    let filename1 = format!("img/render/render-{}x{}-s{}-b{}-{}.png", width, height, samples, bounces, timestamp);
 
+    save_image(&image, &filename1);
+
+    let f2 = String::from("render.png");
+    save_image(&image, &f2);
+
+    /*
     let path = Path::new(&filename1);
 
     match image.save(&path) {
         Ok(_) => println!("Saved output to {:?}", path),
         Err(_) => panic!("Could not save file {:?}", path),
     };
+    */
 }
 
 #[test]

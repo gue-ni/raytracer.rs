@@ -1,4 +1,4 @@
 Cargo.lock
 target/
-img/render/*
+img/render/*.png
 render.png
