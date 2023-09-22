@@ -14,14 +14,11 @@ pub fn main() {
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, 4.0), 1.0),
         material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
-        //material: Material::physical(Vec3f::new(0.0, 1.0, 0.0), 0.25),
-        //material: Material::Specular,
     });
     // left
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(-1.75, 0.5, 4.0), 0.5),
-        //material: Material::diffuse(Vec3f::new(0.0, 0.0, 1.0)),
-        material: Material::Specular,
+        material: Material::specular(),
     });
 
     // light
