@@ -36,10 +36,39 @@ impl Sphere {
 #[derive(Debug, Copy, Clone)]
 pub struct Triangle(pub Vec3f, pub Vec3f, pub Vec3f);
 
-// convex polygon
+/// Convex polygon mesh
 #[derive(Debug, Clone)]
 pub struct Mesh {
     triangles: Vec<Triangle>,
+}
+
+pub enum Geometry {
+    MESH(Mesh),
+    SPHERE(Sphere),
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Object {
+    pub geometry: Sphere,
+    pub material: Material,
+}
+
+pub struct Scene {
+    pub objects: Vec<Object>,
+    pub background: Vec3f, 
+}
+
+impl Scene {
+    pub fn new(background: Vec3f) -> Self {
+        Self {
+            objects: Vec::new(),
+            background,
+        }
+    }
+
+    pub fn add(&mut self, object: Object) {
+        self.objects.push(object);
+    }
 }
 
 pub trait Hittable {
@@ -143,41 +172,12 @@ impl Hittable for Mesh {
     }
 }
 
-pub enum Geometry {
-    MESH(Mesh),
-    SPHERE(Sphere),
-}
-
 impl Hittable for Geometry {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
         match self {
             Geometry::MESH(g) => g.hit(ray, min_t, max_t),
             Geometry::SPHERE(g) => g.hit(ray, min_t, max_t),
         }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Object {
-    pub geometry: Sphere,
-    pub material: Material,
-}
-
-pub struct Scene {
-    pub objects: Vec<Object>,
-    pub background: Vec3f, // background color
-}
-
-impl Scene {
-    pub fn new(background: Vec3f) -> Self {
-        Self {
-            objects: Vec::new(),
-            background,
-        }
-    }
-
-    pub fn add(&mut self, object: Object) {
-        self.objects.push(object);
     }
 }
 

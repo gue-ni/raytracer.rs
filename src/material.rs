@@ -2,18 +2,21 @@ use crate::common::*;
 use crate::vector::*;
 use std::f32::consts::PI;
 
-// Bidirectional Scattering Distribution Function (BSDF)
+/// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
-    // return outgoing vector and pdf
+    /// Returns outgoing vector and pdf
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
-    // return color of hit
+    /// Returns color of hit
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
 }
 
 #[derive(Debug, Copy, Clone)]
 pub enum MaterialType {
+    /// Perfectly Diffuse
     Diffuse,
+    /// Perfectly Specular
     Specular,
+    /// Physically-based Material
     Physical,
 }
 

@@ -22,13 +22,10 @@ pub fn main() {
     });
 
     // light
-    /*
-    let light = Material::emissive(Vec3f::fill(1.0), 5.0);
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.3),
-        material: light,
+        geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.2),
+        material: Material::emissive(from_hex(0xffffff), 0.25),
     });
-    */
 
     let r = 100000.0;
     let s = 1.0;
