@@ -18,7 +18,6 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
-
 fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
 
@@ -28,7 +27,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
     let light_dir = Vec3f::normalize(light_pos - hit.point);
 
     let ray = Ray::new(hit.point, light_dir);
-    let shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
+    let _shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
         Some(_) => 0.0,
         None => 1.0,
     };
@@ -38,7 +37,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
             let reflected = reflect(incoming.direction, hit.normal);
             let ray = Ray::new(hit.point, reflected);
             material.albedo * trace(&ray, scene, depth - 1) * 0.9
-        },
+        }
         _ => {
             let ka = 0.25;
             let kd = 1.0;
@@ -52,7 +51,8 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
 
             let view_dir = -incoming.direction;
             let halfway_dir = Vec3f::normalize(light_dir + view_dir);
-            let specular = light_color * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha) * ks;
+            let specular =
+                light_color * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha) * ks;
 
             (ambient + (diffuse + specular)) * material.albedo
         }
@@ -69,7 +69,7 @@ fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: 
     //let rr_prob = 0.7;
     let rr_prob = luma(albedo);
     //let rr_prob = f32::max(albedo.x, f32::max(albedo.y, albedo.z));
-    
+
     let mut rng = rand::thread_rng();
     if rng.gen_range(0.0..1.0) < rr_prob {
         return emittance;
@@ -126,7 +126,7 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
     }
 
     let mut image = RgbImage::new(width, height);
-    
+
     for y in 0..height {
         for x in 0..width {
             let index = (y * width + x) as usize;

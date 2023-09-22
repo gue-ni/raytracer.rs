@@ -55,7 +55,7 @@ pub struct Object {
 
 pub struct Scene {
     pub objects: Vec<Object>,
-    pub background: Vec3f, 
+    pub background: Vec3f,
 }
 
 impl Scene {
@@ -208,7 +208,6 @@ impl Hittable for Scene {
 mod test {
     use crate::geometry::*;
     use crate::ray::*;
-    use crate::vector::*;
 
     #[test]
     fn test_sphere_hit() {

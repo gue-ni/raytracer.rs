@@ -455,7 +455,7 @@ mod tests {
     fn test_math_vec3() {
         let a = Vec3f::new(2.0, 3.0, 4.0);
         let b = Vec3f::new(5.0, 6.0, 7.0);
-        let s = 1.5;
+        let _s = 1.5;
         assert_eq!(a + b, Vec3f::new(7.0, 9.0, 11.0));
         assert_eq!(a - b, Vec3f::new(-3.0, -3.0, -3.0));
         assert_eq!(a * b, Vec3f::new(10.0, 18.0, 28.0));
@@ -472,9 +472,9 @@ mod tests {
 
     #[test]
     fn test_math_vec2() {
-        let a = Vec2f::new(2.0, 3.0);
-        let b = Vec2f::new(4.0, 5.0);
-        let s = 1.5;
+        let _a = Vec2f::new(2.0, 3.0);
+        let _b = Vec2f::new(4.0, 5.0);
+        let _s = 1.5;
 
         // assert_eq!(a + b, Vec2f::new(1.0, 1.0));
         // assert_eq!(a - b, Vec2f::new(1.0, 1.0));

@@ -1,12 +1,12 @@
 use raytracer::*;
+use std::env;
 use std::path::Path;
 use std::time::Instant;
-use std::env;
 
 fn parse(string: &String) -> u32 {
     match string.parse::<u32>() {
         Ok(val) => val,
-        Err(_) => panic!("Could not parse {:?}", string)
+        Err(_) => panic!("Could not parse {:?}", string),
     }
 }
 
@@ -92,14 +92,10 @@ pub fn main() {
     let image = render(&camera, &scene, SAMPLES, BOUNCES);
     let elapsed = now.elapsed();
 
-
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename1 = format!(
-        "render-{}x{}-s{}-b{}.png",
-        WIDTH, HEIGHT, SAMPLES, BOUNCES
-    );
-    let filename2 = format!("render.png");
+    let filename1 = format!("render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    let _filename2 = format!("render.png");
 
     let path = Path::new(&filename1);
 

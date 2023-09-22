@@ -86,10 +86,10 @@ pub fn cosine_weighted_hemisphere() -> (Vec3f, f32) {
     let r1 = rng.gen_range(0.0..1.0);
     let r2 = rng.gen_range(0.0..1.0);
 
-    let phi = 2.0 * PI * r1;
+    let _phi = 2.0 * PI * r1;
     let sin_theta = f32::sqrt(r2);
     let cos_theta = f32::sqrt(1.0 - r2);
-    
+
     let omega = Vec3f::new(0.0, 0.0, 0.0);
     let pdf = cos_theta * sin_theta / PI;
     (omega, pdf)
@@ -119,7 +119,7 @@ pub fn from_hex(color: u32) -> Vec3f {
     let r = (color & 0xff0000) >> 16;
     let g = (color & 0x00ff00) >> 8;
     let b = (color & 0x0000ff) >> 0;
-    Vec3f::new(r as f32, g as f32, b as f32) / (u8::MAX as f32) 
+    Vec3f::new(r as f32, g as f32, b as f32) / (u8::MAX as f32)
 }
 
 #[cfg(test)]

@@ -36,7 +36,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness: 1.0,
-            material: MaterialType::Diffuse
+            material: MaterialType::Diffuse,
         }
     }
 
@@ -45,7 +45,7 @@ impl Material {
             albedo: color,
             emittance: intensity,
             roughness: 1.0,
-            material: MaterialType::Diffuse
+            material: MaterialType::Diffuse,
         }
     }
 
@@ -54,16 +54,16 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness,
-            material: MaterialType::Physical
+            material: MaterialType::Physical,
         }
     }
 
     pub fn specular(color: Vec3f) -> Self {
-           Material {
+        Material {
             albedo: color,
             emittance: 0.0,
             roughness: 0.0,
-            material: MaterialType::Specular
+            material: MaterialType::Specular,
         }
     }
 }
@@ -71,11 +71,11 @@ impl Material {
 impl BSDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
         match self.material {
-            MaterialType::Specular => { 
+            MaterialType::Specular => {
                 let wi = reflect(-wo, normal);
                 let cos_theta = Vec3f::dot(normal, wi);
                 (wi, cos_theta)
-            },
+            }
             _ => {
                 let pdf = 1.0 / (2.0 * PI);
                 let wi = uniform_sample_hemisphere(normal);
