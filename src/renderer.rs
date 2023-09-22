@@ -27,6 +27,12 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
     let light_color = Vec3f::fill(1.0) * light_intensity;
     let light_dir = Vec3f::normalize(light_pos - hit.point);
 
+    let ray = Ray::new(hit.point, light_dir);
+    let shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
+        Some(_) => 0.0,
+        None => 1.0,
+    }
+
     match material.material {
         MaterialType::Specular => {
             let reflected = reflect(incoming.direction, hit.normal);
@@ -34,17 +40,21 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
             material.albedo * trace(&ray, scene, depth - 1) * 0.9
         },
         _ => {
+            let ka = 0.5;
+            let kd = 0.8;
+            let ks = 0.25;
+            let alpha = 16.0;
 
-            let ambient = light_color * 0.25;
+            let ambient = light_color * ka;
 
             let cos_theta = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
-            let diffuse = light_color * cos_theta;
+            let diffuse = light_color * cos_theta * kd;
 
             let view_dir = -incoming.direction;
             let halfway_dir = Vec3f::normalize(light_dir + view_dir);
-            let specular = light_color * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(32.0);
+            let specular = light_color * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha) * ks;
 
-            (ambient + diffuse + specular) * material.albedo
+            (ambient + (diffuse + specular) * shadow) * material.albedo
         }
     }
 }
