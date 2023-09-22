@@ -90,7 +90,7 @@ pub fn main() {
     println!("Elapsed time: {:.2?}", elapsed);
 
     let filename1 = format!("render-{}x{}-s{}-b{}.png", width, height, samples, bounces);
-    let _filename2 = format!("render.png");
+    let _filename2 = "render.png".to_string();
 
     let path = Path::new(&filename1);
 

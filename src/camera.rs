@@ -10,7 +10,7 @@ pub struct Camera {
 impl Camera {
     pub fn new(position: Vec3f, res: (u32, u32)) -> Self {
         Camera {
-            position: position,
+            position,
             resolution: Vec2f::from(res),
         }
     }

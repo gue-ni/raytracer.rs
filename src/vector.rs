@@ -30,7 +30,7 @@ pub trait Number:
 impl Number for f32 {}
 impl Number for i32 {}
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Vec3<T> {
     pub x: T,
     pub y: T,
@@ -275,7 +275,7 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,

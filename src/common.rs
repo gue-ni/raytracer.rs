@@ -22,9 +22,7 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     if cosi < 0.0 {
         cosi = -cosi;
     } else {
-        let tmp = etai;
-        etai = etat;
-        etat = tmp;
+        std::mem::swap(&mut etai, &mut etat);
         n = -normal;
     }
 
@@ -118,7 +116,7 @@ pub fn from_hex(color: u32) -> Vec3f {
     assert!(color <= 0xffffff);
     let r = (color & 0xff0000) >> 16;
     let g = (color & 0x00ff00) >> 8;
-    let b = (color & 0x0000ff) >> 0;
+    let b = color & 0x0000ff;
     Vec3f::new(r as f32, g as f32, b as f32) / (u8::MAX as f32)
 }
 

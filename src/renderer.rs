@@ -117,7 +117,7 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
         for y in 0..height {
             for x in 0..width {
                 let ray = camera.ray((x, y));
-                framebuffer[(y * width + x) as usize] += trace(&ray, &scene, bounces);
+                framebuffer[(y * width + x) as usize] += trace(&ray, scene, bounces);
             }
         }
 
@@ -152,7 +152,7 @@ fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
             let ray = camera.ray((x, y));
 
             for _ in 0..samples {
-                pixel += trace(&ray, &scene, bounces);
+                pixel += trace(&ray, scene, bounces);
             }
 
             pixel = (pixel * (u8::MAX as f32)) / (samples as f32);

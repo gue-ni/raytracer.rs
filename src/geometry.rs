@@ -96,14 +96,14 @@ impl Hittable for Sphere {
             let point = ray.point_at(t);
             let normal = (point - self.center) / self.radius;
             let idx = 0;
-            return Some(HitRecord {
+            Some(HitRecord {
                 t,
                 normal,
                 point,
                 idx,
-            });
+            })
         } else {
-            return None;
+            None
         }
     }
 }
@@ -152,9 +152,9 @@ impl Hittable for Triangle {
         }
 
         Some(HitRecord {
-            t: t,
-            normal: normal,
-            point: point,
+            t,
+            normal,
+            point,
             idx: 0,
         })
     }
