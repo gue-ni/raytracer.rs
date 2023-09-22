@@ -13,6 +13,12 @@ pub trait BSDF {
     fn albedo(&self) -> Vec3f;
 }
 
+pub enum MaterialType {
+    Diffuse,
+    Specular,
+    Physical,
+}
+
 #[derive(Debug, Copy, Clone)]
 pub enum Material {
     Diffuse {
@@ -68,6 +74,7 @@ impl BSDF for Material {
                 (wi, cos_theta)
             }
             Material::Physical { roughness, .. } => {
+                // TODO
                 let pdf = 1.0 / (2.0 * PI);
                 let reflected = reflect(-wo, normal);
                 let random = uniform_sample_hemisphere(normal);

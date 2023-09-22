@@ -123,7 +123,7 @@ mod test {
         let normal = Vec3f::new(0.0, 1.0, 0.0);
         let incoming = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
         let outgoing = reflect(incoming, normal);
-        assert_eq!(Vec3f::dot(incoming, outgoing), 0.0);
+        assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
         assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
     }
 }

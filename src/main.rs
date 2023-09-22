@@ -76,12 +76,12 @@ pub fn main() {
     println!("Elapsed time: {:.2?}", elapsed);
 
     let filename1 = format!(
-        "img/render/render-{}x{}-s{}-b{}.png",
+        "render-{}x{}-s{}-b{}.png",
         WIDTH, HEIGHT, SAMPLES, BOUNCES
     );
     let filename2 = format!("render.png");
 
-    let path = Path::new(&filename2);
+    let path = Path::new(&filename1);
 
     match image.save(&path) {
         Ok(_) => println!("Saved output to {:?}", path),
