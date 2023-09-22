@@ -59,7 +59,7 @@ pub fn main() {
 
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 512;
+    const SAMPLES: u32 = 4096;
     const BOUNCES: u32 = 5;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
