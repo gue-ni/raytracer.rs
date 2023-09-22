@@ -24,7 +24,9 @@ pub enum Material {
         emittance: f32,
         roughness: f32,
     },
-    Specular,
+    Specular {
+        albedo: Vec3f,
+    },
 }
 
 impl Material {
@@ -49,14 +51,21 @@ impl Material {
             roughness,
         }
     }
+
+    pub fn specular() -> Self {
+        Material::Specular {
+            albedo: Vec3f::new(1.0, 1.0, 1.0),
+        }
+    }
 }
 
 impl BSDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
         match self {
-            Material::Specular => {
+            Material::Specular { .. } => { 
                 let wi = reflect(-wo, normal);
-                (wi, 1.0)
+                let cos_theta = Vec3f::dot(normal, wi);
+                (wi, cos_theta)
             }
             Material::Physical { roughness, .. } => {
                 let pdf = 1.0 / (2.0 * PI);
@@ -77,7 +86,7 @@ impl BSDF for Material {
         match self {
             Material::Diffuse { albedo, .. } => *albedo / PI,
             Material::Physical { albedo, .. } => *albedo / PI,
-            _ => Vec3f::fill(1.0),
+            Material::Specular { albedo, .. } => *albedo,
         }
     }
 
@@ -96,6 +105,7 @@ impl BSDF for Material {
     fn albedo(&self) -> Vec3f {
         match self {
             Material::Diffuse { albedo, .. } => *albedo,
+            Material::Physical { albedo, .. } => *albedo,
             _ => Vec3f::fill(0.0),
         }
     }
