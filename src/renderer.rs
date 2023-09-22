@@ -97,7 +97,7 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
 
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     match scene.hit(ray, 0.0, f32::INFINITY) {
-        Some(hit) if depth > 0 => ray_tracing(&hit, scene, ray, depth),
+        Some(hit) if depth > 0 => naive_path_tracing(&hit, scene, ray, depth),
         Some(_) => Vec3f::fill(0.0),
         None => scene.background,
     }

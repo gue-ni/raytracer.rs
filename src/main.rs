@@ -50,7 +50,7 @@ pub fn main() {
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(r + w, 0.0, 5.0), r),
-        material: Material::diffuse(Vec3f::new(0.25, 0.25, 0.75)),
+        material: Material::diffuse(Vec3f::new(0.25, 0.75, 0.25)),
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, 5.0 + (r + w)), r),
