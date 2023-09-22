@@ -42,10 +42,12 @@ pub fn main() {
         material: Material::specular(Vec3f::fill(0.999)),
     });
     // light
+    /*
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -2.0, z), 0.5),
         material: Material::emissive(from_hex(0xffffff), 12.0),
     });
+    */
 
     let aspect_ratio = (width as f32) / (height as f32);
     let r = 100000.0;
@@ -59,7 +61,7 @@ pub fn main() {
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(r + h), z), r),
-        material: wall,
+        material: _light,
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, r + h, z), r),
