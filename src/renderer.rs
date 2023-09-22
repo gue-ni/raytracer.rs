@@ -31,7 +31,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
     let shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
         Some(_) => 0.0,
         None => 1.0,
-    }
+    };
 
     match material.material {
         MaterialType::Specular => {
