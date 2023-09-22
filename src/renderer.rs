@@ -34,11 +34,15 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
             trace(&ray, scene, depth - 1)
         },
         _ => {
-            let cos_theta = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
 
-            let ambient = light_color * 0.1;
+            let ambient = light_color * 0.25;
+
+            let cos_theta = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
             let diffuse = light_color * cos_theta;
-            let specular = Vec3f::fill(0.0);
+
+            let view_dir = -incoming.direction;
+            let halfway_dir = Vec3f::normalize(light_dir + view_dir);
+            let specular = light_color * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(32.0);
 
             (ambient + diffuse + specular) * material.albedo
         }
