@@ -16,7 +16,8 @@ impl Onb {
         };
 
         let v = Vec3f::normalize(Vec3f::cross(unit_w, a));
-        let u = Vec3f::cross(unit_w, u);
+        let u = Vec3f::cross(unit_w, v);
+        
         Self {
             axis: [u, v, unit_w]
         }
