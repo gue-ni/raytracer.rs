@@ -31,7 +31,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
         MaterialType::Specular => {
             let reflected = reflect(incoming.direction, hit.normal);
             let ray = Ray::new(hit.point, reflected);
-            trace(&ray, scene, depth - 1) * 0.9
+            material.albedo * trace(&ray, scene, depth - 1) * 0.9
         },
         _ => {
 
