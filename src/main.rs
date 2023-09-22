@@ -71,30 +71,25 @@ pub fn main() {
         panic!("Invalid numer of arguments {:?}", args.len());
     }
 
-    let WIDTH = parse(&args[1]);
-    let HEIGHT = parse(&args[2]);
-    let SAMPLES = parse(&args[3]);
-    let BOUNCES = parse(&args[4]);
-
-    //const WIDTH: u32 = 640;
-    //const HEIGHT: u32 = 480;
-    //const SAMPLES: u32 = 4096;
-    //const BOUNCES: u32 = 5;
+    let width = parse(&args[1]);
+    let height = parse(&args[2]);
+    let samples = parse(&args[3]);
+    let bounces = parse(&args[4]);
 
     println!(
         "{}x{}, samples: {}, bounces: {}",
-        WIDTH, HEIGHT, SAMPLES, BOUNCES
+        width, height, samples, bounces
     );
 
-    let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
+    let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (width, height));
 
     let now = Instant::now();
-    let image = render(&camera, &scene, SAMPLES, BOUNCES);
+    let image = render(&camera, &scene, samples, bounces);
     let elapsed = now.elapsed();
 
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let filename1 = format!("render-{}x{}-s{}-b{}.png", WIDTH, HEIGHT, SAMPLES, BOUNCES);
+    let filename1 = format!("render-{}x{}-s{}-b{}.png", width, height, samples, bounces);
     let _filename2 = format!("render.png");
 
     let path = Path::new(&filename1);
