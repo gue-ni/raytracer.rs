@@ -9,6 +9,10 @@ use image::{Rgb, RgbImage};
 extern crate rand;
 use rand::Rng;
 
+fn luma(color: Vec3f) -> f32 {
+    Vec3f::dot(color, Vec3f::new(0.2126, 0.7152, 0.0722))
+}
+
 #[allow(dead_code)]
 fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
@@ -18,11 +22,14 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
 fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
     let emittance = material.emittance();
+    let albedo = material.albedo();
 
     // russian roulette
-    let rr_prob = 0.7;
+    //let rr_prob = 0.7;
+    let rr_prob = luma(albedo);
+    
     let mut rng = rand::thread_rng();
-    if rng.gen_range(0.0..1.0) >= rr_prob {
+    if rng.gen_range(0.0..1.0) < rr_prob {
         return emittance;
     }
 
@@ -47,7 +54,7 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
 
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     match scene.hit(ray, 0.0, f32::INFINITY) {
-        Some(hit) if depth > 0 => naive_path_tracing(&hit, scene, ray, depth),
+        Some(hit) if depth > 0 => naive_path_tracing_rr(&hit, scene, ray, depth),
         Some(_) => Vec3f::fill(0.0),
         None => scene.background,
     }
@@ -73,6 +80,7 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
     }
 
     let mut image = RgbImage::new(width, height);
+    
     for y in 0..height {
         for x in 0..width {
             let index = (y * width + x) as usize;
