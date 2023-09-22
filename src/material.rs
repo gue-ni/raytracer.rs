@@ -1,6 +1,6 @@
 use crate::common::*;
-use crate::vector::*;
 use crate::onb::Onb;
+use crate::vector::*;
 use std::f32::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
@@ -37,7 +37,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness: 1.0,
-            material: MaterialType::Physical,
+            material: MaterialType::Diffuse,
         }
     }
 
@@ -83,10 +83,12 @@ impl BSDF for Material {
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
                 (wi, pdf)
-            },
+            }
             _ => {
                 let pdf = 1.0 / (2.0 * PI);
                 let wi = uniform_sample_hemisphere(normal);
+                //let onb = Onb::new(normal);
+                //let wi = onb.local_to_world(uniform_hemisphere());
                 (wi, pdf)
             }
         }

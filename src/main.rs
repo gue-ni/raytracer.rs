@@ -11,59 +11,6 @@ fn parse(string: &String) -> u32 {
 }
 
 pub fn main() {
-    let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
-
-    let z = 5.0;
-
-    // right
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(1.75, 0.5, z), 0.5),
-        material: Material::diffuse(Vec3f::fill(0.999)),
-    });
-    // middle
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, 0.0, z), 1.0),
-        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
-    });
-    // left
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-1.75, 0.5, z), 0.5),
-        material: Material::specular(Vec3f::fill(0.999)),
-    });
-    // light
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -2.0, z), 0.5),
-        material: Material::emissive(from_hex(0xffffff), 12.0),
-    });
-
-    let r = 100000.0;
-    let s = 1.0;
-    let w = 4.0;
-
-    let wall = Material::diffuse(Vec3f::fill(0.99));
-    let light = Material::emissive(Vec3f::fill(1.0), 0.5);
-
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -(r + w), 5.0), r),
-        material: wall,
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, r + s, 5.0), r),
-        material: wall,
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-(r + w), 0.0, 5.0), r),
-        material: Material::diffuse(Vec3f::new(0.75, 0.25, 0.25)),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(r + w, 0.0, 5.0), r),
-        material: Material::diffuse(Vec3f::new(0.25, 0.75, 0.25)),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, 0.0, 5.0 + (r + w)), r),
-        material: wall,
-    });
-
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 5 {
@@ -74,6 +21,62 @@ pub fn main() {
     let height = parse(&args[2]);
     let samples = parse(&args[3]);
     let bounces = parse(&args[4]);
+
+    let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
+
+    let z = 7.0;
+
+    // right
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(2.5, 2.25, z), 0.75),
+        material: Material::diffuse(Vec3f::fill(0.999)),
+    });
+    // middle
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, 1.5, z), 1.5),
+        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
+    });
+    // left
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(-2.5, 2.25, z), 0.75),
+        material: Material::specular(Vec3f::fill(0.999)),
+    });
+    // light
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, -2.0, z), 0.5),
+        material: Material::emissive(from_hex(0xffffff), 12.0),
+    });
+
+    let aspect_ratio = (width as f32) / (height as f32);
+    let r = 100000.0;
+
+    // room size
+    let h = 3.0;
+    let w = h * aspect_ratio;
+
+    let wall = Material::diffuse(Vec3f::fill(0.99));
+    let _light = Material::emissive(Vec3f::fill(1.0), 0.5);
+
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, -(r + h), z), r),
+        material: wall,
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, r + h, z), r),
+        material: wall,
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(-(r + w), 0.0, z), r),
+        material: Material::diffuse(Vec3f::new(0.75, 0.25, 0.25)),
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(r + w, 0.0, z), r),
+        material: Material::diffuse(Vec3f::new(0.25, 0.75, 0.25)),
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, 0.0, z + (r + w)), r),
+        material: wall,
+    });
 
     println!(
         "{}x{}, samples: {}, bounces: {}",

@@ -38,31 +38,31 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
 
 pub fn distribution_ggx(n: Vec3f, h: Vec3f, a: f32) -> f32 {
     let a2 = a * a;
-    let NdotH = f32::max(Vec3f::dot(n, h), 0.0);
-    let NdotH2 = NdotH * NdotH;
+    let ndoth = f32::max(Vec3f::dot(n, h), 0.0);
+    let ndoth2 = ndoth * ndoth;
     let nom = a2;
-    let mut denom = NdotH2 * (a2 - 1.0) + 1.0;
+    let mut denom = ndoth2 * (a2 - 1.0) + 1.0;
     denom = PI * denom * denom;
     nom / denom
 }
-pub fn geometry_schlick_ggx(NdotV: f32, roughness: f32) -> f32 {
+pub fn geometry_schlick_ggx(ndotv: f32, roughness: f32) -> f32 {
     let r = roughness + 1.0;
     let k = (r * r) / 8.0;
-    let num = NdotV;
-    let denom = NdotV * (1.0 - k) + k;
+    let num = ndotv;
+    let denom = ndotv * (1.0 - k) + k;
     num / denom
 }
 
-pub fn geometry_smith(N: Vec3f, V: Vec3f, L: Vec3f, roughness: f32) -> f32 {
-    let NdotV = f32::max(Vec3f::dot(N, V), 0.0);
-    let NdotL = f32::max(Vec3f::dot(N, L), 0.0);
-    let ggx2 = geometry_schlick_ggx(NdotV, roughness);
-    let ggx1 = geometry_schlick_ggx(NdotL, roughness);
+pub fn geometry_smith(n: Vec3f, v: Vec3f, l: Vec3f, roughness: f32) -> f32 {
+    let ndotv = f32::max(Vec3f::dot(n, v), 0.0);
+    let ndotl = f32::max(Vec3f::dot(n, l), 0.0);
+    let ggx2 = geometry_schlick_ggx(ndotv, roughness);
+    let ggx1 = geometry_schlick_ggx(ndotl, roughness);
     ggx1 * ggx2
 }
 
-pub fn fresnel_schlick(cosTheta: f32, F0: Vec3f) -> Vec3f {
-    F0 + (Vec3f::fill(1.0) - F0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
+pub fn fresnel_schlick(cos_theta: f32, f0: Vec3f) -> Vec3f {
+    f0 + (Vec3f::fill(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
 }
 
 pub fn uniform_hemisphere() -> Vec3f {
@@ -89,7 +89,7 @@ pub fn cosine_weighted_hemisphere() -> Vec3f {
     Vec3f::new(
         f32::cos(phi) * sin_theta,
         f32::sin(phi) * sin_theta,
-        cos_theta 
+        cos_theta,
     )
 }
 

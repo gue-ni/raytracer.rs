@@ -8,7 +8,7 @@ pub struct Onb {
 impl Onb {
     pub fn new(w: Vec3f) -> Self {
         let unit_w = Vec3f::normalize(w);
-        
+
         let a = if unit_w.x.abs() > 0.9 {
             Vec3f::new(0.0, 1.0, 0.0)
         } else {
@@ -19,7 +19,7 @@ impl Onb {
         let u = Vec3f::cross(unit_w, v);
 
         Self {
-            axis: [u, v, unit_w]
+            axis: [u, v, unit_w],
         }
     }
 
@@ -27,7 +27,13 @@ impl Onb {
         a * self.u() + a * self.v() + a * self.w()
     }
 
-    pub fn u(&self) -> Vec3f { self.axis[0] }
-    pub fn v(&self) -> Vec3f { self.axis[1] }
-    pub fn w(&self) -> Vec3f { self.axis[2] }
+    pub fn u(&self) -> Vec3f {
+        self.axis[0]
+    }
+    pub fn v(&self) -> Vec3f {
+        self.axis[1]
+    }
+    pub fn w(&self) -> Vec3f {
+        self.axis[2]
+    }
 }
