@@ -67,7 +67,7 @@ pub fn fresnel_schlick(cosTheta: f32, F0: Vec3f) -> Vec3f {
     F0 + (Vec3f::fill(1.0) - F0) * f32::powf((1.0 - cosTheta).clamp(0.0, 1.0), 5.0)
 }
 
-pub fn sample_hemisphere() -> Vec3f {
+pub fn uniform_hemisphere() -> (Vec3f, f32) {
     let mut rng = rand::thread_rng();
     let x1 = rng.gen_range(0.0..1.0);
     let x2 = rng.gen_range(0.0..1.0);
@@ -76,7 +76,23 @@ pub fn sample_hemisphere() -> Vec3f {
     let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
     let cos_phi = f32::cos(phi);
     let sin_phi = f32::sin(phi);
-    Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
+    let omega = Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta);
+    let pdf = 1.0 / (2.0 * PI);
+    (omega, pdf)
+}
+
+pub fn cosine_weighted_hemisphere() -> (Vec3f, f32) {
+    let mut rng = rand::thread_rng();
+    let r1 = rng.gen_range(0.0..1.0);
+    let r2 = rng.gen_range(0.0..1.0);
+
+    let phi = 2.0 * PI * r1;
+    let sin_theta = f32::sqrt(r2);
+    let cos_theta = f32::sqrt(1.0 - r2);
+    
+    let omega = Vec3f::new(0.0, 0.0, 0.0);
+    let pdf = cos_theta * sin_theta / PI;
+    (omega, pdf)
 }
 
 fn vector_on_sphere() -> Vec3f {
