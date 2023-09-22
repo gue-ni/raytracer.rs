@@ -52,9 +52,9 @@ impl Material {
         }
     }
 
-    pub fn specular() -> Self {
+    pub fn specular(color: Vec3f) -> Self {
         Material::Specular {
-            albedo: Vec3f::new(1.0, 1.0, 1.0),
+            albedo: color,
         }
     }
 }

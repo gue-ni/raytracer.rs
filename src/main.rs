@@ -18,7 +18,7 @@ pub fn main() {
     // left
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(-1.75, 0.5, 4.0), 0.5),
-        material: Material::specular(),
+        material: Material::specular(Vec3f::new(1.0, 1.0, 1.0)),
     });
 
     // light
@@ -60,7 +60,7 @@ pub fn main() {
 
     const WIDTH: u32 = 640;
     const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 256;
+    const SAMPLES: u32 = 512;
     const BOUNCES: u32 = 5;
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
