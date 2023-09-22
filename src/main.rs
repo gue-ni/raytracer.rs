@@ -1,6 +1,14 @@
 use raytracer::*;
 use std::path::Path;
 use std::time::Instant;
+use std::env;
+
+fn parse(string: &String) -> u32 {
+    match string.parse::<u32>() {
+        Ok(val) => val,
+        Err(_) => panic!("Could not parse {:?}", string)
+    }
+}
 
 pub fn main() {
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
@@ -57,10 +65,26 @@ pub fn main() {
         material: wall,
     });
 
-    const WIDTH: u32 = 640;
-    const HEIGHT: u32 = 480;
-    const SAMPLES: u32 = 4096;
-    const BOUNCES: u32 = 5;
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() != 5 {
+        panic!("Invalid numer of arguments (:?)", args.len());
+    }
+
+    let WIDTH = parse(args[1]);
+    let HEIGHT = parse(args[2]);
+    let SAMPLES = parse(args[3]);
+    let BOUNCES = parse(args[4]);
+
+    //const WIDTH: u32 = 640;
+    //const HEIGHT: u32 = 480;
+    //const SAMPLES: u32 = 4096;
+    //const BOUNCES: u32 = 5;
+
+    println!(
+        "{}x{}, samples: {}, bounces: {}",
+        WIDTH, HEIGHT, SAMPLES, BOUNCES
+    );
 
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (WIDTH, HEIGHT));
 
@@ -68,10 +92,7 @@ pub fn main() {
     let image = render(&camera, &scene, SAMPLES, BOUNCES);
     let elapsed = now.elapsed();
 
-    println!(
-        "{}x{}, samples: {}, bounces: {}",
-        WIDTH, HEIGHT, SAMPLES, BOUNCES
-    );
+
     println!("Elapsed time: {:.2?}", elapsed);
 
     let filename1 = format!(
