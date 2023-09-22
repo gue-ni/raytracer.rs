@@ -8,8 +8,9 @@ pub trait BSDF {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
     // return color of hit
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
-    // return emittance
+
     fn emittance(&self) -> Vec3f;
+    fn albedo(&self) -> Vec3f;
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -88,6 +89,13 @@ impl BSDF for Material {
             Material::Diffuse {
                 emittance, albedo, ..
             } => *albedo * *emittance,
+            _ => Vec3f::fill(0.0),
+        }
+    }
+
+    fn albedo(&self) -> Vec3f {
+        match self {
+            Material::Diffuse { albedo, .. } => *albedo,
             _ => Vec3f::fill(0.0),
         }
     }
