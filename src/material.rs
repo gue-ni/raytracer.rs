@@ -36,7 +36,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness: 1.0,
-            material: MaterialType::Diffuse,
+            material: MaterialType::Physical,
         }
     }
 
@@ -76,6 +76,13 @@ impl BSDF for Material {
                 let cos_theta = Vec3f::dot(normal, wi);
                 (wi, cos_theta)
             }
+            MaterialType::Physical => {
+                let onb = Onb::new(normal);
+                let wi = onb.local_to_world(cosine_weighted_hemisphere())
+                let cos_theta = Vec3f::dot(normal, wi);
+                let pdf = cos_theta / PI;
+                (wi, pdf)
+            },
             _ => {
                 let pdf = 1.0 / (2.0 * PI);
                 let wi = uniform_sample_hemisphere(normal);

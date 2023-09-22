@@ -17,13 +17,13 @@ impl Onb {
 
         let v = Vec3f::normalize(Vec3f::cross(unit_w, a));
         let u = Vec3f::cross(unit_w, v);
-        
+
         Self {
             axis: [u, v, unit_w]
         }
     }
 
-    pub fn local(&self, a: Vec3f) -> Vec3f {
+    pub fn local_to_world(&self, a: Vec3f) -> Vec3f {
         a * self.u() + a * self.v() + a * self.w()
     }
 
