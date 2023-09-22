@@ -40,9 +40,9 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
             material.albedo * trace(&ray, scene, depth - 1) * 0.9
         },
         _ => {
-            let ka = 0.5;
-            let kd = 0.8;
-            let ks = 0.25;
+            let ka = 0.25;
+            let kd = 1.0;
+            let ks = 1.0;
             let alpha = 16.0;
 
             let ambient = light_color * ka;
