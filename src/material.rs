@@ -19,10 +19,10 @@ pub enum MaterialType {
 
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
-    albedo: Vec3f,
-    emittance: f32,
-    roughness: f32,
-    material: MaterialType,
+    pub albedo: Vec3f,
+    pub emittance: f32,
+    pub roughness: f32,
+    pub material: MaterialType,
 }
 
 impl Material {
