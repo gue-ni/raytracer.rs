@@ -1,0 +1,26 @@
+name: Render
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Rendering
+      run: cargo run --release -- 640 480 4096 5
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: render-artifact
+        path: |
+          *.png
