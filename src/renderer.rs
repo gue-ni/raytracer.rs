@@ -22,7 +22,7 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
 fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
 
-    let light_pos = Vec3f::new(0.0, -3.0, 5.0);
+    let light_pos = Vec3f::new(0.0, -3.0, 4.0);
     let light_intensity = 1.0;
     let light_color = Vec3f::fill(1.0) * light_intensity;
     let light_dir = Vec3f::normalize(light_pos - hit.point);
@@ -68,6 +68,7 @@ fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: 
     // russian roulette
     //let rr_prob = 0.7;
     let rr_prob = luma(albedo);
+    //let rr_prob = f32::max(albedo.x, f32::max(albedo.y, albedo.z));
     
     let mut rng = rand::thread_rng();
     if rng.gen_range(0.0..1.0) < rr_prob {

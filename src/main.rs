@@ -8,7 +8,7 @@ pub fn main() {
     // right
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(1.75, 0.5, 4.0), 0.5),
-        material: Material::diffuse(Vec3f::new(0.0, 1.0, 0.0)),
+        material: Material::diffuse(Vec3f::fill(0.999)),
     });
     // middle
     scene.add(Object {
@@ -18,20 +18,22 @@ pub fn main() {
     // left
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(-1.75, 0.5, 4.0), 0.5),
-        material: Material::specular(Vec3f::new(1.0, 1.0, 1.0)),
+        material: Material::specular(Vec3f::fill(0.999)),
     });
 
+    /*
     // light
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -1.5, 4.0), 0.3),
         material: Material::emissive(from_hex(0xffffff), 3.0),
     });
+    */
 
     let r = 100000.0;
     let s = 1.0;
     let w = 4.0;
 
-    let wall = Material::diffuse(Vec3f::fill(1.0));
+    let wall = Material::diffuse(Vec3f::fill(0.75));
     let light = Material::emissive(Vec3f::fill(1.0), 0.5);
 
     scene.add(Object {
@@ -44,11 +46,11 @@ pub fn main() {
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(-(r + w), 0.0, 5.0), r),
-        material: wall,
+        material: Material::diffuse(Vec3f::new(0.75, 0.25, 0.25)),
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(r + w, 0.0, 5.0), r),
-        material: wall,
+        material: Material::diffuse(Vec3f::new(0.25, 0.25, 0.75)),
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, 5.0 + (r + w)), r),
