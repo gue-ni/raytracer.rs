@@ -18,6 +18,7 @@ fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u3
     (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
+#[allow(dead_code)]
 fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
 
