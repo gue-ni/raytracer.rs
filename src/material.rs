@@ -79,7 +79,7 @@ impl BSDF for Material {
             }
             MaterialType::Physical => {
                 let onb = Onb::new(normal);
-                let wi = onb.local_to_world(cosine_weighted_hemisphere())
+                let wi = onb.local_to_world(cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
                 (wi, pdf)
