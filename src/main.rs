@@ -68,13 +68,13 @@ pub fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 5 {
-        panic!("Invalid numer of arguments (:?)", args.len());
+        panic!("Invalid numer of arguments {:?}", args.len());
     }
 
-    let WIDTH = parse(args[1]);
-    let HEIGHT = parse(args[2]);
-    let SAMPLES = parse(args[3]);
-    let BOUNCES = parse(args[4]);
+    let WIDTH = parse(&args[1]);
+    let HEIGHT = parse(&args[2]);
+    let SAMPLES = parse(&args[3]);
+    let BOUNCES = parse(&args[4]);
 
     //const WIDTH: u32 = 640;
     //const HEIGHT: u32 = 480;
