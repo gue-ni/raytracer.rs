@@ -31,6 +31,14 @@ fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
     RgbImage::from_vec(width, height, buffer).unwrap()
 }
 
+fn print_progress(current_sample: u32, total_samples: u32) {
+    let percentage = current_sample as f32 / total_samples as f32 * 100.0;
+    println!(
+        "Progress: {:3.1?} % ({}/{})",
+        percentage, current_sample, total_samples
+    );
+}
+
 #[allow(dead_code)]
 fn luma(color: Vec3f) -> f32 {
     Vec3f::dot(color, Vec3f::new(0.2126, 0.7152, 0.0722))
@@ -112,28 +120,23 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
     let material = scene.objects[hit.idx].material;
     let emittance = material.albedo * material.emittance;
 
-    let normal = if Vec3::dot(hit.normal, incoming.direction) < 0.0 {
-        hit.normal
-    } else {
-        -hit.normal
-    };
-
+    // Direction toward camera
     let wo = -incoming.direction;
 
-    /*
-    let (wi, pdf) = material.sample(normal, wo);
-    let bsdf = material.bsdf(normal, wo, wi);
-    let cos_theta = Vec3f::dot(normal, wi);
-    //emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
-    */
+    // Orient normal correctly
+    let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
 
+    // Get outgoing ray direction and (brdf * cos_theta / pdf)
     let (wi, brdf_multiplier) = material.sample_both(normal, wo);
-    let ray = Ray::new(hit.point, wi);
 
-    // Integral is of the form emittance + trace() * brdf * cos_theta / pdf
+    // Reflected ray
+    let ray = Ray::new(hit.point + normal * 0.001, wi);
+
+    // Integral is of the form 'emittance + trace() * brdf * cos_theta / pdf'
     emittance + trace(&ray, scene, depth - 1) * brdf_multiplier
 }
 
+/// Trace ray into scene, returns color
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     if depth > 0 {
         match scene.hit(ray, 0.0, f32::INFINITY) {
@@ -145,7 +148,6 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     }
 }
 
-// maybe call callback with copy of framebuffer every n samples?
 #[allow(dead_code)]
 fn render_singlethread(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
@@ -153,7 +155,7 @@ fn render_singlethread(camera: &Camera, scene: &Scene, samples: u32, bounces: u3
 
     let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
 
-    for s in 0..samples {
+    for sample in 0..samples {
         for y in 0..height {
             for x in 0..width {
                 let ray = camera.ray((x, y));
@@ -161,13 +163,8 @@ fn render_singlethread(camera: &Camera, scene: &Scene, samples: u32, bounces: u3
                     trace(&ray, scene, bounces) / (samples as f32);
             }
         }
-        if s % 5 == 0 {
-            println!(
-                "Progress: {:3.1?} % ({}/{})",
-                s as f32 / samples as f32 * 100.0,
-                s,
-                samples
-            );
+        if sample % 5 == 0 {
+            print_progress(sample, samples);
         }
     }
 
@@ -192,28 +189,25 @@ fn render_multithreaded(camera: &Camera, scene: &Scene, samples: u32, bounces: u
                 for sample in 0..samples {
                     for i in 0..chunk.len() {
                         let xy = get_xy((worker * chunk_size + i) as u32, width);
+
                         let ray = camera.ray(xy);
 
                         chunk[i] += trace(&ray, scene, bounces) / (samples as f32);
                     }
                     if worker == 0 && sample % 5 == 0 {
-                        println!(
-                            "Progress: {:3.1?} % ({}/{})",
-                            sample as f32 / samples as f32 * 100.0,
-                            sample,
-                            samples
-                        );
+                        print_progress(sample, samples);
                     }
                 }
             });
         }
     });
 
-    to_image(framebuffer, width as u32, height as u32)
+    to_image(framebuffer, width, height)
 }
 
+/// Render scene to RgbImage
 pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-    let multithreading = false;
+    let multithreading = true;
     if multithreading {
         render_multithreaded(camera, scene, samples, bounces)
     } else {

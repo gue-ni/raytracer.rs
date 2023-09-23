@@ -7,6 +7,7 @@ use std::f32::consts::PI;
 pub trait BSDF {
     /// Returns outgoing vector and pdf
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
+
     /// Returns color of hit
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
 

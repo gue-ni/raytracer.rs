@@ -109,7 +109,7 @@ pub fn main() {
     });
 
     println!(
-        "{}x{}, samples: {}, bounces: {}",
+        "resolution: ({}, {}) , samples: {}, bounces: {}",
         width, height, samples, bounces
     );
 
