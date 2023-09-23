@@ -60,15 +60,6 @@ pub fn main() {
         material: Material::specular(Vec3f::fill(0.999)),
     });
 
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-1.5, -1.75, z - 1.5), 0.75),
-        material: Material::emissive(from_hex(0x45b9d3), 15.0),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(1.5, -1.75, z + 1.5), 0.75),
-        material: Material::emissive(from_hex(0xbb349b), 15.0),
-    });
-
     let aspect_ratio = (width as f32) / (height as f32);
     let r = 100000.0;
 
@@ -76,12 +67,20 @@ pub fn main() {
     let h = 3.0;
     let w = h * aspect_ratio;
 
-    // light
-    /*
-    let light_radius = 5.0;
+    // ##################lights ###################
+    let light_radius = 3.0;
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -(h + light_radius * 0.97), z), light_radius),
-        material: Material::emissive(from_hex(0xbb349b), 12.0),
+        geometry: Sphere::new(Vec3f::new(0.0, -(h + light_radius * 0.85), z), light_radius),
+        material: Material::emissive(from_hex(0x99dde7), 12.0),
+    });
+    /*
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(-1.5, -1.75, z - 1.5), 0.75),
+        material: Material::emissive(from_hex(0x45b9d3), 15.0),
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(1.5, -1.75, z + 1.5), 0.75),
+        material: Material::emissive(from_hex(0xbb349b), 15.0),
     });
     */
 

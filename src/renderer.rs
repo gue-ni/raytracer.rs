@@ -9,6 +9,10 @@ use image::{Rgb, RgbImage};
 extern crate rand;
 use rand::Rng;
 
+extern crate scoped_threadpool;
+use scoped_threadpool::Pool;
+use std::thread::available_parallelism;
+
 #[allow(dead_code)]
 fn luma(color: Vec3f) -> f32 {
     Vec3f::dot(color, Vec3f::new(0.2126, 0.7152, 0.0722))
@@ -124,6 +128,7 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 }
 
 // maybe call callback with copy of framebuffer every n samples?
+#[allow(dead_code)]
 fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
@@ -184,12 +189,49 @@ fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
     image
 }
 
+fn get_xy(index: u32, width: u32) -> (u32, u32) {
+    let x = index % width;
+    let y = index / width;
+    (x, y)
+}
 
+#[allow(dead_code)]
 fn render_multithreaded(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-    let mut image = RgbImage::new(camera.resolution.x as u32, camera.resolution.y as u32);
+    let width = camera.resolution.x as u32;
+    let height = camera.resolution.y as u32;
+    let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
+
+    let worker_count = available_parallelism().unwrap().get() as u32;
+
+    println!("workers = {}", worker_count);
+    let mut pool = Pool::new(worker_count);
+
+    pool.scoped(|scoped| {
+        for (index, pixel) in framebuffer.iter_mut().enumerate() {
+            scoped.execute(move || {
+                let xy = get_xy(index as u32, width);
+                let ray = camera.ray(xy);
+
+                for _ in 0..samples {
+                    *pixel += trace(&ray, scene, bounces);
+                }
+            })
+        }
+    });
+
+    let mut image = RgbImage::new(width, height);
+
+    for y in 0..height {
+        for x in 0..width {
+            let index = (y * width + x) as usize;
+            let pixel = framebuffer[index] * (u8::MAX as f32) / (samples as f32);
+            image.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
+        }
+    }
+
     image
 }
 
 pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-    render_v1(camera, scene, samples, bounces)
+    render_multithreaded(camera, scene, samples, bounces)
 }

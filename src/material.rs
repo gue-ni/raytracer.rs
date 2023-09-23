@@ -100,7 +100,7 @@ impl BSDF for Material {
             MaterialType::Transparent => {
                 let refraction_index = 0.5;
                 let reflected = reflect(-wo, normal);
-                let refracted = refract(-wo, normal, refraction_index);
+                let _refracted = refract(-wo, normal, refraction_index);
                 let wi = reflected;
                 let cos_theta = Vec3f::dot(normal, wi);
                 (wi, cos_theta)
