@@ -9,6 +9,9 @@ pub trait BSDF {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
     /// Returns color of hit
     fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
+
+    /// Returns outgoing vector and brdf multiplier
+    fn sample_both(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f);
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -67,6 +70,15 @@ impl Material {
             material: MaterialType::Specular,
         }
     }
+
+    pub fn transparent(color: Vec3f) -> Self {
+        Material {
+            albedo: color,
+            emittance: 0.0,
+            roughness: 0.0,
+            material: MaterialType::Transparent,
+        }
+    }
 }
 
 impl BSDF for Material {
@@ -78,13 +90,23 @@ impl BSDF for Material {
                 (wi, cos_theta)
             }
             MaterialType::Physical => {
+                // Cosine Weighted Hemisphere Sampling
                 let onb = Onb::new(normal);
                 let wi = onb.local_to_world(cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
                 (wi, pdf)
             }
+            MaterialType::Transparent => {
+                let refraction_index = 0.5;
+                let reflected = reflect(-wo, normal);
+                let refracted = refract(-wo, normal, refraction_index);
+                let wi = reflected;
+                let cos_theta = Vec3f::dot(normal, wi);
+                (wi, cos_theta)
+            }
             _ => {
+                // Uniform Hemisphere Sampling
                 let pdf = 1.0 / (2.0 * PI);
                 let wi = uniform_sample_hemisphere(normal);
                 //let onb = Onb::new(normal);
@@ -98,6 +120,29 @@ impl BSDF for Material {
         match self.material {
             MaterialType::Specular => self.albedo,
             _ => self.albedo / PI,
+        }
+    }
+
+    fn sample_both(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
+        match self.material {
+            MaterialType::Specular => {
+                let wi = reflect(-wo, normal);
+                let bsdf = self.albedo;
+                (wi, bsdf)
+            }
+            MaterialType::Transparent => {
+                // TODO
+                let wi = reflect(-wo, normal);
+                let bsdf = self.albedo;
+                (wi, bsdf)
+            }
+            _ => {
+                let pdf = 1.0 / (2.0 * PI);
+                let wi = uniform_sample_hemisphere(normal);
+                let cos_theta = Vec3f::dot(normal, wi);
+                let bsdf = self.albedo / PI;
+                (wi, bsdf * cos_theta / pdf)
+            }
         }
     }
 }

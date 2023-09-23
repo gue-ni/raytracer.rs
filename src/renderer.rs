@@ -97,11 +97,19 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
     };
 
     let wo = -incoming.direction;
+
+    /*
     let (wi, pdf) = material.sample(normal, wo);
-    let ray = Ray::new(hit.point, wi);
     let bsdf = material.bsdf(normal, wo, wi);
     let cos_theta = Vec3f::dot(normal, wi);
-    emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
+    //emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
+    */
+
+    let (wi, brdf_multiplier) = material.sample_both(normal, wo);
+    let ray = Ray::new(hit.point, wi);
+
+    // Integral is of the form emittance + trace() * brdf * cos_theta / pdf
+    emittance + trace(&ray, scene, depth - 1) * brdf_multiplier
 }
 
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
@@ -129,7 +137,6 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
                 framebuffer[(y * width + x) as usize] += trace(&ray, scene, bounces);
             }
         }
-
         if s % 5 == 0 {
             println!(
                 "Progress: {:3.1?} % ({}/{})",

@@ -11,3 +11,4 @@
 -  https://boksajak.github.io/files/CrashCourseBRDF.pdf
 -  https://www.pbr-book.org/
 -  https://typhomnt.github.io/teaching/ray_tracing/pbr_intro/
+-  https://nickymeuleman.netlify.app/blog/multithreading-rust
