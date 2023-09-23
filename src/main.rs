@@ -60,7 +60,6 @@ pub fn main() {
         material: Material::specular(Vec3f::fill(0.999)),
     });
 
-
     let aspect_ratio = (width as f32) / (height as f32);
     let r = 100000.0;
 
@@ -74,8 +73,6 @@ pub fn main() {
         geometry: Sphere::new(Vec3f::new(0.0, -(h + light_radius * 0.97), z), light_radius),
         material: Material::emissive(from_hex(0xffffff), 12.0),
     });
-
-
 
     let wall = Material::diffuse(Vec3f::fill(0.99));
     let _light = Material::emissive(Vec3f::fill(1.0), 1.0);
