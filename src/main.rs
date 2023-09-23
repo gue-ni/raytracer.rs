@@ -67,7 +67,7 @@ pub fn main() {
     let h = 3.0;
     let w = h * aspect_ratio;
 
-    // ##################lights ###################
+    // ################## lights ###################
     let light_radius = 3.0;
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(h + light_radius * 0.85), z), light_radius),

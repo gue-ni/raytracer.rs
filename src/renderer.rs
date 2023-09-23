@@ -5,15 +5,31 @@ use crate::material::*;
 use crate::ray::*;
 use crate::vector::*;
 
-use image::{Rgb, RgbImage};
+use image::RgbImage;
+
 extern crate rand;
 use rand::Rng;
 
-extern crate scoped_threadpool;
-use scoped_threadpool::Pool;
+use std::thread;
 use std::thread::available_parallelism;
 
-use std::thread;
+fn get_xy(index: u32, width: u32) -> (u32, u32) {
+    let x = index % width;
+    let y = index / width;
+    (x, y)
+}
+
+fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
+    let buffer = framebuffer
+        .iter()
+        .flat_map(|&raw_pixel| {
+            let pixel = raw_pixel * (u8::MAX as f32);
+            [pixel.x as u8, pixel.y as u8, pixel.z as u8]
+        })
+        .collect();
+
+    RgbImage::from_vec(width, height, buffer).unwrap()
+}
 
 #[allow(dead_code)]
 fn luma(color: Vec3f) -> f32 {
@@ -131,7 +147,7 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
 
 // maybe call callback with copy of framebuffer every n samples?
 #[allow(dead_code)]
-fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
+fn render_singlethread(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 
@@ -141,7 +157,8 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
         for y in 0..height {
             for x in 0..width {
                 let ray = camera.ray((x, y));
-                framebuffer[(y * width + x) as usize] += trace(&ray, scene, bounces);
+                framebuffer[(y * width + x) as usize] +=
+                    trace(&ray, scene, bounces) / (samples as f32);
             }
         }
         if s % 5 == 0 {
@@ -154,95 +171,15 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
         }
     }
 
-    let mut image = RgbImage::new(width, height);
-
-    for y in 0..height {
-        for x in 0..width {
-            let index = (y * width + x) as usize;
-            let pixel = framebuffer[index] * (u8::MAX as f32) / (samples as f32);
-            image.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
-        }
-    }
-
-    image
-}
-
-#[allow(dead_code)]
-fn render_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-    let width = camera.resolution.x as u32;
-    let height = camera.resolution.y as u32;
-
-    let mut image = RgbImage::new(camera.resolution.x as u32, camera.resolution.y as u32);
-
-    for y in 0..height {
-        for x in 0..width {
-            let mut pixel = Vec3f::fill(0.0);
-            let ray = camera.ray((x, y));
-
-            for _ in 0..samples {
-                pixel += trace(&ray, scene, bounces);
-            }
-
-            pixel = (pixel * (u8::MAX as f32)) / (samples as f32);
-            image.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
-        }
-    }
-
-    image
-}
-
-fn get_xy(index: u32, width: u32) -> (u32, u32) {
-    let x = index % width;
-    let y = index / width;
-    (x, y)
-}
-
-fn vec_to_image(framebuffer: &Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
-    let mut image = RgbImage::new(width, height);
-
-    for y in 0..height {
-        for x in 0..width {
-            let index = (y * width + x) as usize;
-            let pixel = framebuffer[index] * (u8::MAX as f32);
-            image.put_pixel(x, y, Rgb([pixel.x as u8, pixel.y as u8, pixel.z as u8]));
-        }
-    }
-
-    image
+    to_image(framebuffer, width as u32, height as u32)
 }
 
 #[allow(dead_code)]
 fn render_multithreaded(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
-    let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
 
-    let worker_count = available_parallelism().unwrap().get() as u32;
-
-    println!("workers = {}", worker_count);
-    let mut pool = Pool::new(worker_count);
-
-    pool.scoped(|scoped| {
-        for (index, pixel) in framebuffer.iter_mut().enumerate() {
-            scoped.execute(move || {
-                let xy = get_xy(index as u32, width);
-                let ray = camera.ray(xy);
-
-                for _ in 0..samples {
-                    *pixel += trace(&ray, scene, bounces) / (samples as f32);
-                }
-            })
-        }
-    });
-
-    vec_to_image(&framebuffer, width, height)
-}
-
-#[allow(dead_code)]
-fn render_multithreaded_v2(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-    let width = camera.resolution.x as u32;
-    let height = camera.resolution.y as u32;
-    let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
+    let mut framebuffer = vec![Vec3f::fill(0.0); (width * height) as usize];
 
     let worker_count = available_parallelism().unwrap().get();
     let chunk_size = framebuffer.len() / worker_count;
@@ -250,23 +187,36 @@ fn render_multithreaded_v2(camera: &Camera, scene: &Scene, samples: u32, bounces
     println!("workers = {}", worker_count);
 
     thread::scope(|scope| {
-        for (index, chunk) in framebuffer.chunks_mut(chunk_size).enumerate() {
+        for (worker, chunk) in framebuffer.chunks_mut(chunk_size).enumerate() {
             scope.spawn(move || {
-                for i in 0..chunk.len() {
-                    let xy = get_xy((index * chunk_size + i) as u32, width);
-                    let ray = camera.ray(xy);
+                for sample in 0..samples {
+                    for i in 0..chunk.len() {
+                        let xy = get_xy((worker * chunk_size + i) as u32, width);
+                        let ray = camera.ray(xy);
 
-                    for _ in 0..samples {
-                        chunk[i] += (trace(&ray, scene, bounces) / (samples as f32));
+                        chunk[i] += trace(&ray, scene, bounces) / (samples as f32);
+                    }
+                    if worker == 0 && sample % 5 == 0 {
+                        println!(
+                            "Progress: {:3.1?} % ({}/{})",
+                            sample as f32 / samples as f32 * 100.0,
+                            sample,
+                            samples
+                        );
                     }
                 }
             });
         }
     });
 
-    vec_to_image(&framebuffer, width, height)
+    to_image(framebuffer, width as u32, height as u32)
 }
 
 pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-    render_multithreaded_v2(camera, scene, samples, bounces)
+    let multithreading = false;
+    if multithreading {
+        render_multithreaded(camera, scene, samples, bounces)
+    } else {
+        render_singlethread(camera, scene, samples, bounces)
+    }
 }
