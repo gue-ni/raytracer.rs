@@ -130,25 +130,22 @@ fn render_v1(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbI
 
     let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
 
-    for y in 0..height {
-        for x in 0..width {
-            for s in 0..samples {
+    for s in 0..samples {
+        for y in 0..height {
+            for x in 0..width {
                 let ray = camera.ray((x, y));
                 framebuffer[(y * width + x) as usize] += trace(&ray, scene, bounces);
             }
         }
+        if s % 5 == 0 {
+            println!(
+                "Progress: {:3.1?} % ({}/{})",
+                s as f32 / samples as f32 * 100.0,
+                s,
+                samples
+            );
+        }
     }
-
-    /*
-    if s % 5 == 0 {
-        println!(
-            "Progress: {:3.1?} % ({}/{})",
-            s as f32 / samples as f32 * 100.0,
-            s,
-            samples
-        );
-    }
-    */
 
     let mut image = RgbImage::new(width, height);
 
