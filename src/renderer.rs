@@ -89,11 +89,18 @@ fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: 
 fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
     let emittance = material.albedo * material.emittance;
+
+    let normal = if Vec3::dot(hit.normal, incoming.direction) < 0.0 {
+        hit.normal
+    } else {
+        -hit.normal
+    };
+
     let wo = -incoming.direction;
-    let (wi, pdf) = material.sample(hit.normal, wo);
+    let (wi, pdf) = material.sample(normal, wo);
     let ray = Ray::new(hit.point, wi);
-    let bsdf = material.bsdf(hit.normal, wo, wi);
-    let cos_theta = Vec3f::dot(hit.normal, wi);
+    let bsdf = material.bsdf(normal, wo, wi);
+    let cos_theta = Vec3f::dot(normal, wi);
     emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / pdf
 }
 
