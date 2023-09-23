@@ -6,13 +6,13 @@ use std::f32::consts::PI;
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
     /// Returns outgoing vector and pdf
-    fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
+    //fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
 
     /// Returns color of hit
-    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
+    //fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
 
     /// Returns outgoing vector and brdf multiplier
-    fn sample_both(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f);
+    fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f);
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -83,48 +83,7 @@ impl Material {
 }
 
 impl BSDF for Material {
-    fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32) {
-        match self.material {
-            MaterialType::Specular => {
-                let wi = reflect(-wo, normal);
-                let cos_theta = Vec3f::dot(normal, wi);
-                (wi, cos_theta)
-            }
-            MaterialType::Physical => {
-                // Cosine Weighted Hemisphere Sampling
-                let onb = Onb::new(normal);
-                let wi = onb.local_to_world(cosine_weighted_hemisphere());
-                let cos_theta = Vec3f::dot(normal, wi);
-                let pdf = cos_theta / PI;
-                (wi, pdf)
-            }
-            MaterialType::Transparent => {
-                let refraction_index = 0.5;
-                let reflected = reflect(-wo, normal);
-                let _refracted = refract(-wo, normal, refraction_index);
-                let wi = reflected;
-                let cos_theta = Vec3f::dot(normal, wi);
-                (wi, cos_theta)
-            }
-            _ => {
-                // Uniform Hemisphere Sampling
-                let pdf = 1.0 / (2.0 * PI);
-                let wi = uniform_sample_hemisphere(normal);
-                //let onb = Onb::new(normal);
-                //let wi = onb.local_to_world(uniform_hemisphere());
-                (wi, pdf)
-            }
-        }
-    }
-
-    fn bsdf(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
-        match self.material {
-            MaterialType::Specular => self.albedo,
-            _ => self.albedo / PI,
-        }
-    }
-
-    fn sample_both(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
+    fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
             MaterialType::Specular => {
                 let wi = reflect(-wo, normal);
@@ -137,8 +96,24 @@ impl BSDF for Material {
                 let bsdf = self.albedo;
                 (wi, bsdf)
             }
-            _ => {
+            MaterialType::Physical => {
+                // Cosine-weighted hemisphere sampling
+                // pdf = cos(θ) / 𝜋
+                // brdf = albedo / 𝜋
+                let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
+                let cos_theta = Vec3f::dot(normal, wi);
+                let bsdf = self.albedo / PI;
+                let pdf = cos_theta / PI;
+                (wi, bsdf * cos_theta / pdf)
+            }
+            MaterialType::Diffuse => {
+                // Uniform hemisphere sampling
+                // pdf = 1 / 2 * 𝜋
+                // brdf = albedo / 𝜋
                 let pdf = 1.0 / (2.0 * PI);
+                //let sample  = uniform_sample_hemisphere(Vec3f::new(0.0, 1.0, 0.0));
+                //let sample  = uniform_hemisphere();
+                //let wi = Onb::local_to_world(normal, sample);
                 let wi = uniform_sample_hemisphere(normal);
                 let cos_theta = Vec3f::dot(normal, wi);
                 let bsdf = self.albedo / PI;

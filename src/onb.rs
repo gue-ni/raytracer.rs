@@ -9,7 +9,7 @@ impl Onb {
     pub fn new(w: Vec3f) -> Self {
         let unit_w = Vec3f::normalize(w);
 
-        let a = if unit_w.x.abs() > 0.9 {
+        let a = if unit_w.x.abs() > 0.1 {
             Vec3f::new(0.0, 1.0, 0.0)
         } else {
             Vec3f::new(1.0, 0.0, 0.0)
@@ -23,7 +23,13 @@ impl Onb {
         }
     }
 
-    pub fn local_to_world(&self, a: Vec3f) -> Vec3f {
+    /// Create coordinate system around w and transform a
+    pub fn local_to_world(w: Vec3f, a: Vec3f) -> Vec3f {
+        let onb = Self::new(w);
+        onb.transform(Vec3f::normalize(a))
+    }
+
+    pub fn transform(&self, a: Vec3f) -> Vec3f {
         a * self.u() + a * self.v() + a * self.w()
     }
 
@@ -37,3 +43,6 @@ impl Onb {
         self.axis[2]
     }
 }
+
+#[cfg(test)]
+mod test {}

@@ -92,30 +92,6 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
 }
 
 #[allow(dead_code)]
-fn naive_path_tracing_rr(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
-    let material = scene.objects[hit.idx].material;
-    let emittance = material.albedo * material.emittance;
-    let albedo = material.albedo;
-
-    // russian roulette
-    //let rr_prob = 0.7;
-    let rr_prob = luma(albedo);
-    //let rr_prob = f32::max(albedo.x, f32::max(albedo.y, albedo.z));
-
-    let mut rng = rand::thread_rng();
-    if rng.gen_range(0.0..1.0) < rr_prob {
-        return emittance;
-    }
-
-    let wo = -incoming.direction;
-    let (wi, pdf) = material.sample(hit.normal, wo);
-    let ray = Ray::new(hit.point, wi);
-    let bsdf = material.bsdf(hit.normal, wo, wi);
-    let cos_theta = Vec3f::dot(hit.normal, wi);
-    emittance + trace(&ray, scene, depth - 1) * bsdf * cos_theta / (pdf * rr_prob)
-}
-
-#[allow(dead_code)]
 fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     let material = scene.objects[hit.idx].material;
     let emittance = material.albedo * material.emittance;
@@ -127,7 +103,7 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
     let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
 
     // Get outgoing ray direction and (brdf * cos_theta / pdf)
-    let (wi, brdf_multiplier) = material.sample_both(normal, wo);
+    let (wi, brdf_multiplier) = material.sample(normal, wo);
 
     // Reflected ray
     let ray = Ray::new(hit.point + normal * 0.001, wi);
@@ -140,8 +116,8 @@ fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32
 fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
     if depth > 0 {
         match scene.hit(ray, 0.0, f32::INFINITY) {
-            Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
             None => scene.background,
+            Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
         }
     } else {
         Vec3f::fill(0.0)

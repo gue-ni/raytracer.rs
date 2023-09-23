@@ -65,32 +65,36 @@ pub fn fresnel_schlick(cos_theta: f32, f0: Vec3f) -> Vec3f {
     f0 + (Vec3f::fill(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
 }
 
-pub fn uniform_hemisphere() -> Vec3f {
-    let mut rng = rand::thread_rng();
-    let x1 = rng.gen_range(0.0..1.0);
-    let x2 = rng.gen_range(0.0..1.0);
-    let phi = 2.0 * PI * x2;
-    let cos_theta = x1;
-    let sin_theta = f32::sqrt(1.0 - (cos_theta * cos_theta));
-    let cos_phi = f32::cos(phi);
-    let sin_phi = f32::sin(phi);
+/// Returns vector based on spherical coordinates
+pub fn from_spherical(theta: f32, phi: f32) -> Vec3f {
+    let sin_phi = phi.sin();
+    let cos_phi = phi.cos();
+    let sin_theta = theta.sin();
+    let cos_theta = theta.cos();
     Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
 
-pub fn cosine_weighted_hemisphere() -> Vec3f {
+/// Uniform sample from hemisphere
+pub fn uniform_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
     let r1 = rng.gen_range(0.0..1.0);
     let r2 = rng.gen_range(0.0..1.0);
 
     let phi = 2.0 * PI * r1;
-    let sin_theta = f32::sqrt(r2);
-    let cos_theta = f32::sqrt(1.0 - r2);
+    let theta = f32::acos(r2);
 
-    Vec3f::new(
-        f32::cos(phi) * sin_theta,
-        f32::sin(phi) * sin_theta,
-        cos_theta,
-    )
+    from_spherical(theta, phi)
+}
+
+pub fn cosine_weighted_hemisphere() -> Vec3f {
+    let mut rng = rand::thread_rng();
+
+    let r1 = rng.gen_range(0.0..1.0);
+    let r2 = rng.gen_range(0.0..1.0);
+
+    let phi = 2.0 * PI * r1;
+    let theta = f32::acos(f32::sqrt(r2));
+    from_spherical(theta, phi)
 }
 
 fn vector_on_sphere() -> Vec3f {
@@ -131,5 +135,26 @@ mod test {
         let outgoing = reflect(incoming, normal);
         assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
         assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
+    }
+
+    fn func(_r1: f32, r2: f32) -> f32 {
+        let cos_theta = 1.0 - r2;
+        cos_theta * cos_theta * cos_theta
+    }
+
+    #[test]
+    fn test_integral() {
+        let mut rng = rand::thread_rng();
+        let mut sum = 0.0;
+        let n = 10000000;
+        for _i in 0..n {
+            let r1 = rng.gen_range(0.0..1.0);
+            let r2 = rng.gen_range(0.0..1.0);
+
+            sum += (func(r1, r2)) / (1.0 / (2.0 * PI));
+        }
+
+        //assert_eq!(sum / n as f32, PI / 2.0);
+        //assert!((sum / n as f32 - PI / 2.0).abs() < f32::EPSILON);
     }
 }
