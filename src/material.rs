@@ -41,7 +41,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness: 1.0,
-            material: MaterialType::Physical,
+            material: MaterialType::CosineWeighted,
         }
     }
 
@@ -50,7 +50,7 @@ impl Material {
             albedo: color,
             emittance: intensity,
             roughness: 1.0,
-            material: MaterialType::Physical,
+            material: MaterialType::CosineWeighted,
         }
     }
 
@@ -59,7 +59,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness,
-            material: MaterialType::Physical,
+            material: MaterialType::CosineWeighted,
         }
     }
 
@@ -96,20 +96,20 @@ impl BSDF for Material {
                 let bsdf = self.albedo;
                 (wi, bsdf)
             }
-            MaterialType::Physical => {
+            MaterialType::CosineWeighted => {
                 // Cosine-weighted hemisphere sampling
-                // pdf = cos(θ) / 𝜋
                 // brdf = albedo / 𝜋
+                // pdf = cos(θ) / 𝜋
                 let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
                 let bsdf = self.albedo / PI;
                 let pdf = cos_theta / PI;
                 (wi, bsdf * cos_theta / pdf)
             }
-            MaterialType::Diffuse => {
+            MaterialType::Uniform => {
                 // Uniform hemisphere sampling
-                // pdf = 1 / 2 * 𝜋
                 // brdf = albedo / 𝜋
+                // pdf = 1 / 2 * 𝜋
                 let pdf = 1.0 / (2.0 * PI);
                 let wi = Onb::local_to_world(normal, uniform_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
