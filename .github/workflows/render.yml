@@ -16,8 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: High Quality Render (1920x1080 pixels)
-      run: cargo run --release -- 1920 1080 4096 5
+    - name: High Quality Render
+      run: cargo run --release -- 320 180 4096 5
     
     - uses: actions/upload-artifact@v3
       with:
