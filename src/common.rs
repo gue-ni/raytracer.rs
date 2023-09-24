@@ -38,32 +38,6 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     }
 }
 
-pub fn distribution_ggx(n: Vec3f, h: Vec3f, roughness: f32) -> f32 {
-    let a2 = roughness * roughness;
-    let ndoth = f32::max(Vec3f::dot(n, h), 0.0);
-    let ndoth2 = ndoth * ndoth;
-    let nom = a2;
-    let mut denom = ndoth2 * (a2 - 1.0) + 1.0;
-    denom = PI * denom * denom;
-    nom / denom
-}
-
-fn geometry_schlick_ggx(ndotv: f32, roughness: f32) -> f32 {
-    let r = roughness + 1.0;
-    let k = (r * r) / 8.0;
-    let num = ndotv;
-    let denom = ndotv * (1.0 - k) + k;
-    num / denom
-}
-
-pub fn geometry_smith(n: Vec3f, v: Vec3f, l: Vec3f, roughness: f32) -> f32 {
-    let ndotv = f32::max(Vec3f::dot(n, v), 0.0);
-    let ndotl = f32::max(Vec3f::dot(n, l), 0.0);
-    let ggx2 = geometry_schlick_ggx(ndotv, roughness);
-    let ggx1 = geometry_schlick_ggx(ndotl, roughness);
-    ggx1 * ggx2
-}
-
 /// Returns vector based on spherical coordinates
 pub fn from_spherical(theta: f32, phi: f32) -> Vec3f {
     let sin_phi = phi.sin();
@@ -126,17 +100,19 @@ pub fn from_hex(color: u32) -> Vec3f {
 
 pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
     let scale = u8::MAX as f32;
-    const GAMMA: f32 = 1.5;
+    const _GAMMA: f32 = 2.2;
 
     let buffer: Vec<u8> = framebuffer
         .iter()
         .flat_map(|&pixel| [pixel.x, pixel.y, pixel.z])
         .map(|value| {
             // gamma correction
-            // (value * scale) as u8
+            //(value * scale) as u8
             //(value.sqrt() * scale) as u8
-            (value.powf(1.0 / GAMMA) * scale) as u8
+            //((value * scale).powf(1.0 / GAMMA) ) as u8
+            (value / (value + 1.0)).powf(1.0 / _GAMMA)
         })
+        .map(|value| (value * scale) as u8)
         .collect();
 
     RgbImage::from_vec(width, height, buffer).unwrap()

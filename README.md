@@ -1,6 +1,6 @@
 # Monte Carlo path tracing in Rust
 
-![](./img/latest.png)
+![](./img/render-1695561956-1920x1080-s16384-b5.png)
 
 ## Links
 

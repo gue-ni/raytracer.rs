@@ -81,7 +81,12 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
 
 /// Naive, unbiased monte-carlo path tracing
 /// This function implements the rendering equation using monte-carlo integration
-/// L(p, wo) = Le + ∫ Li(p, wi)  fr(wo, wi) cos(theta) dw
+/// Rendering Equation:
+/// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
+///
+/// Monte-Carlo:
+/// L(p, wo) = 1/N * Σ (Le + fr(wo, wi) * cos(theta) / pdf(wi))
+///
 #[allow(dead_code)]
 fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
     // Material properties

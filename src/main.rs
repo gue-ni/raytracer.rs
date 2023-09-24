@@ -51,35 +51,22 @@ pub fn main() {
     let spacing = 2.3;
     let left = -spacing * 2.5;
 
-
-    // left
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 1.0, 2.0, z), 1.0),
         material: Material::diffuse(Vec3f::fill(0.99)),
     });
-
-    //
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 2.0, 2.0, z), 1.0),
         material: Material::physical(from_hex(0xff9429), 0.2, 0.5),
-
     });
-
-    // 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 3.0, 2.0, z), 1.0),
-        material: Material::mirror(Vec3f::from(0.99)),
+        material: Material::mirror(Vec3f::from(0.95)),
     });
-
-    // right
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 4.0, 2.0, z), 1.0),
-        material: Material::physical(Vec3f::new(0.99, 0.01, 0.01), 0.2, 1.0),
+        material: Material::physical(Vec3f::new(0.99, 0.01, 0.01), 0.25, 0.85),
     });
-
-
-
-
 
     let r = 100000.0;
 
