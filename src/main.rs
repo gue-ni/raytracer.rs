@@ -53,7 +53,7 @@ pub fn main() {
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 1.0, 2.0, z), 1.0),
-        material: Material::diffuse(Vec3f::from(0.99)),
+        material: Material::transparent(Vec3f::from(0.99)),
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 2.0, 2.0, z), 1.0),

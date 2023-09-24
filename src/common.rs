@@ -1,4 +1,3 @@
-
 use rand::Rng;
 
 #[allow(unused_imports)]
@@ -24,7 +23,9 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     if cosi < 0.0 {
         cosi = -cosi;
     } else {
-        std::mem::swap(&mut etai, &mut etat);
+        let tmp = etai;
+        etai = etat;
+        etat = tmp;
         n = -normal;
     }
 
@@ -36,6 +37,10 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     } else {
         incoming * eta + n * (eta * cosi - k.sqrt())
     }
+}
+
+pub fn fresnel(_incoming: Vec3f, _normal: Vec3f) -> f32 {
+    0.0
 }
 
 /// Returns vector based on spherical coordinates

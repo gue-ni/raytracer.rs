@@ -2,6 +2,7 @@ use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
 
+#[derive(Debug)]
 pub struct HitRecord {
     pub t: f32,
     pub normal: Vec3f,
@@ -206,7 +207,9 @@ impl Hittable for Scene {
 
 #[cfg(test)]
 mod test {
+    use crate::common::*;
     use crate::geometry::*;
+    use crate::material::*;
     use crate::ray::*;
 
     #[test]
@@ -259,5 +262,44 @@ mod test {
         let hit = possible_hit.unwrap();
         assert_eq!(hit.point, Vec3f::new(0.0, 0.0, -s));
         assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn test_sphere_inside() {
+        let sphere = Sphere::new(Vec3f::from(0.0), 3.0);
+        let ray = Ray::towards(sphere.center, Vec3::new(0.0, 0.0, 1.0));
+
+        let possible = sphere.hit(&ray, 0.0, f32::INFINITY);
+        println!("possible = {:?}", possible);
+
+        let hit = possible.unwrap();
+    }
+
+    #[test]
+    fn test_misc() {
+        let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
+        let ray_1 = Ray::towards(Vec3::new(0.0, 0.0, 0.0), sphere.center);
+
+        let hit_1 = sphere.hit(&ray_1, 0.0, f32::INFINITY).unwrap();
+
+        println!("{:?}", sphere);
+        println!("{:?}", ray_1);
+        println!("{:?}", hit_1);
+
+        let incoming = ray_1.direction;
+
+        let ior = 1.2;
+        let reflected = reflect(incoming, hit_1.normal);
+        let refracted = refract(incoming, hit_1.normal, ior);
+
+        println!("reflected = {:?}", reflected);
+        println!("refracted = {:?}", refracted);
+
+        let ray_2 = Ray::new(hit_1.point + hit_1.normal * -0.001, refracted);
+        println!("{:?}", ray_2);
+
+        let hit_2 = sphere.hit(&ray_2, 0.0, f32::INFINITY).unwrap();
+
+        println!("hit_2 = {:?}", hit_2);
     }
 }

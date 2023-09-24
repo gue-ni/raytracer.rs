@@ -14,4 +14,8 @@ impl Ray {
     pub fn point_at(&self, t: f32) -> Vec3f {
         self.origin + self.direction * t
     }
+
+    pub fn towards(origin: Vec3f, target: Vec3f) -> Self {
+        Ray::new(origin, Vec3::normalize(target - origin))
+    }
 }

@@ -6,8 +6,6 @@ use std::f32::consts::PI;
 //
 use rand::Rng;
 
-
-
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BRDF {
     /// Returns outgoing vector and brdf multiplier
@@ -91,7 +89,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness: 0.0,
-            ior: 1.0,
+            ior: 1.52, //glass
             metallic: 0.0,
             material: MaterialType::Transparent,
         }
@@ -136,11 +134,15 @@ impl BRDF for Material {
                 let mut rng = rand::thread_rng();
                 let r = rng.gen_range(0.0..1.0);
 
+                /*
                 let wi = if r < 0.5 {
-                    refract(-wo, normal, self.ior)
+                    refract(-wo, normal, 0.0)
                 } else {
                     reflect(-wo, normal)
                 };
+                */
+
+                let wi = refract(-wo, normal, 1.2);
 
                 let brdf = self.albedo;
                 (wi, brdf)
