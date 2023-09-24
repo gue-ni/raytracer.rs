@@ -17,14 +17,11 @@ pub trait BSDF {
 
 #[derive(Debug, Copy, Clone)]
 pub enum MaterialType {
-    /// Perfectly Diffuse
-    Diffuse,
-    /// Perfectly Specular
     Specular,
-    /// Physically-based Material
-    Physical,
-    /// Refractive
     Transparent,
+    Uniform,
+    CosineWeighted,
+    CookTorrance,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -115,6 +112,9 @@ impl BSDF for Material {
                 let cos_theta = Vec3f::dot(normal, wi);
                 let bsdf = self.albedo / PI;
                 (wi, bsdf * cos_theta / pdf)
+            }
+            _ => {
+                panic!("not implemented")
             }
         }
     }
