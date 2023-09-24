@@ -13,8 +13,8 @@ impl Default for HitRecord {
     fn default() -> Self {
         HitRecord {
             t: f32::INFINITY,
-            normal: Vec3f::fill(0.0),
-            point: Vec3f::fill(0.0),
+            normal: Vec3f::from(0.0),
+            point: Vec3f::from(0.0),
             idx: 0,
         }
     }
@@ -55,6 +55,7 @@ pub struct Object {
 
 pub struct Scene {
     pub objects: Vec<Object>,
+    /// Background color
     pub background: Vec3f,
 }
 
@@ -72,6 +73,7 @@ impl Scene {
 }
 
 pub trait Hittable {
+    /// Returns HitRecord if ray intersects geometry
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
 }
 
@@ -94,13 +96,11 @@ impl Hittable for Sphere {
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
-            let normal = (point - self.center) / self.radius;
-            let idx = 0;
             Some(HitRecord {
                 t,
-                normal,
+                normal: (point - self.center) / self.radius,
                 point,
-                idx,
+                idx: 0,
             })
         } else {
             None

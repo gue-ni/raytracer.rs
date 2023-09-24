@@ -53,7 +53,7 @@ pub fn main() {
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 1.0, 2.0, z), 1.0),
-        material: Material::diffuse(Vec3f::fill(0.99)),
+        material: Material::diffuse(Vec3f::from(0.99)),
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(left + spacing * 2.0, 2.0, z), 1.0),
@@ -87,8 +87,8 @@ pub fn main() {
         material: Material::emissive(from_hex(0xbb349b), 17.0),
     });
 
-    let wall = Material::diffuse(Vec3f::fill(0.99));
-    let _light = Material::emissive(Vec3f::fill(1.0), 1.0);
+    let wall = Material::diffuse(Vec3f::from(0.99));
+    let _light = Material::emissive(Vec3f::from(1.0), 1.0);
 
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, -(r + h), z), r),

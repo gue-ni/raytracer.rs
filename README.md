@@ -1,4 +1,4 @@
-# Monte Carlo path tracing in Rust
+# Monte Carlo Path Tracing in Rust
 
 ![](./img/render-1695561956-1920x1080-s16384-b5.png)
 

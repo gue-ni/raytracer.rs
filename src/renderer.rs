@@ -34,7 +34,7 @@ fn luma(color: Vec3f) -> f32 {
 
 #[allow(dead_code)]
 fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
-    (Vec3f::fill(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
+    (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
 }
 
 #[allow(dead_code)]
@@ -43,7 +43,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
 
     let light_pos = Vec3f::new(0.0, -3.5, 4.0);
     let light_intensity = 1.0;
-    let light_color = Vec3f::fill(1.0) * light_intensity;
+    let light_color = Vec3f::from(1.0) * light_intensity;
     let light_dir = Vec3f::normalize(light_pos - hit.point);
 
     let ray = Ray::new(hit.point, light_dir);
@@ -85,7 +85,7 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
 /// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
 ///
 /// Monte-Carlo:
-/// L(p, wo) = 1/N * Σ (Le + fr(wo, wi) * cos(theta) / pdf(wi))
+/// L(p, wo) = Le + 1/N * Σ (fr(wo, wi) * cos(theta) / pdf(wi))
 ///
 #[allow(dead_code)]
 fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
@@ -117,7 +117,7 @@ fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
             Some(hit) => naive_path_tracing(&hit, scene, ray, depth),
         }
     } else {
-        Vec3f::fill(0.0)
+        Vec3f::from(0.0)
     }
 }
 
@@ -126,7 +126,7 @@ fn render_singlethread(camera: &Camera, scene: &Scene, samples: u32, bounces: u3
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 
-    let mut framebuffer = vec![Vec3f::fill(0.0); width as usize * height as usize];
+    let mut framebuffer = vec![Vec3f::from(0.0); width as usize * height as usize];
 
     for sample in 0..samples {
         for y in 0..height {
@@ -149,7 +149,7 @@ fn render_multithreaded(camera: &Camera, scene: &Scene, samples: u32, bounces: u
     let width = camera.resolution.x as u32;
     let height = camera.resolution.y as u32;
 
-    let mut framebuffer = vec![Vec3f::fill(0.0); (width * height) as usize];
+    let mut framebuffer = vec![Vec3f::from(0.0); (width * height) as usize];
 
     // leave one thread for operating the computer : )
     let worker_count = usize::max(available_parallelism().unwrap().get() - 1, 2);

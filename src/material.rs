@@ -100,7 +100,7 @@ impl Material {
 
 /// Schlick's Fresnel Approximation
 fn fresnel_schlick(cos_theta: f32, f0: Vec3f) -> Vec3f {
-    f0 + (Vec3f::fill(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
+    f0 + (Vec3f::from(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
 }
 
 fn distribution_ggx(normal: Vec3f, halfway: Vec3f, roughness: f32) -> f32 {
@@ -109,7 +109,6 @@ fn distribution_ggx(normal: Vec3f, halfway: Vec3f, roughness: f32) -> f32 {
     let ndoth2 = ndoth * ndoth;
     let nom = a2;
     let denom = ndoth2 * (a2 - 1.0) + 1.0;
-    //denom = PI * denom * denom;
     nom / (PI * denom * denom)
 }
 

@@ -32,7 +32,7 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
 
     if k < 0.0 {
-        Vec3f::fill(0.0)
+        Vec3f::from(0.0)
     } else {
         incoming * eta + n * (eta * cosi - k.sqrt())
     }
@@ -137,20 +137,18 @@ mod test {
         height: usize,
         sample_hemisphere: impl Fn() -> Vec3f,
     ) -> RgbImage {
-        let mut buffer = vec![Vec3f::fill(0.0); (width * height) as usize];
+        let mut buffer = vec![Vec3f::from(0.0); (width * height) as usize];
 
         let samples = 10000;
         for _ in 0..samples {
             let vec = sample_hemisphere();
             let sample = (vec + 1.0) / 2.0;
-            //println!("{:?}, {:?}", vec, sample);
 
             let w = width as f32;
             let h = height as f32;
 
             let x = (sample.x * w) as usize;
             let y = (sample.z * h) as usize;
-            //println!("{}, {}", x, y);
             assert!(x < width && y < height);
 
             let index = (y * width + x) as usize;
