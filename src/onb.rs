@@ -7,21 +7,20 @@ pub struct Onb {
 }
 
 impl Onb {
-    ///
-    pub fn new(up: Vec3f) -> Self {
-        // 'a' must not be parallel to 'up'
-        let a = if up.x.abs() > 0.9 {
+    /// Returns new Orthonormal Bases
+    /// 'w' - normalized vector
+    pub fn new(w: Vec3f) -> Self {
+        // 'a' must not be parallel to 'w'
+        let a = if w.x.abs() > 0.9 {
             Vec3f::new(0.0, 1.0, 0.0)
         } else {
             Vec3f::new(1.0, 0.0, 0.0)
         };
 
-        let front = Vec3f::normalize(Vec3f::cross(up, a));
-        let right = Vec3f::cross(up, front);
+        let v = Vec3f::normalize(Vec3f::cross(w, a));
+        let u = Vec3f::cross(w, v);
 
-        Self {
-            axis: [right, front, up],
-        }
+        Self { axis: [u, v, w] }
     }
 
     /// Create coordinate system around w and transform a
@@ -31,16 +30,16 @@ impl Onb {
     }
 
     pub fn transform(&self, a: Vec3f) -> Vec3f {
-        self.right() * a.x + self.front() * a.y + self.up() * a.z
+        self.u() * a.x + self.v() * a.y + self.w() * a.z
     }
 
-    pub fn right(&self) -> Vec3f {
+    pub fn u(&self) -> Vec3f {
         self.axis[0]
     }
-    pub fn front(&self) -> Vec3f {
+    pub fn v(&self) -> Vec3f {
         self.axis[1]
     }
-    pub fn up(&self) -> Vec3f {
+    pub fn w(&self) -> Vec3f {
         self.axis[2]
     }
 }
@@ -57,9 +56,9 @@ mod test {
         let onb = Onb::new(normal);
 
         // all vectors must be orthogonal
-        assert_eq!(Vec3::dot(onb.front(), onb.up()), 0.0);
-        assert_eq!(Vec3::dot(onb.front(), onb.right()), 0.0);
-        assert_eq!(Vec3::dot(onb.up(), onb.right()), 0.0);
+        assert_eq!(Vec3::dot(onb.v(), onb.w()), 0.0);
+        assert_eq!(Vec3::dot(onb.v(), onb.u()), 0.0);
+        assert_eq!(Vec3::dot(onb.w(), onb.u()), 0.0);
     }
 
     #[test]
