@@ -44,10 +44,6 @@ where
     pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
-
-    pub fn fill(v: T) -> Self {
-        Self::new(v, v, v)
-    }
 }
 
 impl<T> From<(T, T, T)> for Vec3<T>
@@ -55,11 +51,7 @@ where
     T: Number,
 {
     fn from(item: (T, T, T)) -> Self {
-        Self {
-            x: item.0,
-            y: item.1,
-            z: item.2,
-        }
+        Self::new(item.0, item.1, item.2)
     }
 }
 
@@ -297,9 +289,13 @@ where
     pub fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
+}
 
-    #[allow(dead_code)]
-    pub fn fill(v: T) -> Self {
+impl<T> From<T> for Vec2<T>
+where
+    T: Number,
+{
+    fn from(v: T) -> Self {
         Self::new(v, v)
     }
 }
@@ -309,10 +305,7 @@ where
     T: Number,
 {
     fn from(item: (T, T)) -> Self {
-        Self {
-            x: item.0,
-            y: item.1,
-        }
+        Self::new(item.0, item.1)
     }
 }
 
