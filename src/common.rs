@@ -4,6 +4,8 @@ use rand::Rng;
 #[allow(unused_imports)]
 use std::f32::consts::PI;
 
+use image::RgbImage;
+
 use crate::vector::*;
 
 #[allow(dead_code)]
@@ -71,7 +73,7 @@ pub fn from_spherical(theta: f32, phi: f32) -> Vec3f {
     let cos_phi = phi.cos();
     let sin_theta = theta.sin();
     let cos_theta = theta.cos();
-    Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
+    Vec3f::new(cos_phi * sin_theta, cos_theta, sin_phi * sin_theta)
 }
 
 /// Uniform sample from hemisphere
@@ -83,7 +85,7 @@ pub fn uniform_hemisphere() -> Vec3f {
     let phi = 2.0 * PI * r1;
     let theta = f32::acos(r2);
 
-    from_spherical(theta, phi)
+    Vec3f::normalize(from_spherical(theta, phi))
 }
 
 pub fn cosine_weighted_hemisphere() -> Vec3f {
@@ -94,7 +96,7 @@ pub fn cosine_weighted_hemisphere() -> Vec3f {
 
     let phi = 2.0 * PI * r1;
     let theta = f32::acos(f32::sqrt(r2));
-    from_spherical(theta, phi)
+    Vec3f::normalize(from_spherical(theta, phi))
 }
 
 fn vector_on_sphere() -> Vec3f {
@@ -124,6 +126,18 @@ pub fn from_hex(color: u32) -> Vec3f {
     Vec3f::new(r as f32, g as f32, b as f32) / (u8::MAX as f32)
 }
 
+pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
+    let buffer = framebuffer
+        .iter()
+        .flat_map(|&raw_pixel| {
+            let pixel = raw_pixel * (u8::MAX as f32);
+            [pixel.x as u8, pixel.y as u8, pixel.z as u8]
+        })
+        .collect();
+
+    RgbImage::from_vec(width, height, buffer).unwrap()
+}
+
 #[cfg(test)]
 mod test {
     use crate::common::*;
@@ -137,24 +151,43 @@ mod test {
         assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
     }
 
-    fn func(_r1: f32, r2: f32) -> f32 {
-        let cos_theta = 1.0 - r2;
-        cos_theta * cos_theta * cos_theta
+    pub fn create_image_from_distribution(
+        width: usize,
+        height: usize,
+        sample_hemisphere: impl Fn() -> Vec3f,
+    ) -> RgbImage {
+        let mut buffer = vec![Vec3f::fill(0.0); (width * height) as usize];
+
+        let samples = 5000;
+        for _ in 0..samples {
+            let vec = sample_hemisphere();
+            let sample = (vec + 1.0) / 2.0;
+            //println!("{:?}, {:?}", vec, sample);
+
+            let w = width as f32;
+            let h = height as f32;
+
+            let x = (sample.x * w) as usize;
+            let y = (sample.z * h) as usize;
+            //println!("{}, {}", x, y);
+            assert!(x < width && y < height);
+
+            let index = (y * width + x) as usize;
+            buffer[index] = Vec3::lerp(Vec3::new(0.0, 0.0, 1.0), Vec3::new(1.0, 0.0, 0.0), vec.y);
+        }
+
+        to_image(buffer, width as u32, height as u32)
     }
 
     #[test]
-    fn test_integral() {
-        let mut rng = rand::thread_rng();
-        let mut sum = 0.0;
-        let n = 10000000;
-        for _i in 0..n {
-            let r1 = rng.gen_range(0.0..1.0);
-            let r2 = rng.gen_range(0.0..1.0);
+    fn test_cosine() {
+        let image = create_image_from_distribution(200, 200, || cosine_weighted_hemisphere());
+        let _ = image.save("cosine.png");
+    }
 
-            sum += (func(r1, r2)) / (1.0 / (2.0 * PI));
-        }
-
-        //assert_eq!(sum / n as f32, PI / 2.0);
-        //assert!((sum / n as f32 - PI / 2.0).abs() < f32::EPSILON);
+    #[test]
+    fn test_uniform_hemisphere() {
+        let image = create_image_from_distribution(200, 200, || uniform_hemisphere());
+        let _ = image.save("uniform.png");
     }
 }

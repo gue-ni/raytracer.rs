@@ -7,8 +7,8 @@ use crate::vector::*;
 
 use image::RgbImage;
 
-extern crate rand;
-use rand::Rng;
+//extern crate rand;
+//use rand::Rng;
 
 use std::thread;
 use std::thread::available_parallelism;
@@ -17,18 +17,6 @@ fn get_xy(index: u32, width: u32) -> (u32, u32) {
     let x = index % width;
     let y = index / width;
     (x, y)
-}
-
-fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
-    let buffer = framebuffer
-        .iter()
-        .flat_map(|&raw_pixel| {
-            let pixel = raw_pixel * (u8::MAX as f32);
-            [pixel.x as u8, pixel.y as u8, pixel.z as u8]
-        })
-        .collect();
-
-    RgbImage::from_vec(width, height, buffer).unwrap()
 }
 
 fn print_progress(current_sample: u32, total_samples: u32) {

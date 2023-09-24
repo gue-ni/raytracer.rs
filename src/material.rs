@@ -112,9 +112,9 @@ impl BSDF for Material {
                 // brdf = albedo / 𝜋
                 let pdf = 1.0 / (2.0 * PI);
                 //let sample  = uniform_sample_hemisphere(Vec3f::new(0.0, 1.0, 0.0));
-                //let sample  = uniform_hemisphere();
-                //let wi = Onb::local_to_world(normal, sample);
-                let wi = uniform_sample_hemisphere(normal);
+                let sample = uniform_hemisphere();
+                let wi = Onb::local_to_world(normal, sample);
+                //let wi = uniform_sample_hemisphere(normal);
                 let cos_theta = Vec3f::dot(normal, wi);
                 let bsdf = self.albedo / PI;
                 (wi, bsdf * cos_theta / pdf)
