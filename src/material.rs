@@ -19,7 +19,7 @@ pub enum MaterialType {
     CosineWeighted,
     /// Physically based model
     CookTorrance,
-    /// 
+    ///
     Transparent,
 }
 
@@ -114,7 +114,7 @@ impl BSDF for Material {
                 (wi, bsdf * cos_theta / pdf)
             }
             MaterialType::CookTorrance => {
-                // TODO: 
+                // TODO:
                 let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
                 let bsdf = self.albedo / PI;

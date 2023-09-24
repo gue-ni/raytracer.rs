@@ -187,18 +187,21 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_cosine() {
         let image = create_image_from_distribution(200, 200, || cosine_weighted_hemisphere());
         let _ = image.save("cosine.png");
     }
 
     #[test]
+    #[ignore]
     fn test_uniform_hemisphere_1() {
         let image = create_image_from_distribution(200, 200, || uniform_hemisphere());
         let _ = image.save("uniform_v1.png");
     }
 
     #[test]
+    #[ignore]
     fn test_uniform_hemisphere_2() {
         let normal = Vec3::new(0.0, 1.0, 0.0);
         let image = create_image_from_distribution(200, 200, || uniform_sample_hemisphere(normal));
@@ -206,6 +209,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_onb() {
         let image = create_image_from_distribution(200, 200, || {
             //let sample = uniform_sample_hemisphere(normal);
