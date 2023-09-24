@@ -45,4 +45,6 @@ impl Onb {
 }
 
 #[cfg(test)]
-mod test {}
+mod test {
+    fn test_onb() {}
+}

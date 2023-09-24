@@ -420,6 +420,103 @@ impl From<Vec2u> for Vec2f {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Mat3<T> {
+    pub m: [T; 3 * 3],
+}
+
+impl <T> Default for Mat3<T> where T: Number  + std::default::Default {
+    fn default() -> Self {
+        Self {
+            m: [T::default(); 3 * 3]
+        }
+    }
+}
+
+impl<T> From<T> for Mat3<T>
+where
+    T: Number,
+{
+    fn from(item: T) -> Self {
+        Self { m: [item; 3 * 3] }
+    }
+}
+
+impl<T> From<[T; 3 * 3]> for Mat3<T>
+where
+    T: Number,
+{
+    fn from(item: [T; 3 * 3]) -> Self {
+        Self { m: item }
+    }
+}
+
+impl<T> Mul for Mat3<T>
+where
+    T: Number + std::default::Default + AddAssign,
+{
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
+        let mut result = Self::default();
+
+        const ROWS: usize = 3;
+        const COLUMNS: usize = 3;
+
+        for i in 0..ROWS {
+            for j in 0..COLUMNS {
+                let mut sum = T::default();
+                for k in 0..COLUMNS {
+                    sum += self.m[i * COLUMNS + k] * other.m[k * COLUMNS + j];
+                }
+                result.m[i * COLUMNS + j] = sum;
+            }
+        }
+
+        result
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Mat4<T> {
+    pub m: [T; 4 * 4],
+}
+
+impl <T> Default for Mat4<T> where T: Number  + std::default::Default {
+    fn default() -> Self {
+        Self {
+            m: [T::default(); 4 * 4]
+        }
+    }
+}
+
+impl<T> Mul for Mat4<T>
+where
+    T: Number + std::default::Default + AddAssign,
+{
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
+        let mut result = Self::default();
+
+        const ROWS: usize = 4;
+        const COLUMNS: usize = 4;
+
+        for i in 0..ROWS {
+            for j in 0..COLUMNS {
+                let mut sum = T::default();
+                for k in 0..COLUMNS {
+                    sum += self.m[i * COLUMNS + k] * other.m[k * COLUMNS + j];
+                }
+                result.m[i * COLUMNS + j] = sum;
+            }
+        }
+
+        result
+    }
+}
+
+#[allow(dead_code)]
+pub type Mat3f = Mat3<f32>;
+
 #[cfg(test)]
 mod tests {
     use crate::vector::*;
@@ -493,5 +590,13 @@ mod tests {
         assert_eq!(v.x, v[0]);
         assert_eq!(v.y, v[1]);
         assert_eq!(v.z, v[2]);
+    }
+
+    #[test]
+    fn test_matrix_mult() {
+        let a = Mat3::from([2.0, 7.0, 3.0, 1.0, 5.0, 8.0, 0.0, 4.0, 1.0]);
+        let b = Mat3::from([3.0, 0.0, 1.0, 2.0, 1.0, 0.0, 1.0, 2.0, 4.0]);
+        let c = Mat3::from([23.0, 13.0, 14.0, 21.0, 21.0, 33.0, 9.0, 6.0, 4.0]);
+        assert_eq!(a * b, c);
     }
 }

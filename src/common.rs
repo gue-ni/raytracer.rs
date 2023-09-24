@@ -151,7 +151,7 @@ mod test {
         assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
     }
 
-    pub fn create_image_from_distribution(
+    fn create_image_from_distribution(
         width: usize,
         height: usize,
         sample_hemisphere: impl Fn() -> Vec3f,

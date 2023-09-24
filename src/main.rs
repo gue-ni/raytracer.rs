@@ -76,12 +76,12 @@ pub fn main() {
     });
     */
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-1.5, -1.75, z - 1.5), 0.75),
-        material: Material::emissive(from_hex(0x45b9d3), 15.0),
+        geometry: Sphere::new(Vec3f::new(-1.5, -1.75, z - 1.5), 0.5),
+        material: Material::emissive(from_hex(0x45b9d3), 17.0),
     });
     scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(1.5, -1.75, z + 1.5), 0.75),
-        material: Material::emissive(from_hex(0xbb349b), 15.0),
+        geometry: Sphere::new(Vec3f::new(1.5, -1.75, z + 1.5), 0.5),
+        material: Material::emissive(from_hex(0xbb349b), 17.0),
     });
 
     let wall = Material::diffuse(Vec3f::fill(0.99));
