@@ -1,25 +1,26 @@
 use crate::vector::*;
 
 /// Orthonormal Bases
+#[derive(Debug)]
 pub struct Onb {
     axis: [Vec3f; 3],
 }
 
 impl Onb {
-    pub fn new(w: Vec3f) -> Self {
-        let unit_w = Vec3f::normalize(w);
-
-        let a = if unit_w.x.abs() > 0.9 {
+    ///
+    pub fn new(up: Vec3f) -> Self {
+        // 'a' must not be parallel to 'up'
+        let a = if up.x.abs() > 0.9 {
             Vec3f::new(0.0, 1.0, 0.0)
         } else {
             Vec3f::new(1.0, 0.0, 0.0)
         };
 
-        let v = Vec3f::normalize(Vec3f::cross(unit_w, a));
-        let u = Vec3f::cross(unit_w, v);
+        let front = Vec3f::normalize(Vec3f::cross(up, a));
+        let right = Vec3f::cross(up, front);
 
         Self {
-            axis: [u, v, unit_w],
+            axis: [right, front, up],
         }
     }
 
@@ -30,16 +31,16 @@ impl Onb {
     }
 
     pub fn transform(&self, a: Vec3f) -> Vec3f {
-        a * self.u() + a * self.v() + a * self.w()
+        self.right() * a.x + self.front() * a.y + self.up() * a.z
     }
 
-    pub fn u(&self) -> Vec3f {
+    pub fn right(&self) -> Vec3f {
         self.axis[0]
     }
-    pub fn v(&self) -> Vec3f {
+    pub fn front(&self) -> Vec3f {
         self.axis[1]
     }
-    pub fn w(&self) -> Vec3f {
+    pub fn up(&self) -> Vec3f {
         self.axis[2]
     }
 }
@@ -47,11 +48,31 @@ impl Onb {
 #[cfg(test)]
 mod test {
 
+    use crate::onb::*;
     use crate::vector::*;
 
-    fn test_onb() {
-        let w = Vec3f::new(0.0, 1.0, 0.0);
-        let a = Vec3f::new(0.0, 1.0, 0.0);
-        //assert_eq!()
+    #[test]
+    fn test_00() {
+        let normal = Vec3::new(0.0, 1.0, 0.0);
+        let onb = Onb::new(normal);
+
+        // all vectors must be orthogonal
+        assert_eq!(Vec3::dot(onb.front(), onb.up()), 0.0);
+        assert_eq!(Vec3::dot(onb.front(), onb.right()), 0.0);
+        assert_eq!(Vec3::dot(onb.up(), onb.right()), 0.0);
+    }
+
+    #[test]
+    fn test_01() {
+        // the vector to center the coordinate system
+        let normal = Vec3::new(0.0, 1.0, 0.0);
+
+        let onb = Onb::new(normal);
+        println!("{:?}", onb);
+
+        // the input vector, could be randomly generated in hemisphere
+        let v = Vec3::new(0.0, 0.0, 1.0);
+
+        assert_eq!(onb.transform(v), Vec3::new(0.0, 1.0, 0.0));
     }
 }

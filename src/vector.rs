@@ -554,7 +554,16 @@ mod tests {
     fn test_cross() {
         let a = Vec3::new(2.0, 3.0, 4.0);
         let b = Vec3::new(5.0, 6.0, 7.0);
-        assert_eq!(Vec3::cross(a, b), Vec3::new(-3.0, 6.0, -3.0));
+        let c = Vec3::new(-3.0, 6.0, -3.0);
+        assert_eq!(Vec3::cross(a, b), c);
+    }
+
+    #[test]
+    fn test_cross_2() {
+        let a = Vec3::new(1.0, 0.0, 0.0);
+        let b = Vec3::new(0.0, 1.0, 0.0);
+        let c = Vec3::new(0.0, 0.0, 1.0);
+        assert_eq!(Vec3::cross(a, b), c);
     }
 
     #[test]

@@ -121,7 +121,6 @@ pub fn main() {
 
     println!("Elapsed time: {:.2?}", elapsed);
 
-
     let timestamp = get_sys_time_in_secs();
     let filename = format!(
         "img/render/render-{}-{}x{}-s{}-b{}.png",

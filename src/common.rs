@@ -73,7 +73,7 @@ pub fn from_spherical(theta: f32, phi: f32) -> Vec3f {
     let cos_phi = phi.cos();
     let sin_theta = theta.sin();
     let cos_theta = theta.cos();
-    Vec3f::new(cos_phi * sin_theta, cos_theta, sin_phi * sin_theta)
+    Vec3f::new(cos_phi * sin_theta, sin_phi * sin_theta, cos_theta)
 }
 
 /// Uniform sample from hemisphere
@@ -99,7 +99,7 @@ pub fn cosine_weighted_hemisphere() -> Vec3f {
     Vec3f::normalize(from_spherical(theta, phi))
 }
 
-fn vector_on_sphere() -> Vec3f {
+pub fn vector_on_sphere() -> Vec3f {
     let r = 1.0;
     let mut rng = rand::thread_rng();
     Vec3f::normalize(Vec3f::new(
@@ -163,7 +163,7 @@ mod test {
     ) -> RgbImage {
         let mut buffer = vec![Vec3f::fill(0.0); (width * height) as usize];
 
-        let samples = 5000;
+        let samples = 10000;
         for _ in 0..samples {
             let vec = sample_hemisphere();
             let sample = (vec + 1.0) / 2.0;
@@ -178,7 +178,9 @@ mod test {
             assert!(x < width && y < height);
 
             let index = (y * width + x) as usize;
-            buffer[index] = Vec3::lerp(Vec3::new(0.0, 0.0, 1.0), Vec3::new(1.0, 0.0, 0.0), vec.y);
+            let blue = Vec3::new(0.0, 0.0, 1.0);
+            let red = Vec3::new(1.0, 0.0, 0.0);
+            buffer[index] = Vec3::lerp(blue, red, vec.y);
         }
 
         to_image(buffer, width as u32, height as u32)
@@ -191,33 +193,31 @@ mod test {
     }
 
     #[test]
-    fn test_uniform_hemisphere() {
+    fn test_uniform_hemisphere_1() {
         let image = create_image_from_distribution(200, 200, || uniform_hemisphere());
-        let _ = image.save("uniform.png");
+        let _ = image.save("uniform_v1.png");
+    }
+
+    #[test]
+    fn test_uniform_hemisphere_2() {
+        let normal = Vec3::new(0.0, 1.0, 0.0);
+        let image = create_image_from_distribution(200, 200, || uniform_sample_hemisphere(normal));
+        let _ = image.save("uniform_v2.png");
     }
 
     #[test]
     fn test_onb() {
         let image = create_image_from_distribution(200, 200, || {
-            let normal = Vec3::new(1.0, 0.0, 0.0);
-            let sample = uniform_sample_hemisphere(normal);
+            //let normal = Vec3::new(0.0, 0.0, 1.0);
+            //let sample = uniform_sample_hemisphere(normal);
+            let sample = cosine_weighted_hemisphere();
 
-            //println!(" {:?}", sample);
+            let normal = Vec3::new(0.0, 1.0, 0.0);
 
-            let w = Vec3::new(0.0, 1.0, 0.0);
-
-            let onb = Onb::new(w);
-            onb.transform(sample)
-            //sample
+            let onb = Onb::new(normal);
+            //onb.transform(sample)
+            Onb::local_to_world(normal, sample)
         });
         let _ = image.save("onb.png");
-    }
-
-    #[test]
-    #[ignore]
-    fn test_onb_basic() {
-        let w = Vec3::new(0.0, 1.0, 0.0);
-        let v = Vec3::new(1.0, 0.0, 0.0);
-        assert_eq!(Onb::local_to_world(w, v), Vec3::new(0.0, 1.0, 0.0));
     }
 }
