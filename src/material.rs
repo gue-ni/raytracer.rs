@@ -3,6 +3,11 @@ use crate::onb::Onb;
 use crate::vector::*;
 use std::f32::consts::PI;
 
+//
+use rand::Rng;
+
+
+
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BRDF {
     /// Returns outgoing vector and brdf multiplier
@@ -15,16 +20,12 @@ pub trait BRDF {
 pub enum MaterialType {
     /// Mirror (perfectly specular)
     Mirror,
-
     /// Uniform Hemisphere Sampling (perfectly diffuse)
     Uniform,
-
     /// Cosine-weighted Hemisphere Sampling (perfectly diffuse)
     CosineWeighted,
-
     /// Cook-Torrance Reflection Model
     CookTorrance,
-
     ///
     Transparent,
 }
@@ -163,9 +164,9 @@ impl BRDF for Material {
             MaterialType::CookTorrance => {
                 // Cook-Torrance Reflection Model
 
-                //let wi = Onb::local_to_world(normal, uniform_hemisphere());
-                //let cos_theta = Vec3f::dot(normal, wi);
-                //let pdf = 1.0 / (2.0 * PI);
+                // let wi = Onb::local_to_world(normal, uniform_hemisphere());
+                // let cos_theta = Vec3f::dot(normal, wi);
+                // let pdf = 1.0 / (2.0 * PI);
 
                 let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);

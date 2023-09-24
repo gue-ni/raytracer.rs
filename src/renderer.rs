@@ -7,7 +7,7 @@ use crate::vector::*;
 
 use image::RgbImage;
 
-//extern crate rand;
+//
 //use rand::Rng;
 
 use std::thread;

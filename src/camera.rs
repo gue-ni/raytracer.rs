@@ -1,7 +1,7 @@
 use crate::ray::*;
 use crate::vector::*;
 
-extern crate rand;
+
 use rand::Rng;
 
 #[derive(Debug, Copy, Clone)]

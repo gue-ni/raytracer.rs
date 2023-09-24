@@ -1,6 +1,7 @@
 # Monte Carlo Path Tracing in Rust
 
 ![](./img/render-1695561956-1920x1080-s16384-b5.png)
+![](./img/render-1695581387-1920x1080-s16384-b5.png)
 
 ## Links
 

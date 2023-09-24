@@ -1,4 +1,4 @@
-extern crate rand;
+
 use rand::Rng;
 
 #[allow(unused_imports)]
