@@ -208,14 +208,9 @@ mod test {
     #[test]
     fn test_onb() {
         let image = create_image_from_distribution(200, 200, || {
-            //let normal = Vec3::new(0.0, 0.0, 1.0);
             //let sample = uniform_sample_hemisphere(normal);
             let sample = cosine_weighted_hemisphere();
-
             let normal = Vec3::new(0.0, 1.0, 0.0);
-
-            let onb = Onb::new(normal);
-            //onb.transform(sample)
             Onb::local_to_world(normal, sample)
         });
         let _ = image.save("onb.png");

@@ -1,4 +1,4 @@
-# Raytracing in Rust
+# Monte Carlo path tracing in Rust
 
 ![](./img/latest.png)
 

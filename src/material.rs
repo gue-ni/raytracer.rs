@@ -5,25 +5,25 @@ use std::f32::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
-    /// Returns outgoing vector and pdf
-    //fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f32);
-
-    /// Returns color of hit
-    //fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
-
-    /// Returns outgoing vector and brdf multiplier
+    /// Returns outgoing vector and bsdf multiplier
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f);
 }
 
 #[derive(Debug, Copy, Clone)]
 pub enum MaterialType {
-    Specular,
-    Transparent,
+    /// Mirror (perfectly specular)
+    Mirror,
+    /// Uniform Hemisphere Sampling (perfectly diffuse)
     Uniform,
+    /// Cosine-weighted Hemisphere Sampling (perfectly diffuse)
     CosineWeighted,
+    /// Physically based model
     CookTorrance,
+    /// 
+    Transparent,
 }
 
+/// Material Properties
 #[derive(Debug, Copy, Clone)]
 pub struct Material {
     pub albedo: Vec3f,
@@ -65,7 +65,7 @@ impl Material {
             albedo: color,
             emittance: 0.0,
             roughness: 0.0,
-            material: MaterialType::Specular,
+            material: MaterialType::Mirror,
         }
     }
 
@@ -82,7 +82,7 @@ impl Material {
 impl BSDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
-            MaterialType::Specular => {
+            MaterialType::Mirror => {
                 let wi = reflect(-wo, normal);
                 let bsdf = self.albedo;
                 (wi, bsdf)
@@ -113,8 +113,13 @@ impl BSDF for Material {
                 let bsdf = self.albedo / PI;
                 (wi, bsdf * cos_theta / pdf)
             }
-            _ => {
-                panic!("not implemented")
+            MaterialType::CookTorrance => {
+                // TODO: 
+                let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
+                let cos_theta = Vec3f::dot(normal, wi);
+                let bsdf = self.albedo / PI;
+                let pdf = cos_theta / PI;
+                (wi, bsdf * cos_theta / pdf)
             }
         }
     }

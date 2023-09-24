@@ -24,6 +24,7 @@ impl Onb {
     }
 
     /// Create coordinate system around w and transform a
+    ///
     pub fn local_to_world(w: Vec3f, a: Vec3f) -> Vec3f {
         let onb = Self::new(w);
         onb.transform(Vec3f::normalize(a))
@@ -48,7 +49,6 @@ impl Onb {
 mod test {
 
     use crate::onb::*;
-    use crate::vector::*;
 
     #[test]
     fn test_00() {
