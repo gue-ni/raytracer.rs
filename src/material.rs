@@ -36,8 +36,7 @@ pub struct Material {
     pub emittance: f32,
     pub roughness: f32,
     pub ior: f32,
-    pub metalic: f32,
-    /// Index of Refraction
+    pub metallic: f32,
     pub material: MaterialType,
 }
 
@@ -48,7 +47,7 @@ impl Material {
             emittance: 0.0,
             roughness: 0.0,
             ior: 0.0,
-            metalic: 0.0,
+            metallic: 0.0,
             material: MaterialType::CosineWeighted,
         }
     }
@@ -57,18 +56,18 @@ impl Material {
         Material {
             albedo: color,
             emittance: intensity,
-            roughness: 1.0,
+            roughness: 0.0,
             ior: 0.0,
-            metalic: 0.0,
+            metallic: 0.0,
             material: MaterialType::CosineWeighted,
         }
     }
 
-    pub fn physical(color: Vec3f, roughness: f32, metalic: f32) -> Self {
+    pub fn physical(color: Vec3f, roughness: f32, metallic: f32) -> Self {
         Material {
             albedo: color,
             roughness,
-            metalic,
+            metallic,
             emittance: 0.0,
             ior: 0.0,
             material: MaterialType::CookTorrance,
@@ -81,7 +80,7 @@ impl Material {
             emittance: 0.0,
             roughness: 0.0,
             ior: 0.0,
-            metalic: 0.0,
+            metallic: 0.0,
             material: MaterialType::Mirror,
         }
     }
@@ -92,14 +91,14 @@ impl Material {
             emittance: 0.0,
             roughness: 0.0,
             ior: 1.0,
-            metalic: 0.0,
+            metallic: 0.0,
             material: MaterialType::Transparent,
         }
     }
 }
 
 /// Schlick's Fresnel Approximation
-fn fresnel_schlick(cos_theta: f32, f0: Vec3f) -> Vec3f {
+fn fresnel_schlick(f0: Vec3f, cos_theta: f32) -> Vec3f {
     f0 + (Vec3f::from(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
 }
 
@@ -131,36 +130,35 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f32) -> f32 {
 impl BRDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
-            MaterialType::Mirror => {
-                let wi = reflect(-wo, normal);
-                let bsdf = self.albedo;
-                (wi, bsdf)
-            }
+            MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
             MaterialType::Transparent => {
-                // TODO
-                let wi = refract(-wo, normal, self.ior);
-                let bsdf = self.albedo;
-                (wi, bsdf)
+                let mut rng = rand::thread_rng();
+                let r = rng.gen_range(0.0..1.0);
+
+                let wi = if r < 0.5 {
+                    refract(-wo, normal, self.ior)
+                } else {
+                    reflect(-wo, normal)
+                };
+
+                let brdf = self.albedo;
+                (wi, brdf)
             }
             MaterialType::CosineWeighted => {
                 // Cosine-weighted hemisphere sampling
-                // brdf = albedo / 𝜋
-                // pdf = cos(θ) / 𝜋
                 let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
-                let bsdf = self.albedo / PI;
-                (wi, bsdf * cos_theta / pdf)
+                let brdf = self.albedo / PI;
+                (wi, brdf * cos_theta / pdf)
             }
             MaterialType::Uniform => {
                 // Uniform hemisphere sampling
-                // brdf = albedo / 𝜋
-                // pdf = 1 / 2 * 𝜋
                 let pdf = 1.0 / (2.0 * PI);
                 let wi = Onb::local_to_world(normal, uniform_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
-                let bsdf = self.albedo / PI;
-                (wi, bsdf * cos_theta / pdf)
+                let brdf = self.albedo / PI;
+                (wi, brdf * cos_theta / pdf)
             }
             MaterialType::CookTorrance => {
                 // Cook-Torrance Reflection Model
@@ -173,11 +171,10 @@ impl BRDF for Material {
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
 
-                //
-                let specular_color = Vec3::lerp(Vec3::from(0.04), self.albedo, self.metalic);
+                let f0 = Vec3::lerp(Vec3::from(0.04), self.albedo, self.metallic);
 
                 // Schlick's fresnel approximation
-                let fresnel = fresnel_schlick(cos_theta, specular_color);
+                let fresnel = fresnel_schlick(f0, cos_theta);
 
                 // Halfway vector between wo and wi
                 let halfway = Vec3::normalize(wo + wi);
@@ -191,6 +188,7 @@ impl BRDF for Material {
                 // DFG / (4 dot(wo, n) dot(wi, n))
                 let brdf =
                     (fresnel * distribution * geometry) / (4.0 * cos_theta * Vec3::dot(normal, wo));
+
                 (wi, brdf * cos_theta / pdf)
             }
         }
