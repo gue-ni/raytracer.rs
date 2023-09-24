@@ -1,6 +1,6 @@
 use crate::vector::*;
 
-/// Orthonormal Basis
+/// Orthonormal Bases
 pub struct Onb {
     axis: [Vec3f; 3],
 }
@@ -9,7 +9,7 @@ impl Onb {
     pub fn new(w: Vec3f) -> Self {
         let unit_w = Vec3f::normalize(w);
 
-        let a = if unit_w.x.abs() > 0.1 {
+        let a = if unit_w.x.abs() > 0.9 {
             Vec3f::new(0.0, 1.0, 0.0)
         } else {
             Vec3f::new(1.0, 0.0, 0.0)
@@ -46,5 +46,12 @@ impl Onb {
 
 #[cfg(test)]
 mod test {
-    fn test_onb() {}
+
+    use crate::vector::*;
+
+    fn test_onb() {
+        let w = Vec3f::new(0.0, 1.0, 0.0);
+        let a = Vec3f::new(0.0, 1.0, 0.0);
+        //assert_eq!()
+    }
 }

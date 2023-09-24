@@ -127,11 +127,15 @@ pub fn from_hex(color: u32) -> Vec3f {
 }
 
 pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
-    let buffer = framebuffer
+    let scale = u8::MAX as f32;
+
+    let buffer: Vec<u8> = framebuffer
         .iter()
-        .flat_map(|&raw_pixel| {
-            let pixel = raw_pixel * (u8::MAX as f32);
-            [pixel.x as u8, pixel.y as u8, pixel.z as u8]
+        .flat_map(|&pixel| [pixel.x, pixel.y, pixel.z])
+        .map(|value| {
+            // gamma correction
+            // (value * scale) as u8
+            (value.sqrt() * scale) as u8
         })
         .collect();
 
@@ -141,6 +145,7 @@ pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
 #[cfg(test)]
 mod test {
     use crate::common::*;
+    use crate::onb::*;
 
     #[test]
     fn test_reflect() {
@@ -189,5 +194,29 @@ mod test {
     fn test_uniform_hemisphere() {
         let image = create_image_from_distribution(200, 200, || uniform_hemisphere());
         let _ = image.save("uniform.png");
+    }
+
+    #[test]
+    fn test_onb() {
+        let image = create_image_from_distribution(200, 200, || {
+            let normal = Vec3::new(1.0, 0.0, 0.0);
+            let sample = uniform_sample_hemisphere(normal);
+
+            //println!(" {:?}", sample);
+
+            let w = Vec3::new(0.0, 1.0, 0.0);
+
+            let onb = Onb::new(w);
+            onb.transform(sample)
+            //sample
+        });
+        let _ = image.save("onb.png");
+    }
+
+    #[test]
+    fn test_onb_basic() {
+        let w = Vec3::new(0.0, 1.0, 0.0);
+        let v = Vec3::new(1.0, 0.0, 0.0);
+        assert_eq!(Onb::local_to_world(w, v), Vec3::new(0.0, 1.0, 0.0));
     }
 }

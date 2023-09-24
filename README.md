@@ -4,6 +4,8 @@
 
 ![](./img/render-1695389283-640x480-s1024-b5.png)
 
+![](./img/render-1695545641-640x480-s16384-b5.png)
+
 ## Links
 
 -  https://www.scratchapixel.com/lessons/3d-basic-rendering/global-illumination-path-tracing/introduction-global-illumination-path-tracing.html

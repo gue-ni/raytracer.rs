@@ -387,21 +387,6 @@ where
     }
 }
 
-#[allow(dead_code)]
-pub type Vec3f = Vec3<f32>;
-
-#[allow(dead_code)]
-pub type Vec3i = Vec3<i32>;
-
-#[allow(dead_code)]
-pub type Vec2f = Vec2<f32>;
-
-#[allow(dead_code)]
-pub type Vec2i = Vec2<i32>;
-
-#[allow(dead_code)]
-pub type Vec2u = Vec2<u32>;
-
 impl From<(u32, u32)> for Vec2f {
     fn from(item: (u32, u32)) -> Self {
         Self {
@@ -425,10 +410,13 @@ pub struct Mat3<T> {
     pub m: [T; 3 * 3],
 }
 
-impl <T> Default for Mat3<T> where T: Number  + std::default::Default {
+impl<T> Default for Mat3<T>
+where
+    T: Number + std::default::Default,
+{
     fn default() -> Self {
         Self {
-            m: [T::default(); 3 * 3]
+            m: [T::default(); 3 * 3],
         }
     }
 }
@@ -481,11 +469,32 @@ pub struct Mat4<T> {
     pub m: [T; 4 * 4],
 }
 
-impl <T> Default for Mat4<T> where T: Number  + std::default::Default {
+impl<T> Default for Mat4<T>
+where
+    T: Number + std::default::Default,
+{
     fn default() -> Self {
         Self {
-            m: [T::default(); 4 * 4]
+            m: [T::default(); 4 * 4],
         }
+    }
+}
+
+impl<T> From<T> for Mat4<T>
+where
+    T: Number,
+{
+    fn from(item: T) -> Self {
+        Self { m: [item; 4 * 4] }
+    }
+}
+
+impl<T> From<[T; 4 * 4]> for Mat4<T>
+where
+    T: Number,
+{
+    fn from(item: [T; 4 * 4]) -> Self {
+        Self { m: item }
     }
 }
 
@@ -514,8 +523,16 @@ where
     }
 }
 
-#[allow(dead_code)]
+pub type Vec3f = Vec3<f32>;
+pub type Vec3i = Vec3<i32>;
+pub type Vec3u = Vec3<u32>;
+
+pub type Vec2f = Vec2<f32>;
+pub type Vec2i = Vec2<i32>;
+pub type Vec2u = Vec2<u32>;
+
 pub type Mat3f = Mat3<f32>;
+pub type Mat4f = Mat4<f32>;
 
 #[cfg(test)]
 mod tests {
@@ -523,43 +540,43 @@ mod tests {
 
     #[test]
     fn test_length() {
-        let v0 = Vec3f::new(1.0, 0.0, 0.0);
+        let v0 = Vec3::new(1.0, 0.0, 0.0);
         assert_eq!(v0.length(), 1.0);
     }
 
     #[test]
     fn test_normalize() {
-        let v0 = Vec3f::new(1.0, 5.0, 1.0);
-        assert_eq!(Vec3f::normalize(v0).length(), 1.0);
+        let v0 = Vec3::new(1.0, 5.0, 1.0);
+        assert_eq!(Vec3::normalize(v0).length(), 1.0);
     }
 
     #[test]
     fn test_cross() {
-        let a = Vec3f::new(2.0, 3.0, 4.0);
-        let b = Vec3f::new(5.0, 6.0, 7.0);
-        assert_eq!(Vec3f::cross(a, b), Vec3f::new(-3.0, 6.0, -3.0));
+        let a = Vec3::new(2.0, 3.0, 4.0);
+        let b = Vec3::new(5.0, 6.0, 7.0);
+        assert_eq!(Vec3::cross(a, b), Vec3::new(-3.0, 6.0, -3.0));
     }
 
     #[test]
     fn test_dot() {
         assert_eq!(
-            Vec3f::dot(Vec3f::new(0.0, 1.0, 0.0), Vec3f::new(1.0, 0.0, 0.0)),
+            Vec3::dot(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0, 0.0, 0.0)),
             0.0
         );
     }
 
     #[test]
     fn test_math_vec3() {
-        let a = Vec3f::new(2.0, 3.0, 4.0);
-        let b = Vec3f::new(5.0, 6.0, 7.0);
+        let a = Vec3::new(2.0, 3.0, 4.0);
+        let b = Vec3::new(5.0, 6.0, 7.0);
         let _s = 1.5;
-        assert_eq!(a + b, Vec3f::new(7.0, 9.0, 11.0));
-        assert_eq!(a - b, Vec3f::new(-3.0, -3.0, -3.0));
-        assert_eq!(a * b, Vec3f::new(10.0, 18.0, 28.0));
+        assert_eq!(a + b, Vec3::new(7.0, 9.0, 11.0));
+        assert_eq!(a - b, Vec3::new(-3.0, -3.0, -3.0));
+        assert_eq!(a * b, Vec3::new(10.0, 18.0, 28.0));
 
-        let c = Vec3f::fill(6.0);
-        let d = Vec3f::fill(3.0);
-        assert_eq!(c / d, Vec3f::fill(2.0));
+        let c = Vec3::fill(6.0);
+        let d = Vec3::fill(3.0);
+        assert_eq!(c / d, Vec3::fill(2.0));
 
         //assert_eq!(a + s, Vec3f::new(1.0, 1.0, 6.0));
         //assert_eq!(a - s, Vec3f::new(1.0, 1.0, 6.0));
@@ -569,8 +586,8 @@ mod tests {
 
     #[test]
     fn test_math_vec2() {
-        let _a = Vec2f::new(2.0, 3.0);
-        let _b = Vec2f::new(4.0, 5.0);
+        let _a = Vec2::new(2.0, 3.0);
+        let _b = Vec2::new(4.0, 5.0);
         let _s = 1.5;
 
         // assert_eq!(a + b, Vec2f::new(1.0, 1.0));
@@ -586,7 +603,7 @@ mod tests {
 
     #[test]
     fn test_index() {
-        let v = Vec3f::new(1.0, 2.0, 3.0);
+        let v = Vec3::new(1.0, 2.0, 3.0);
         assert_eq!(v.x, v[0]);
         assert_eq!(v.y, v[1]);
         assert_eq!(v.z, v[2]);

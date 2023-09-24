@@ -42,12 +42,12 @@ pub fn main() {
 
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
-    let z = 7.0;
+    let z = 8.5;
 
     // right
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(2.5, 2.25, z), 0.75),
-        material: Material::diffuse(Vec3f::fill(0.999)),
+        material: Material::emissive(Vec3f::fill(0.999), 0.75),
     });
     // middle
     scene.add(Object {
@@ -57,7 +57,7 @@ pub fn main() {
     // left
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(-2.5, 2.25, z), 0.75),
-        material: Material::specular(Vec3f::fill(0.999)),
+        material: Material::specular(Vec3f::fill(0.95)),
     });
 
     let aspect_ratio = (width as f32) / (height as f32);
@@ -121,13 +121,13 @@ pub fn main() {
 
     println!("Elapsed time: {:.2?}", elapsed);
 
-    let mut filename = String::from("render.png");
-    save_image(&image, &filename);
 
     let timestamp = get_sys_time_in_secs();
-    filename = format!(
+    let filename = format!(
         "img/render/render-{}-{}x{}-s{}-b{}.png",
         timestamp, width, height, samples, bounces
     );
+    save_image(&image, &String::from("render.png"));
+    save_image(&image, &String::from("img/latest.png"));
     save_image(&image, &filename);
 }
