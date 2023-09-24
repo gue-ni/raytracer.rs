@@ -1,4 +1,5 @@
 Cargo.lock
 target/
+references/
 img/render/*.png
 *.png

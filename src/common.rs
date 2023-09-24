@@ -38,8 +38,8 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     }
 }
 
-pub fn distribution_ggx(n: Vec3f, h: Vec3f, a: f32) -> f32 {
-    let a2 = a * a;
+pub fn distribution_ggx(n: Vec3f, h: Vec3f, roughness: f32) -> f32 {
+    let a2 = roughness * roughness;
     let ndoth = f32::max(Vec3f::dot(n, h), 0.0);
     let ndoth2 = ndoth * ndoth;
     let nom = a2;
@@ -47,7 +47,8 @@ pub fn distribution_ggx(n: Vec3f, h: Vec3f, a: f32) -> f32 {
     denom = PI * denom * denom;
     nom / denom
 }
-pub fn geometry_schlick_ggx(ndotv: f32, roughness: f32) -> f32 {
+
+fn geometry_schlick_ggx(ndotv: f32, roughness: f32) -> f32 {
     let r = roughness + 1.0;
     let k = (r * r) / 8.0;
     let num = ndotv;
@@ -61,10 +62,6 @@ pub fn geometry_smith(n: Vec3f, v: Vec3f, l: Vec3f, roughness: f32) -> f32 {
     let ggx2 = geometry_schlick_ggx(ndotv, roughness);
     let ggx1 = geometry_schlick_ggx(ndotl, roughness);
     ggx1 * ggx2
-}
-
-pub fn fresnel_schlick(cos_theta: f32, f0: Vec3f) -> Vec3f {
-    f0 + (Vec3f::fill(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
 }
 
 /// Returns vector based on spherical coordinates
@@ -88,6 +85,7 @@ pub fn uniform_hemisphere() -> Vec3f {
     Vec3f::normalize(from_spherical(theta, phi))
 }
 
+/// Cosine weighted sample from hemisphere
 pub fn cosine_weighted_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
 
@@ -128,6 +126,7 @@ pub fn from_hex(color: u32) -> Vec3f {
 
 pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
     let scale = u8::MAX as f32;
+    const GAMMA: f32 = 1.5;
 
     let buffer: Vec<u8> = framebuffer
         .iter()
@@ -135,7 +134,8 @@ pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
         .map(|value| {
             // gamma correction
             // (value * scale) as u8
-            (value.sqrt() * scale) as u8
+            //(value.sqrt() * scale) as u8
+            (value.powf(1.0 / GAMMA) * scale) as u8
         })
         .collect();
 

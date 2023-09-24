@@ -44,28 +44,38 @@ pub fn main() {
 
     let z = 8.5;
 
-    // right
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(2.5, 2.25, z), 0.75),
-        material: Material::emissive(Vec3f::fill(0.999), 0.75),
-    });
-    // middle
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, 1.5, z), 1.5),
-        material: Material::diffuse(Vec3f::new(1.0, 0.0, 0.0)),
-    });
-    // left
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-2.5, 2.25, z), 0.75),
-        material: Material::specular(Vec3f::fill(0.95)),
-    });
-
-    let aspect_ratio = (width as f32) / (height as f32);
-    let r = 100000.0;
-
     // room size
+    let aspect_ratio = (width as f32) / (height as f32);
     let h = 3.0;
     let w = h * aspect_ratio;
+    let spacing = 2.3;
+    let left = -spacing * 2.5;
+
+    // left
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(left + spacing * 1.0, 2.0, z), 1.0),
+        material: Material::mirror(Vec3f::from(0.99)),
+    });
+
+    //
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(left + spacing * 2.0, 2.0, z), 1.0),
+        material: Material::physical(from_hex(0xff9429), 0.2, 0.5),
+    });
+
+    //
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(left + spacing * 3.0, 2.0, z), 1.0),
+        material: Material::diffuse(Vec3f::fill(0.99)),
+    });
+
+    // right
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(left + spacing * 4.0, 2.0, z), 1.0),
+        material: Material::physical(Vec3f::new(0.99, 0.01, 0.01), 0.2, 1.0),
+    });
+
+    let r = 100000.0;
 
     // ################## lights ###################
     /*
@@ -105,6 +115,10 @@ pub fn main() {
     });
     scene.add(Object {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, z + (r + w)), r),
+        material: wall,
+    });
+    scene.add(Object {
+        geometry: Sphere::new(Vec3f::new(0.0, 0.0, z - (r + w)), r),
         material: wall,
     });
 

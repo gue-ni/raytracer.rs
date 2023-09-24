@@ -79,8 +79,12 @@ fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Ve
     }
 }
 
+/// Naive, unbiased monte-carlo path tracing
+/// This function implements the rendering equation using monte-carlo integration
+/// L(p, wo) = Le + ∫ Li(p, wi)  fr(wo, wi) cos(theta) dw
 #[allow(dead_code)]
 fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+    // Material properties
     let material = scene.objects[hit.idx].material;
     let emittance = material.albedo * material.emittance;
 
@@ -142,7 +146,8 @@ fn render_multithreaded(camera: &Camera, scene: &Scene, samples: u32, bounces: u
 
     let mut framebuffer = vec![Vec3f::fill(0.0); (width * height) as usize];
 
-    let worker_count = available_parallelism().unwrap().get();
+    // leave one thread for operating the computer : )
+    let worker_count = usize::max(available_parallelism().unwrap().get() - 1, 2);
     let chunk_size = framebuffer.len() / worker_count;
 
     println!("workers = {}", worker_count);

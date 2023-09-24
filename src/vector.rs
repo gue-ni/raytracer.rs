@@ -63,6 +63,15 @@ where
     }
 }
 
+impl<T> From<T> for Vec3<T>
+where
+    T: Number,
+{
+    fn from(v: T) -> Self {
+        Self::new(v, v, v)
+    }
+}
+
 impl<T> Add for Vec3<T>
 where
     T: Number,

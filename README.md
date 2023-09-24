@@ -10,3 +10,5 @@
 -   https://www.pbr-book.org/
 -   https://typhomnt.github.io/teaching/ray_tracing/pbr_intro/
 -   https://nickymeuleman.netlify.app/blog/multithreading-rust
+-   https://computergraphics.stackexchange.com/questions/4979/what-is-importance-sampling
+-   https://computergraphics.stackexchange.com/questions/4394/path-tracing-the-cook-torrance-brdf
