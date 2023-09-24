@@ -585,9 +585,9 @@ mod tests {
         assert_eq!(a - b, Vec3::new(-3.0, -3.0, -3.0));
         assert_eq!(a * b, Vec3::new(10.0, 18.0, 28.0));
 
-        let c = Vec3::fill(6.0);
-        let d = Vec3::fill(3.0);
-        assert_eq!(c / d, Vec3::fill(2.0));
+        let c = Vec3::from(6.0);
+        let d = Vec3::from(3.0);
+        assert_eq!(c / d, Vec3::from(2.0));
 
         //assert_eq!(a + s, Vec3f::new(1.0, 1.0, 6.0));
         //assert_eq!(a - s, Vec3f::new(1.0, 1.0, 6.0));
