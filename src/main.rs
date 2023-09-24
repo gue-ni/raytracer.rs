@@ -123,7 +123,7 @@ pub fn main() {
     let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (width, height));
 
     let now = Instant::now();
-    let image = render(&camera, &scene, samples, bounces);
+    let image = Renderer::render(&camera, &scene, samples, bounces);
     let elapsed = now.elapsed();
 
     println!("Elapsed time: {:.2?}", elapsed);
