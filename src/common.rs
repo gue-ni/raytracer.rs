@@ -45,7 +45,7 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     }
 }
 
-pub fn fresnel(_incoming: Vec3f, _normal: Vec3f) -> f32 {
+pub fn fresnel(_incoming: Vec3f, _normal: Vec3f, _ior: f32) -> f32 {
     0.0
 }
 
@@ -200,7 +200,7 @@ mod test {
 
     #[test]
     fn test_serialize() {
-        let json = fs::read_to_string("scenes/minimal.json").unwrap();
+        let json = fs::read_to_string("scenes/sphere.json").unwrap();
         let config: ConfigFile = serde_json::from_str(&json).unwrap();
         println!("{:?}", config);
     }

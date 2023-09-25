@@ -3,9 +3,9 @@
 		"background": { "x": 0.68, "y": 0.87, "z": 0.96 },
 		"objects": [
 			{
-				"geometry": { "center": { "x": -3.45, "y": 2.0, "z": 8.5 }, "radius": 1.0 },
+				"geometry": { "center": [-3.45, 2.0, 8.5], "radius": 1.0 },
 				"material": {
-					"albedo": { "x": 0.99, "y": 0.99, "z": 0.99 },
+					"albedo": [0.99, 0.09, 0.09],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -50,7 +50,7 @@
 				"geometry": { "center": { "x": -1.5, "y": -1.75, "z": 7.0 }, "radius": 0.75 },
 				"material": {
 					"albedo": { "x": 0.27058825, "y": 0.7254902, "z": 0.827451 },
-					"emittance": 15.0,
+					"emittance": 8.0,
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
@@ -61,7 +61,7 @@
 				"geometry": { "center": { "x": 1.5, "y": -1.75, "z": 10.0 }, "radius": 0.75 },
 				"material": {
 					"albedo": { "x": 0.73333335, "y": 0.20392157, "z": 0.60784316 },
-					"emittance": 15.0,
+					"emittance": 8.0,
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
@@ -101,6 +101,7 @@
 					"material": "CosineWeighted"
 				}
 			},
+
 			{
 				"geometry": { "center": { "x": 100005.336, "y": 0.0, "z": 8.5 }, "radius": 100000.0 },
 				"material": {
@@ -124,9 +125,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 0.0, "y": 0.0, "z": -99996.836 }, "radius": 100000.0 },
+				"geometry": { "center": { "x": 0.0, "y": 0.0, "z": -100000.836 }, "radius": 100000.0 },
 				"material": {
-					"albedo": { "x": 0.99, "y": 0.99, "z": 0.99 },
+					"albedo": [0,0,0],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,

@@ -114,9 +114,10 @@ impl Renderer {
     /// Trace ray into scene, returns color
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
-            match scene.hit(ray, 0.0, f32::INFINITY) {
-                None => scene.background,
-                Some(hit) => Self::naive_path_tracing(&hit, scene, ray, depth),
+            if let Some(hit) = scene.hit(ray, 0.0001, f32::INFINITY) {
+                Self::naive_path_tracing(&hit, scene, ray, depth)
+            } else {
+                scene.background
             }
         } else {
             Vec3f::from(0.0)
