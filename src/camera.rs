@@ -7,6 +7,8 @@ use rand::Rng;
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Camera {
     pub position: Vec3f,
+
+    #[serde(skip)]
     pub resolution: Vec2f,
 }
 

@@ -32,7 +32,11 @@ fn save_image(image: &RgbImage, filename: &String) {
 pub fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() != 5 {
+    if args.len() != 6 {
+        println!(
+            "Usage: {} <width> <height> <samples> <bounces> <scene json>",
+            args[0]
+        );
         panic!("Invalid numer of arguments {:?}", args.len());
     }
 
@@ -40,99 +44,21 @@ pub fn main() {
     let height = parse(&args[2]);
     let samples = parse(&args[3]);
     let bounces = parse(&args[4]);
+    let scene_path = &args[5];
 
-    /*
-
-    let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
-
-    let z = 8.5;
-
-    // room size
-    let aspect_ratio = (width as f32) / (height as f32);
-    let h = 3.0;
-    let w = h * aspect_ratio;
-    let spacing = 2.3;
-    let left = -spacing * 2.5;
-
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(left + spacing * 1.0, 2.0, z), 1.0),
-        material: Material::transparent(Vec3f::from(0.99)),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(left + spacing * 2.0, 2.0, z), 1.0),
-        material: Material::physical(from_hex(0xff9429), 0.2, 0.5),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(left + spacing * 3.0, 2.0, z), 1.0),
-        material: Material::mirror(Vec3f::from(0.95)),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(left + spacing * 4.0, 2.0, z), 1.0),
-        material: Material::physical(Vec3f::new(0.99, 0.01, 0.01), 0.25, 0.85),
-    });
-
-    let r = 100000.0;
-
-    // ################## lights ###################
-    /*
-    let light_radius = 3.0;
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -(h + light_radius * 0.85), z), light_radius),
-        material: Material::emissive(from_hex(0x99dde7), 12.0),
-    });
-    */
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-1.5, -1.75, z - 1.5), 0.5),
-        material: Material::emissive(from_hex(0x45b9d3), 17.0),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(1.5, -1.75, z + 1.5), 0.5),
-        material: Material::emissive(from_hex(0xbb349b), 17.0),
-    });
-
-    let wall = Material::diffuse(Vec3f::from(0.99));
-    let _light = Material::emissive(Vec3f::from(1.0), 1.0);
-
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, -(r + h), z), r),
-        material: wall,
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, r + h, z), r),
-        material: wall,
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(-(r + w), 0.0, z), r),
-        material: Material::diffuse(Vec3f::new(0.75, 0.25, 0.25)),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(r + w, 0.0, z), r),
-        material: Material::diffuse(Vec3f::new(0.25, 0.75, 0.25)),
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, 0.0, z + (r + w)), r),
-        material: wall,
-    });
-    scene.add(Object {
-        geometry: Sphere::new(Vec3f::new(0.0, 0.0, z - (r + w)), r),
-        material: wall,
-    });
-    */
-
-    let json = fs::read_to_string("scenes/scene.json").unwrap();
+    let json = fs::read_to_string(scene_path).unwrap();
     let config: ConfigFile = serde_json::from_str(&json).unwrap();
 
+    let camera = Camera::new(config.camera.position, (width, height));
+
+    println!("Config: {}", scene_path);
     println!(
         "resolution: ({}, {}) , samples: {}, bounces: {}",
         width, height, samples, bounces
     );
 
-    //let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (width, height));
-    let camera = config.camera;
-    let scene = config.scene;
-
     let now = Instant::now();
-    let image = Renderer::render(&camera, &scene, samples, bounces);
+    let image = Renderer::render(&camera, &config.scene, samples, bounces);
     let elapsed = now.elapsed();
 
     println!("Elapsed time: {:.2?}", elapsed);

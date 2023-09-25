@@ -292,6 +292,15 @@ where
     }
 }
 
+impl<T> Default for Vec2<T>
+where
+    T: Number + std::default::Default,
+{
+    fn default() -> Self {
+        Self::new(T::default(), T::default())
+    }
+}
+
 impl<T> From<T> for Vec2<T>
 where
     T: Number,
