@@ -211,7 +211,7 @@ mod test {
 
     #[test]
     fn test_serialize() {
-        let json = fs::read_to_string("scenes/scene.json").unwrap();
+        let json = fs::read_to_string("scenes/minimal.json").unwrap();
         let config: ConfigFile = serde_json::from_str(&json).unwrap();
         println!("{:?}", config);
     }
