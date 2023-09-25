@@ -72,10 +72,9 @@ pub fn main() {
 
     let timestamp = get_sys_time_in_secs();
     let filename = format!(
-        "img/render/render-{}-{}x{}-s{}-b{}.png",
+        "renders/render-{}-{}x{}-s{}-b{}.png",
         timestamp, width, height, samples, bounces
     );
     save_image(&image, &String::from("render.png"));
-    save_image(&image, &String::from("img/latest.png"));
     save_image(&image, &filename);
 }
