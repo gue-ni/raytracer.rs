@@ -58,9 +58,9 @@ pub fn main() {
 
     let camera = Camera::new(config.camera.position, (width, height));
 
-    println!("config: {}", scene_path);
+    println!("Config: {}", scene_path);
     println!(
-        "resolution: ({}, {}) , samples: {}, bounces: {}",
+        "Resolution: ({}, {}) , Samples: {}, Bounces: {}",
         width, height, samples, bounces
     );
 
