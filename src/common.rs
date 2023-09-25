@@ -116,16 +116,10 @@ pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
     let buffer: Vec<u8> = framebuffer
         .iter()
         .flat_map(|&pixel| [pixel.x, pixel.y, pixel.z])
-        /*
         .map(|value| {
             // gamma correction
-            //(value * scale) as u8
-            //(value.sqrt() * scale) as u8
-            //((value * scale).powf(1.0 / GAMMA) ) as u8
-            //(value / (value + 1.0)).powf(1.0 / _GAMMA)
-            value
+            value.sqrt()
         })
-        */
         .map(|value| (value * scale) as u8)
         .collect();
 

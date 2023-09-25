@@ -1,0 +1,128 @@
+{
+	"scene": {
+		"background": [0.68, 0.87, 0.96],
+		"objects": [
+			{
+				"comment": "Floor",
+				"geometry": { "center": [0, 5002, 5], "radius": 5000 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Ceiling",
+				"geometry": { "center": [0, -5002, 5], "radius": 5000 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Green Wall",
+				"geometry": { "center": [5002, 0, 5], "radius": 5000 },
+				"material": {
+					"albedo": [0.0, 1.0, 0.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Red Wall",
+				"geometry": { "center": [-5002, 0, 5], "radius": 5000 },
+				"material": {
+					"albedo": [1.0, 0.0, 0.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Front Wall",
+				"geometry": { "center": [0, 0, 5007], "radius": 5000 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Back Wall",
+				"geometry": { "center": [0, 0, -5002], "radius": 5000 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Light",
+				"geometry": { "center": [0, -6.95, 5], "radius": 5 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 12,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			},
+			{
+				"comment": "Metallic Sphere",
+				"geometry": { "center": [-1.0, 1.25, 5.0], "radius": 0.75 },
+				"material": {
+					"albedo": [1.0, 0.58, 0.16],
+					"emittance": 0,
+					"roughness": 0.2,
+					"ior": 0,
+					"metallic": 0.5,
+					"material": "CookTorrance"
+				}
+			},
+			{
+				"comment": "Mirror Sphere",
+				"geometry": { "center": [1.0, 1.25, 5.0], "radius": 0.75 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "Mirror"
+				}
+			},
+			{
+				"comment": "Diffuse Sphere",
+				"geometry": { "center": [0.0, 1.25, 6.0], "radius": 0.75 },
+				"material": {
+					"albedo": [1.0, 1.0, 1.0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
+					"material": "CosineWeighted"
+				}
+			}
+		]
+	},
+	"camera": { "position": [0, 0, 0] }
+}
