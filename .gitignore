@@ -1,5 +1,6 @@
 Cargo.lock
 target/
+scenes/
+renders/
 references/
-img/render/*.png
 *.png

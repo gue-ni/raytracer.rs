@@ -1,6 +1,6 @@
 {
 	"scene": {
-		"background": { "x": 0.68, "y": 0.87, "z": 0.96 },
+		"background": [0.68, 0.87, 0.96],
 		"objects": [
 			{
 				"geometry": { "center": [-3.45, 2.0, 8.5], "radius": 1.0 },
@@ -14,9 +14,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": -1.1500001, "y": 2.0, "z": 8.5 }, "radius": 1.0 },
+				"geometry": { "center": [-1.1500001, 2.0, 8.5], "radius": 1.0 },
 				"material": {
-					"albedo": { "x": 1.0, "y": 0.5803922, "z": 0.16078432 },
+					"albedo": [1.0, 0.5803922, 0.16078432],
 					"emittance": 0.0,
 					"roughness": 0.2,
 					"ior": 0.0,
@@ -25,9 +25,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 1.1499996, "y": 2.0, "z": 8.5 }, "radius": 1.0 },
+				"geometry": { "center": [1.1499996, 2.0, 8.5], "radius": 1.0 },
 				"material": {
-					"albedo": { "x": 0.95, "y": 0.95, "z": 0.95 },
+					"albedo": [0.95, 0.95, 0.95],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -36,9 +36,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 3.4499998, "y": 2.0, "z": 8.5 }, "radius": 1.0 },
+				"geometry": { "center": [3.4499998, 2.0, 8.5], "radius": 1.0 },
 				"material": {
-					"albedo": { "x": 0.99, "y": 0.01, "z": 0.01 },
+					"albedo": [0.99, 0.01, 0.01],
 					"emittance": 0.0,
 					"roughness": 0.25,
 					"ior": 0.0,
@@ -47,9 +47,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": -1.5, "y": -1.75, "z": 7.0 }, "radius": 0.75 },
+				"geometry": { "center": [-1.5, -1.75, 7.0], "radius": 0.75 },
 				"material": {
-					"albedo": { "x": 0.27058825, "y": 0.7254902, "z": 0.827451 },
+					"albedo": [0.27058825, 0.7254902, 0.827451],
 					"emittance": 8.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -58,9 +58,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 1.5, "y": -1.75, "z": 10.0 }, "radius": 0.75 },
+				"geometry": { "center": [1.5, -1.75, 10.0], "radius": 0.75 },
 				"material": {
-					"albedo": { "x": 0.73333335, "y": 0.20392157, "z": 0.60784316 },
+					"albedo": [0.73333335, 0.20392157, 0.60784316],
 					"emittance": 8.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -69,9 +69,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 0.0, "y": -100003.0, "z": 8.5 }, "radius": 100000.0 },
+				"geometry": { "center": [0.0, -100003.0, 8.5], "radius": 100000.0 },
 				"material": {
-					"albedo": { "x": 0.99, "y": 0.99, "z": 0.99 },
+					"albedo": [0.99, 0.99, 0.99],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -80,9 +80,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 0.0, "y": 100003.0, "z": 8.5 }, "radius": 100000.0 },
+				"geometry": { "center": [0.0, 100003.0, 8.5], "radius": 100000.0 },
 				"material": {
-					"albedo": { "x": 0.99, "y": 0.99, "z": 0.99 },
+					"albedo": [0.99, 0.99, 0.99],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -91,9 +91,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": -100005.336, "y": 0.0, "z": 8.5 }, "radius": 100000.0 },
+				"geometry": { "center": [-100005.336, 0.0, 8.5], "radius": 100000.0 },
 				"material": {
-					"albedo": { "x": 0.75, "y": 0.25, "z": 0.25 },
+					"albedo": [0.75, 0.25, 0.25],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -103,9 +103,9 @@
 			},
 
 			{
-				"geometry": { "center": { "x": 100005.336, "y": 0.0, "z": 8.5 }, "radius": 100000.0 },
+				"geometry": { "center": [100005.336, 0.0, 8.5], "radius": 100000.0 },
 				"material": {
-					"albedo": { "x": 0.25, "y": 0.75, "z": 0.25 },
+					"albedo": [0.25, 0.75, 0.25],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -114,9 +114,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 0.0, "y": 0.0, "z": 100013.836 }, "radius": 100000.0 },
+				"geometry": { "center": [0.0, 0.0, 100013.836], "radius": 100000.0 },
 				"material": {
-					"albedo": { "x": 0.99, "y": 0.99, "z": 0.99 },
+					"albedo": [0.99, 0.99, 0.99],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -125,9 +125,9 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 0.0, "y": 0.0, "z": -100000.836 }, "radius": 100000.0 },
+				"geometry": { "center": [0.0, 0.0, -100000.836], "radius": 100000.0 },
 				"material": {
-					"albedo": [0,0,0],
+					"albedo": [0, 0, 0],
 					"emittance": 0.0,
 					"roughness": 0.0,
 					"ior": 0.0,
@@ -137,5 +137,5 @@
 			}
 		]
 	},
-	"camera": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 } }
+	"camera": { "position": [0.0, 0.0, 0.0] }
 }
