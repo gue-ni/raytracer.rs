@@ -1,11 +1,17 @@
+use image::RgbImage;
 use rand::Rng;
-
-#[allow(unused_imports)]
+use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
-use image::RgbImage;
-
+use crate::camera::*;
+use crate::geometry::*;
 use crate::vector::*;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ConfigFile {
+    pub scene: Scene,
+    pub camera: Camera,
+}
 
 #[allow(dead_code)]
 pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
@@ -127,6 +133,7 @@ pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
 mod test {
     use crate::common::*;
     use crate::onb::*;
+    use std::fs;
 
     #[test]
     fn test_reflect() {
@@ -197,5 +204,12 @@ mod test {
             Onb::local_to_world(normal, sample)
         });
         let _ = image.save("onb.png");
+    }
+
+    #[test]
+    fn test_serialize() {
+        let json = fs::read_to_string("scenes/scene.json").unwrap();
+        let config: ConfigFile = serde_json::from_str(&json).unwrap();
+        println!("{:?}", config);
     }
 }

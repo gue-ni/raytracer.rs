@@ -1,6 +1,7 @@
 use image::RgbImage;
 use raytracer::*;
 use std::env;
+use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
@@ -39,6 +40,8 @@ pub fn main() {
     let height = parse(&args[2]);
     let samples = parse(&args[3]);
     let bounces = parse(&args[4]);
+
+    /*
 
     let mut scene: Scene = Scene::new(Vec3f::new(0.68, 0.87, 0.96));
 
@@ -114,13 +117,19 @@ pub fn main() {
         geometry: Sphere::new(Vec3f::new(0.0, 0.0, z - (r + w)), r),
         material: wall,
     });
+    */
+
+    let json = fs::read_to_string("scenes/scene.json").unwrap();
+    let config: ConfigFile = serde_json::from_str(&json).unwrap();
 
     println!(
         "resolution: ({}, {}) , samples: {}, bounces: {}",
         width, height, samples, bounces
     );
 
-    let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (width, height));
+    //let camera = Camera::new(Vec3f::new(0.0, 0.0, 0.0), (width, height));
+    let camera = config.camera;
+    let scene = config.scene;
 
     let now = Instant::now();
     let image = Renderer::render(&camera, &scene, samples, bounces);

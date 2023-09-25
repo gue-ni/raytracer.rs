@@ -1,6 +1,7 @@
 use crate::common::*;
 use crate::onb::Onb;
 use crate::vector::*;
+use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
 
 //
@@ -14,7 +15,7 @@ pub trait BRDF {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f);
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum MaterialType {
     /// Mirror (perfectly specular)
     Mirror,
@@ -29,7 +30,7 @@ pub enum MaterialType {
 }
 
 /// Material Properties
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Material {
     pub albedo: Vec3f,
     pub emittance: f32,

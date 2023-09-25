@@ -1,9 +1,10 @@
 use crate::ray::*;
 use crate::vector::*;
+use serde::{Deserialize, Serialize};
 
 use rand::Rng;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Camera {
     pub position: Vec3f,
     pub resolution: Vec2f,
@@ -29,4 +30,17 @@ impl Camera {
     }
 
     //pub fn look_at(resolution: (u32, u32), eye: Vec3f, up: Vec3f, target: Vec3f) -> Self {}
+}
+
+#[cfg(test)]
+mod test {
+    use crate::camera::*;
+
+    #[test]
+    fn test_deserialize() {
+        let json = r#"{ "position": [0.0, 1.0, 0.0], "resolution": [640.0, 480.0] }"#;
+        let camera: Camera = serde_json::from_str(json).unwrap();
+        assert_eq!(camera.position, Vec3::new(0.0, 1.0, 0.0));
+        assert_eq!(camera.resolution, Vec2::new(640.0, 480.0));
+    }
 }

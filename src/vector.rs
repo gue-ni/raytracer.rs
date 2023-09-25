@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
 pub trait SquareRoot {
@@ -30,7 +31,7 @@ pub trait Number:
 impl Number for f32 {}
 impl Number for i32 {}
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Vec3<T> {
     pub x: T,
     pub y: T,
@@ -276,7 +277,7 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,
@@ -626,5 +627,28 @@ mod tests {
         let b = Mat3::from([3.0, 0.0, 1.0, 2.0, 1.0, 0.0, 1.0, 2.0, 4.0]);
         let c = Mat3::from([23.0, 13.0, 14.0, 21.0, 21.0, 33.0, 9.0, 6.0, 4.0]);
         assert_eq!(a * b, c);
+    }
+
+    #[test]
+    fn test_deserialize() {
+        {
+            let json = r#"{"x": 1.0, "y": 2.0, "z": 3.0}"#;
+            let vec: Vec3f = serde_json::from_str(json).unwrap();
+            println!("{:?}", vec);
+            assert_eq!(vec, Vec3f::new(1.0, 2.0, 3.0));
+        }
+        {
+            let json = r#"[1.0, 2.0, 3.0]"#;
+            let vec: Vec3f = serde_json::from_str(json).unwrap();
+            println!("{:?}", vec);
+            assert_eq!(vec, Vec3f::new(1.0, 2.0, 3.0));
+        }
+    }
+
+    #[test]
+    fn test_serialize() {
+        let vec = Vec3f::new(1.0, 2.0, 3.0);
+        let json = serde_json::to_string(&vec).unwrap();
+        println!("{:?}", json);
     }
 }
