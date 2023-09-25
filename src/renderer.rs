@@ -98,7 +98,8 @@ impl Renderer {
         let wo = -incoming.direction;
 
         // Orient normal correctly
-        let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
+        //let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
+        let normal = hit.normal;
 
         // Get outgoing ray direction and (brdf * cos_theta / pdf)
         let (wi, brdf_multiplier) = material.sample(normal, wo);

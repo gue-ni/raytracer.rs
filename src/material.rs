@@ -127,23 +127,25 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f32) -> f32 {
     ggx1 * ggx2
 }
 
+#[allow(dead_code)]
+fn fresnel() -> f32 {
+    0.0
+}
+
 impl BRDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
             MaterialType::Transparent => {
                 let mut rng = rand::thread_rng();
-                let _r = rng.gen_range(0.0..1.0);
 
-                /*
-                let wi = if r < 0.5 {
-                    refract(-wo, normal, 0.0)
+                let transparency = 0.5;
+
+                let wi = if rng.gen_range(0.0..1.0) <= transparency {
+                    refract(-wo, normal, 1.0 / self.ior)
                 } else {
                     reflect(-wo, normal)
                 };
-                */
-
-                let wi = refract(-wo, normal, 1.2);
 
                 let brdf = self.albedo;
                 (wi, brdf)

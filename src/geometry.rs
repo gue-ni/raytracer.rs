@@ -215,19 +215,33 @@ impl Hittable for Scene {
 mod test {
     use crate::common::*;
     use crate::geometry::*;
-    use crate::material::*;
     use crate::ray::*;
-
-    use std::fs;
 
     #[test]
     fn test_sphere_hit() {
         let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
         let ray = Ray::new(Vec3f::new(0.0, 0.0, 0.0), Vec3f::new(0.0, 0.0, 1.0));
-        let hit = sphere.hit(&ray, 0.0, f32::INFINITY).unwrap();
-        assert_eq!(hit.t, 4.0);
-        assert_eq!(hit.point, Vec3f::new(0.0, 0.0, 4.0));
-        assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
+        if let Some(hit) = sphere.hit(&ray, 0.0, f32::INFINITY) {
+            assert_eq!(hit.t, 4.0);
+            assert_eq!(hit.point, Vec3f::new(0.0, 0.0, 4.0));
+            assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn test_sphere_hit_inside() {
+        let sphere = Sphere::new(Vec3f::from(0.0), 3.0);
+        let ray = Ray::towards(sphere.center, Vec3::new(0.0, 0.0, 1.0));
+        if let Some(hit) = sphere.hit(&ray, 0.0, f32::INFINITY) {
+            assert_eq!(hit.t, 3.0);
+            assert_eq!(hit.point, Vec3f::new(0.0, 0.0, 3.0));
+            // what should the normal be in this case?
+            assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, 1.0));
+        } else {
+            assert!(false);
+        }
     }
 
     #[test]
@@ -273,18 +287,6 @@ mod test {
     }
 
     #[test]
-    fn test_sphere_inside() {
-        let sphere = Sphere::new(Vec3f::from(0.0), 3.0);
-        let ray = Ray::towards(sphere.center, Vec3::new(0.0, 0.0, 1.0));
-
-        if let Some(hit) = sphere.hit(&ray, 0.0, f32::INFINITY) {
-            println!("hit = {:?}", hit);
-        } else {
-            assert!(false);
-        }
-    }
-
-    #[test]
     fn test_misc() {
         let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
         let ray_1 = Ray::towards(Vec3::new(0.0, 0.0, 0.0), sphere.center);
@@ -315,10 +317,10 @@ mod test {
     #[test]
     fn test_deserialize() {
         {
-            let json = r#"{ "radius": 1.0, "center": [0.0, 0.0, 0.0] }"#;
+            let json = r#"{ "radius": 1.0, "center": [0.5, -1.0, 0.0] }"#;
             let sphere: Sphere = serde_json::from_str(json).unwrap();
             assert_eq!(sphere.radius, 1.0);
-            assert_eq!(sphere.center, Vec3::new(0.0, 0.0, 0.0));
+            assert_eq!(sphere.center, Vec3::new(0.5, -1.0, 0.0));
         }
         {
             let json = r#"{
@@ -335,8 +337,7 @@ mod test {
                     "material": "CosineWeighted"
                 }
             }"#;
-            //println!("{:?}", json);
-            let object: Object = serde_json::from_str(json).unwrap();
+            let _object: Object = serde_json::from_str(json).unwrap();
             //println!("{:?}", object);
         }
         {
@@ -359,7 +360,7 @@ mod test {
                     }
                 ]
             }"#;
-            let scene: Scene = serde_json::from_str(json).unwrap();
+            let _scene: Scene = serde_json::from_str(json).unwrap();
             //println!("{:?}", scene);
         }
     }
