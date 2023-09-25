@@ -40,9 +40,8 @@ mod test {
 
     #[test]
     fn test_deserialize() {
-        let json = r#"{ "position": [0.0, 1.0, 0.0], "resolution": [640.0, 480.0] }"#;
+        let json = r#"{ "position": [0.0, 1.0, 0.0] }"#;
         let camera: Camera = serde_json::from_str(json).unwrap();
         assert_eq!(camera.position, Vec3::new(0.0, 1.0, 0.0));
-        assert_eq!(camera.resolution, Vec2::new(640.0, 480.0));
     }
 }
