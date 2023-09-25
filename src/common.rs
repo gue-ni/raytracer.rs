@@ -111,16 +111,11 @@ pub fn from_hex(color: u32) -> Vec3f {
 
 pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
     let scale = u8::MAX as f32;
-    const _GAMMA: f32 = 2.2;
 
     let buffer: Vec<u8> = framebuffer
         .iter()
         .flat_map(|&pixel| [pixel.x, pixel.y, pixel.z])
-        .map(|value| {
-            // gamma correction
-            value.sqrt()
-        })
-        .map(|value| (value * scale) as u8)
+        .map(|value| (value.sqrt() * scale) as u8)
         .collect();
 
     RgbImage::from_vec(width, height, buffer).unwrap()
