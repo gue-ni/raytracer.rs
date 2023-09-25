@@ -159,7 +159,8 @@ impl Renderer {
         let mut framebuffer = vec![Vec3f::from(0.0); (width * height) as usize];
 
         // leave one thread for operating the computer : )
-        let worker_count = usize::max(available_parallelism().unwrap().get() - 1, 2);
+        //let worker_count = usize::max(available_parallelism().unwrap().get() - 1, 2);
+        let worker_count = available_parallelism().unwrap().get();
         let chunk_size = framebuffer.len() / worker_count;
 
         println!("workers = {}", worker_count);

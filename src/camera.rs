@@ -31,7 +31,10 @@ impl Camera {
         Ray::new(origin, Vec3f::normalize(target - origin))
     }
 
-    //pub fn look_at(resolution: (u32, u32), eye: Vec3f, up: Vec3f, target: Vec3f) -> Self {}
+    pub fn look_at(resolution: (u32, u32), position: Vec3f, _up: Vec3f, _target: Vec3f) -> Self {
+        // TODO
+        Self::new(position, resolution)
+    }
 }
 
 #[cfg(test)]

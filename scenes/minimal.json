@@ -1,33 +1,33 @@
 {
-	"camera": { "position": [0.0, 0.0, 0.0], "resolution": [1.0, 2.0] },
+	"camera": { "position": [0, 0, 0.0], "resolution": [1.0, 2.0] },
 	"scene": {
 		"background": [0.52, 0.8, 0.92],
 		"objects": [
 			{
 				"geometry": {
 					"radius": 1.0,
-					"center": [0.0, 0.0, 5.0]
+					"center": [0, 0, 5.0]
 				},
 				"material": {
-					"albedo": [0.99, 0.01, 0.01],
-					"emittance": 0.0,
-					"roughness": 0.0,
-					"ior": 0.0,
-					"metallic": 0.0,
+					"albedo": [1,0,0],
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
 					"material": "CosineWeighted"
 				}
 			},
 			{
 				"geometry": {
-					"radius": 5000.0,
-					"center": [0.0, 5001.0, 5.0]
+					"radius": 25000,
+					"center": [0, 25001.0, 5.0]
 				},
 				"material": {
 					"albedo": [0.75, 0.75, 0.75],
-					"emittance": 0.0,
-					"roughness": 0.0,
-					"ior": 0.0,
-					"metallic": 0.0,
+					"emittance": 0,
+					"roughness": 0,
+					"ior": 0,
+					"metallic": 0,
 					"material": "CosineWeighted"
 				}
 			}

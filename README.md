@@ -1,14 +1,14 @@
 # Monte Carlo Path Tracing in Rust
 
-```bash
-cargo run --release -- scenes/minimal.json 640 360 1024 5
-```
+`cargo run --release .\scenes\cornell_box.json 512 512 16384 5  `
+
+![cornell box](img/render-1695670962-512x512-s16384-b5.png)
+
+`cargo run --release -- scenes/minimal.json 640 360 1024 5`
 
 ![minimal.json](./img/render-1695660012-640x360-s1024-b5.png)
 
-```bash
-cargo run --release -- scenes/box.json 640 360 8192 5
-```
+`cargo run --release -- scenes/box.json 640 360 8192 5`
 
 ![box.json](./img/render-1695660447-640x360-s8192-b5.png)
 
