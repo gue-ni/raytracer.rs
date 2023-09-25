@@ -33,25 +33,32 @@ pub fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 6 {
-        println!(
-            "Usage: {} <width> <height> <samples> <bounces> <scene json>",
+        eprintln!(
+            "Usage: {} <scene_json> <width> <height> <samples> <bounces>",
             args[0]
         );
-        panic!("Invalid numer of arguments {:?}", args.len());
+        std::process::exit(1);
     }
 
-    let width = parse(&args[1]);
-    let height = parse(&args[2]);
-    let samples = parse(&args[3]);
-    let bounces = parse(&args[4]);
-    let scene_path = &args[5];
+    let scene_path = &args[1];
+    let width = parse(&args[2]);
+    let height = parse(&args[3]);
+    let samples = parse(&args[4]);
+    let bounces = parse(&args[5]);
 
-    let json = fs::read_to_string(scene_path).unwrap();
-    let config: ConfigFile = serde_json::from_str(&json).unwrap();
+    let json = match fs::read_to_string(scene_path) {
+        Ok(value) => value,
+        Err(error) => panic!("Failed to read {:?} ({:?})", scene_path, error),
+    };
+
+    let config: ConfigFile = match serde_json::from_str(&json) {
+        Ok(value) => value,
+        Err(error) => panic!("Failed to parse scene: {:?}", error),
+    };
 
     let camera = Camera::new(config.camera.position, (width, height));
 
-    println!("Config: {}", scene_path);
+    println!("config: {}", scene_path);
     println!(
         "resolution: ({}, {}) , samples: {}, bounces: {}",
         width, height, samples, bounces

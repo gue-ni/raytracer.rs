@@ -1,7 +1,7 @@
 {
 	"camera": { "position": [0.0, 0.0, 0.0], "resolution": [1.0, 2.0] },
 	"scene": {
-		"background": [0.68, 0.87, 0.96],
+		"background": [0.52, 0.8, 0.92],
 		"objects": [
 			{
 				"geometry": {

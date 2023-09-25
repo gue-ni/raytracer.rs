@@ -47,7 +47,7 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": -1.5, "y": -1.75, "z": 7.0 }, "radius": 0.5 },
+				"geometry": { "center": { "x": -1.5, "y": -1.75, "z": 7.0 }, "radius": 0.75 },
 				"material": {
 					"albedo": { "x": 0.27058825, "y": 0.7254902, "z": 0.827451 },
 					"emittance": 17.0,
@@ -58,7 +58,7 @@
 				}
 			},
 			{
-				"geometry": { "center": { "x": 1.5, "y": -1.75, "z": 10.0 }, "radius": 0.5 },
+				"geometry": { "center": { "x": 1.5, "y": -1.75, "z": 10.0 }, "radius": 0.75 },
 				"material": {
 					"albedo": { "x": 0.73333335, "y": 0.20392157, "z": 0.60784316 },
 					"emittance": 17.0,

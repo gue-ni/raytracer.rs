@@ -133,7 +133,7 @@ impl BRDF for Material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
             MaterialType::Transparent => {
                 let mut rng = rand::thread_rng();
-                let r = rng.gen_range(0.0..1.0);
+                let _r = rng.gen_range(0.0..1.0);
 
                 /*
                 let wi = if r < 0.5 {

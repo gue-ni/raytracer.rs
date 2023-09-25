@@ -73,13 +73,6 @@ impl Scene {
     pub fn add(&mut self, object: Object) {
         self.objects.push(object);
     }
-
-    pub fn from_str(string: &String) -> Scene {
-        match serde_json::from_str(string) {
-            Ok(scene) => scene,
-            Err(error) => panic!("Could not read Scene from string"),
-        }
-    }
 }
 
 pub trait Hittable {
@@ -363,7 +356,7 @@ mod test {
                     }
                 ]
             }"#;
-            let scene: Scene = Scene::from_str(&json.to_string());
+            let scene: Scene = serde_json::from_str(json).unwrap();
             //println!("{:?}", scene);
         }
     }
