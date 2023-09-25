@@ -83,10 +83,10 @@ pub trait Hittable {
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
         let m = ray.origin - self.center;
-        let b = Vec3f::dot(m, ray.direction);
-        let c = Vec3f::dot(m, m) - self.radius * self.radius;
+        let b = Vec3::dot(m, ray.direction);
+        let c = Vec3::dot(m, m) - self.radius * self.radius;
 
-        if c > 0.0 && b > 0.0 {
+        if 0.0 < c && 0.0 < b {
             return None;
         }
 
@@ -95,7 +95,11 @@ impl Hittable for Sphere {
             return None;
         }
 
-        let t = -b - discr.sqrt();
+        let mut t = -b - f32::sqrt(discr);
+
+        if t < 0.0 {
+            t = -b + f32::sqrt(discr);
+        }
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
@@ -269,19 +273,18 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_sphere_inside() {
         let sphere = Sphere::new(Vec3f::from(0.0), 3.0);
         let ray = Ray::towards(sphere.center, Vec3::new(0.0, 0.0, 1.0));
 
-        let possible = sphere.hit(&ray, 0.0, f32::INFINITY);
-        println!("possible = {:?}", possible);
-
-        let hit = possible.unwrap();
+        if let Some(hit) = sphere.hit(&ray, 0.0, f32::INFINITY) {
+            println!("hit = {:?}", hit);
+        } else {
+            assert!(false);
+        }
     }
 
     #[test]
-    #[ignore]
     fn test_misc() {
         let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
         let ray_1 = Ray::towards(Vec3::new(0.0, 0.0, 0.0), sphere.center);

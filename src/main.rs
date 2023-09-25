@@ -60,7 +60,7 @@ pub fn main() {
 
     println!("Config: {}", scene_path);
     println!(
-        "Resolution: ({}, {}) , Samples: {}, Bounces: {}",
+        "Resolution: ({}, {}), Samples: {}, Bounces: {}",
         width, height, samples, bounces
     );
 
@@ -68,7 +68,7 @@ pub fn main() {
     let image = Renderer::render(&camera, &config.scene, samples, bounces);
     let elapsed = now.elapsed();
 
-    println!("Elapsed time: {:.2?}", elapsed);
+    println!("Rendered {} pixels in {:.2?}", width * height, elapsed);
 
     let timestamp = get_sys_time_in_secs();
     let filename = format!(
