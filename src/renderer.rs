@@ -105,7 +105,8 @@ impl Renderer {
         let (wi, brdf_multiplier) = material.sample(normal, wo);
 
         // Reflected ray
-        let ray = Ray::new(hit.point + normal * 0.001, wi);
+        let bias = Vec3::dot(wi, normal) * 0.001;
+        let ray = Ray::new(hit.point + normal * bias, wi);
 
         // Integral is of the form 'emittance + trace() * brdf * cos_theta / pdf'
         emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
