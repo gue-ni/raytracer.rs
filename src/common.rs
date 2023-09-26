@@ -72,9 +72,9 @@ pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f32) -> f32 {
     else {
         let cost = f32::sqrt(f32::max(0.0, 1.0 - sint * sint));
         cosi = cosi.abs();
-        let Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-        let Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-        (Rs * Rs + Rp * Rp) / 2.0
+        let rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+        let rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+        (rs * rs + rp * rp) / 2.0
     };
 
     1.0 - kr  
