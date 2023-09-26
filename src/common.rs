@@ -221,13 +221,13 @@ mod test {
             let h = height as f32;
 
             let x = (sample.x * w) as usize;
-            let y = (sample.y * h) as usize;
+            let y = (sample.z * h) as usize;
             assert!(x < width && y < height);
 
             let index = (y * width + x) as usize;
             let blue = Vec3::new(0.0, 0.0, 1.0);
             let red = Vec3::new(1.0, 0.0, 0.0);
-            buffer[index] = Vec3::lerp(blue, red, vec.z);
+            buffer[index] = Vec3::lerp(blue, red, vec.y);
         }
 
         to_image(buffer, width as u32, height as u32)
