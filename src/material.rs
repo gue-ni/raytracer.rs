@@ -169,27 +169,27 @@ impl BSDF for Material {
                 // let cos_theta = Vec3f::dot(normal, wi);
                 // let pdf = 1.0 / (2.0 * PI);
 
-                //let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
-                //let cos_theta = Vec3f::dot(normal, wi);
-                //let pdf = cos_theta / PI;
-
-                let wi = Onb::local_to_world(normal, ggx_hemisphere(self.roughness));
+                let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
+                let pdf = cos_theta / PI;
+
+                //let wi = Onb::local_to_world(normal, ggx_hemisphere(self.roughness));
+                //let cos_theta = Vec3f::dot(normal, wi);
                 
                 // Halfway vector between wo and wi
                 let halfway = Vec3::normalize(wo + wi);
 
+                /*
                 let a2 = self.roughness * self.roughness;
                 let exp = (a2 - 1.0) * cos_theta * cos_theta + 1.0;
                 let d = a2 / (PI * exp * exp);
                 let pdf = (d * Vec3::dot(halfway, normal)) / (4.0 * Vec3::dot(halfway, wo));
-
+                */
+                
                 let f0 = Vec3::lerp(Vec3::from(0.04), self.albedo, self.metallic);
 
-                // Schlick's fresnel approximation
+                // Schlick's Fresnel Approximation
                 let fresnel = fresnel_schlick(f0, cos_theta);
-
-                
 
                 // Normal Distribution Function
                 let distribution = distribution_ggx(normal, halfway, self.roughness);
