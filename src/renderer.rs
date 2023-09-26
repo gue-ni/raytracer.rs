@@ -20,7 +20,7 @@ fn get_xy(index: u32, width: u32) -> (u32, u32) {
 }
 
 fn print_progress(current_sample: u32, total_samples: u32) {
-    let percentage = current_sample as f32 / total_samples as f32 * 100.0;
+    let percentage = current_sample as f64 / total_samples as f64 * 100.0;
     println!(
         "Progress: {:3.1?} % ({}/{})",
         percentage, current_sample, total_samples
@@ -47,7 +47,7 @@ impl Renderer {
         let light_dir = Vec3f::normalize(light_pos - hit.point);
 
         let ray = Ray::new(hit.point, light_dir);
-        let _shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
+        let _shadow = match scene.hit(&ray, 0.0, f64::INFINITY) {
             Some(_) => 1.0,
             None => 0.0,
         };
@@ -66,13 +66,13 @@ impl Renderer {
 
                 let ambient = light_color * ka;
 
-                let cos_theta = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
+                let cos_theta = f64::max(Vec3f::dot(hit.normal, light_dir), 0.0);
                 let diffuse = light_color * cos_theta * kd;
 
                 let view_dir = -incoming.direction;
                 let halfway_dir = Vec3f::normalize(light_dir + view_dir);
                 let specular = light_color
-                    * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha)
+                    * f64::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha)
                     * ks;
 
                 (ambient + (diffuse + specular) * _shadow) * material.albedo
@@ -115,7 +115,7 @@ impl Renderer {
     /// Trace ray into scene, returns color
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
-            if let Some(hit) = scene.hit(ray, 0.001, f32::INFINITY) {
+            if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
                 Self::naive_path_tracing(&hit, scene, ray, depth)
             } else {
                 scene.background
@@ -137,7 +137,7 @@ impl Renderer {
                 for x in 0..width {
                     let ray = camera.ray((x, y));
                     framebuffer[(y * width + x) as usize] +=
-                        Self::trace(&ray, scene, bounces) / (samples as f32);
+                        Self::trace(&ray, scene, bounces) / (samples as f64);
                 }
             }
             if sample % 5 == 0 {
@@ -176,7 +176,7 @@ impl Renderer {
 
                             let ray = camera.ray(xy);
 
-                            chunk[i] += Self::trace(&ray, scene, bounces) / (samples as f32);
+                            chunk[i] += Self::trace(&ray, scene, bounces) / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
                             print_progress(sample, samples);

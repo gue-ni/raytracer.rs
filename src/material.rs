@@ -4,7 +4,7 @@ use crate::vector::*;
 
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::f32::consts::PI;
+use std::f64::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
@@ -21,7 +21,7 @@ pub enum MaterialType {
     /// Uniform Hemisphere Sampling (perfectly diffuse)
     Uniform,
     /// Cosine-weighted Hemisphere Sampling (perfectly diffuse)
-    CosineWeighted,
+    Lambert,
     /// Cook-Torrance Reflection Model
     CookTorrance,
     ///
@@ -32,10 +32,10 @@ pub enum MaterialType {
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Material {
     pub albedo: Vec3f,
-    pub emittance: f32,
-    pub roughness: f32,
-    pub ior: f32,
-    pub metallic: f32,
+    pub emittance: f64,
+    pub roughness: f64,
+    pub ior: f64,
+    pub metallic: f64,
     pub material: MaterialType,
 }
 
@@ -47,22 +47,22 @@ impl Material {
             roughness: 0.0,
             ior: 0.0,
             metallic: 0.0,
-            material: MaterialType::CosineWeighted,
+            material: MaterialType::Lambert,
         }
     }
 
-    pub fn emissive(color: Vec3f, intensity: f32) -> Self {
+    pub fn emissive(color: Vec3f, intensity: f64) -> Self {
         Material {
             albedo: color,
             emittance: intensity,
             roughness: 0.0,
             ior: 0.0,
             metallic: 0.0,
-            material: MaterialType::CosineWeighted,
+            material: MaterialType::Lambert,
         }
     }
 
-    pub fn physical(color: Vec3f, roughness: f32, metallic: f32) -> Self {
+    pub fn physical(color: Vec3f, roughness: f64, metallic: f64) -> Self {
         Material {
             albedo: color,
             roughness,
@@ -97,20 +97,20 @@ impl Material {
 }
 
 /// Schlick's Fresnel Approximation
-fn fresnel_schlick(f0: Vec3f, cos_theta: f32) -> Vec3f {
-    f0 + (Vec3f::from(1.0) - f0) * f32::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
+fn fresnel_schlick(f0: Vec3f, cos_theta: f64) -> Vec3f {
+    f0 + (Vec3f::from(1.0) - f0) * f64::powf((1.0 - cos_theta).clamp(0.0, 1.0), 5.0)
 }
 
-fn distribution_ggx(normal: Vec3f, halfway: Vec3f, roughness: f32) -> f32 {
+fn distribution_ggx(normal: Vec3f, halfway: Vec3f, roughness: f64) -> f64 {
     let a2 = roughness * roughness;
-    let ndoth = f32::max(Vec3f::dot(normal, halfway), 0.0);
+    let ndoth = f64::max(Vec3f::dot(normal, halfway), 0.0);
     let ndoth2 = ndoth * ndoth;
     let nom = a2;
     let denom = ndoth2 * (a2 - 1.0) + 1.0;
     nom / (PI * denom * denom)
 }
 
-fn geometry_schlick_ggx(ndotv: f32, roughness: f32) -> f32 {
+fn geometry_schlick_ggx(ndotv: f64, roughness: f64) -> f64 {
     let r = roughness + 1.0;
     let k = (r * r) / 8.0;
     let num = ndotv;
@@ -118,9 +118,9 @@ fn geometry_schlick_ggx(ndotv: f32, roughness: f32) -> f32 {
     num / denom
 }
 
-fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f32) -> f32 {
-    let ndotv = f32::max(Vec3f::dot(normal, wo), 0.0);
-    let ndotl = f32::max(Vec3f::dot(normal, wi), 0.0);
+fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f64) -> f64 {
+    let ndotv = f64::max(Vec3f::dot(normal, wo), 0.0);
+    let ndotl = f64::max(Vec3f::dot(normal, wi), 0.0);
     let ggx2 = geometry_schlick_ggx(ndotv, roughness);
     let ggx1 = geometry_schlick_ggx(ndotl, roughness);
     ggx1 * ggx2
@@ -135,7 +135,6 @@ impl BSDF for Material {
                 let r = rng.gen_range(0.0..1.0);
 
                 let fr = fresnel(-wo, normal, self.ior);
-                //let fr = 1.0;
 
                 if r <= fr {
                     let wi = refract(-wo, normal, self.ior);
@@ -145,7 +144,7 @@ impl BSDF for Material {
                     (wi, self.albedo * (1.0 - fr))
                 }
             }
-            MaterialType::CosineWeighted => {
+            MaterialType::Lambert => {
                 // Cosine-weighted hemisphere sampling
                 let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
