@@ -173,6 +173,10 @@ impl BSDF for Material {
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
 
+                //let wi = Onb::local_to_world(normal, ggx_hemisphere(self.roughness));
+                //let cos_theta = Vec3f::dot(normal, wi);
+                //let pdf = 
+
                 let f0 = Vec3::lerp(Vec3::from(0.04), self.albedo, self.metallic);
 
                 // Schlick's fresnel approximation
