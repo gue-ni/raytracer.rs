@@ -1,6 +1,6 @@
 # Monte Carlo Path Tracing in Rust
 
-`cargo run --release .\scenes\cornell_box.json 512 512 16384 5`
+`cargo run --release scenes/cornell_box.json 512 512 16384 5`
 
 ![cornell box](img/render-1695670962-512x512-s16384-b5.png)
 
