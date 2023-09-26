@@ -10,7 +10,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -54,7 +54,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -65,7 +65,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -76,7 +76,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -87,7 +87,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -98,7 +98,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 
@@ -110,7 +110,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -121,7 +121,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -132,7 +132,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			}
 		]

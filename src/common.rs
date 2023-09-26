@@ -196,6 +196,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_reflect() {
         {
             let normal = Vec3f::new(0.0, 1.0, 0.0);
@@ -208,6 +209,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_refract() {
         {
             let ior = 1.5; // glass

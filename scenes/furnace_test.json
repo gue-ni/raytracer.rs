@@ -14,7 +14,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			}
 		]
