@@ -129,11 +129,39 @@ mod test {
 
     #[test]
     fn test_reflect() {
-        let normal = Vec3f::new(0.0, 1.0, 0.0);
-        let incoming = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
-        let outgoing = reflect(incoming, normal);
-        assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
-        assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
+        {
+            let normal = Vec3f::new(0.0, 1.0, 0.0);
+            let incoming = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
+            let outgoing = reflect(incoming, normal);
+            assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
+            assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
+        }
+        {
+            let normal = Vec3f::new(0.0, 1.0, 0.0);
+            let incoming = Vec3f::new(0.707, -0.707, 0.0);
+            let outgoing = reflect(incoming, normal);
+            
+            // law of reflection
+            assert_eq!(Vec3::dot(incoming, normal), Vec3::dot(outgoing, normal)); 
+            assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
+            assert_eq!(outgoing, Vec3f::new(0.707, 707, 0.0));
+        }
+    }
+
+    #[test]
+    fn test_refract() {
+        {   
+            let ior = 1.2;
+            let normal = Vec3f::new(0.0, 1.0, 0.0);
+            let incoming = Vec3f::new(0.707, -0.707, 0.0);
+            let outgoing = refract(incoming, normal, ior);
+            // Compare with value from glm implementation
+            assert_eq!(outgoing, Vec3f::new(0.849, -0.529, 0.0));
+        }
+    }
+
+    #[test]
+    fn test_fresnel() {
     }
 
     fn create_image_from_distribution(
@@ -201,7 +229,7 @@ mod test {
     #[test]
     fn test_serialize() {
         let json = fs::read_to_string("scenes/sphere.json").unwrap();
-        let config: ConfigFile = serde_json::from_str(&json).unwrap();
+        let _config: ConfigFile = serde_json::from_str(&json).unwrap();
         println!("{:?}", config);
     }
 }
