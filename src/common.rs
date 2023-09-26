@@ -112,6 +112,7 @@ pub fn cosine_weighted_hemisphere() -> Vec3f {
 
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 // https://computergraphics.stackexchange.com/questions/4979/what-is-importance-sampling
+// https://schuttejoe.github.io/post/ggximportancesamplingpart1/
 pub fn ggx_hemisphere(roughness: f32) -> Vec3f {
     let mut rng = rand::thread_rng();
     let r1 = rng.gen_range(0.0..1.0);
