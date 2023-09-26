@@ -143,14 +143,13 @@ impl BRDF for Material {
 
                 let kr = fresnel(-wo, normal, self.ior);
 
-                let p = kr;
-
-                let mut wi: Vecf;
-                
-                wi = refract(-wo, normal, self.ior);
-                let brdf = self.albedo;
-                
-                (wi, brdf)
+                if rnd < kr {
+                    let wi = refract(-wo, normal, self.ior);
+                    (wi, self.albedo / (kr))
+                } else {
+                    let wi = reflect(-wo, normal);
+                    (wi, self.albedo / (1.0 - kr))
+                }
             }
             MaterialType::CosineWeighted => {
                 // Cosine-weighted hemisphere sampling
