@@ -14,14 +14,14 @@ pub struct ConfigFile {
 }
 
 #[allow(dead_code)]
-pub fn reflect(incoming: Vec3f, normal: Vec3f) -> Vec3f {
-    incoming - normal * 2.0 * Vec3f::dot(incoming, normal)
+pub fn reflect(incident: Vec3f, normal: Vec3f) -> Vec3f {
+    incident - normal * 2.0 * Vec3f::dot(incident, normal)
 }
 
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
 #[allow(dead_code)]
-pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
-    let mut cosi = Vec3f::dot(incoming, normal).clamp(-1.0, 1.0);
+pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
+    let mut cosi = Vec3f::dot(incident, normal).clamp(-1.0, 1.0);
     let mut etai = 1.0;
     let mut etat = ior;
     let mut n = normal;
@@ -41,15 +41,25 @@ pub fn refract(incoming: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     if k < 0.0 {
         Vec3f::from(0.0)
     } else {
-        incoming * eta + n * (eta * cosi - k.sqrt())
+        incident * eta + n * (eta * cosi - k.sqrt())
     }
+    /*
+    // https://registry.khronos.org/OpenGL-Refpages/gl4/html/refract.xhtml
+    let k = 1.0 - ior * ior * (1.0 - Vec3::dot(normal, incident) * Vec3::dot(normal, incident));
+    if k < 0.0 {
+        Vec3::from(0.0)
+    } else {
+        incident * ior - normal * (ior * Vec3::dot(normal, incident) + f32::sqrt(k))        
+    }
+    */
 }
 
-pub fn fresnel(_incoming: Vec3f, _normal: Vec3f, _ior: f32) -> f32 {
+pub fn fresnel(_incident: Vec3f, _normal: Vec3f, _ior: f32) -> f32 {
     0.0
 }
 
 /// Returns vector based on spherical coordinates
+/// But: in our coordinate system, y is up
 pub fn from_spherical(theta: f32, phi: f32) -> Vec3f {
     let sin_phi = phi.sin();
     let cos_phi = phi.cos();
@@ -63,20 +73,16 @@ pub fn uniform_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
     let r1 = rng.gen_range(0.0..1.0);
     let r2 = rng.gen_range(0.0..1.0);
-
     let phi = 2.0 * PI * r1;
     let theta = f32::acos(r2);
-
     Vec3f::normalize(from_spherical(theta, phi))
 }
 
 /// Cosine weighted sample from hemisphere
 pub fn cosine_weighted_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
-
     let r1 = rng.gen_range(0.0..1.0);
     let r2 = rng.gen_range(0.0..1.0);
-
     let phi = 2.0 * PI * r1;
     let theta = f32::acos(f32::sqrt(r2));
     Vec3f::normalize(from_spherical(theta, phi))
@@ -143,7 +149,8 @@ mod test {
             
             // law of reflection
             assert_eq!(Vec3::dot(incoming, normal), Vec3::dot(outgoing, normal)); 
-            assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
+            // right angle
+            assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); 
             assert_eq!(outgoing, Vec3f::new(0.707, 707, 0.0));
         }
     }
