@@ -239,18 +239,18 @@ where
 }
 
 pub trait Cross<T> {
-    fn cross(a: Self, b: Self) -> Self;
+    fn cross(self, b: Self) -> Self;
 }
 
 impl<T> Cross<T> for Vec3<T>
 where
     T: Number,
 {
-    fn cross(a: Self, b: Self) -> Self {
+    fn cross(self, b: Self) -> Self {
         Self::new(
-            a.y * b.z - a.z * b.y,
-            a.z * b.x - a.x * b.z,
-            a.x * b.y - a.y * b.x,
+            self.y * b.z - self.z * b.y,
+            self.z * b.x - self.x * b.z,
+            self.x * b.y - self.y * b.x,
         )
     }
 }
