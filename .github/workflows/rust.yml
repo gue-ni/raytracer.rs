@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Run app
-      run: cargo run --release -- scenes/box.json 640 360 256 5
+      run: cargo run --release -- scenes/cornell_box.json 512 512 256 5
     
     - uses: actions/upload-artifact@v3
       with:
