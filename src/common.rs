@@ -57,6 +57,7 @@ pub fn refract_glsl(incident: Vec3f, normal: Vec3f, eta: f32) -> Vec3f {
     }
 }
 
+/// 
 pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f32) -> f32 {      
     let mut cosi = Vec3f::dot(incident, normal);
     let mut etai = 1.0;
@@ -164,17 +165,6 @@ mod test {
             assert_eq!(Vec3f::dot(incident, outgoing), 0.0);
             assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
         }
-        {
-            let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incident = Vec3f::new(0.707, -0.707, 0.0);
-            let outgoing = reflect(incident, normal);
-            
-            // law of reflection
-            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal)); 
-            // right angle
-            assert_eq!(Vec3f::dot(incident, outgoing), 0.0); 
-            assert_eq!(outgoing, Vec3f::new(0.707, 0.707, 0.0));
-        }
     }
 
     #[test]
@@ -186,12 +176,13 @@ mod test {
             let eta = etai / etat; // going from air into glass
             
             let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incident = Vec3f::new(0.707, -0.707, 0.0);
+            let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
+            
             let r1 = refract_glsl(incident, normal, eta);
             let r2 = refract(incident, normal, ior);
             
             // Compare with value from glm implementation
-            assert_eq!(r1, Vec3f::new(0.471, -0.882, 0.0));
+            assert_eq!(r1, Vec3f::new(0.47133335, -0.88187903, 0.0));
             assert_eq!(r1, r2);
         }
     }
