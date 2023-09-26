@@ -247,9 +247,26 @@ mod test {
 
     #[test]
     fn test_ggx_hemisphere() {
-        let alpha = 0.2;
-        let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-        let _ = image.save("ggx.png");
+        {
+            let alpha = 0.2;
+            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+            let _ = image.save("ggx_02.png");
+        }
+        {
+            let alpha = 1.0;
+            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+            let _ = image.save("ggx_10.png");
+        }
+        {
+            let alpha = 0.0;
+            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+            let _ = image.save("ggx_00.png");
+        }
+        {
+            let alpha = 0.5;
+            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+            let _ = image.save("ggx_05.png");
+        }
     }
 
     #[test]
