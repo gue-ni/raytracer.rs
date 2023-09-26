@@ -173,7 +173,7 @@ mod test {
             assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal)); 
             // right angle
             assert_eq!(Vec3f::dot(incident, outgoing), 0.0); 
-            assert_eq!(outgoing, Vec3f::new(0.707, 707, 0.0));
+            assert_eq!(outgoing, Vec3f::new(0.707, 0.707, 0.0));
         }
     }
 
@@ -266,6 +266,6 @@ mod test {
     fn test_serialize() {
         let json = fs::read_to_string("scenes/sphere.json").unwrap();
         let _config: ConfigFile = serde_json::from_str(&json).unwrap();
-        println!("{:?}", config);
+        println!("{:?}", _config);
     }
 }
