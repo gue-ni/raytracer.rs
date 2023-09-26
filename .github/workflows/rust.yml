@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: cargo build --release --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --verbose -- --show-output
     - name: Run app
       run: cargo run --release -- scenes/cornell_box.json 512 512 256 5
     
