@@ -209,7 +209,7 @@ where
     T: Number + SquareRoot,
 {
     fn length(self) -> T;
-    fn normalize(v: Self) -> Self;
+    fn normalize(self) -> Self;
 }
 
 impl<T> Magnitude<T> for Vec3<T>
@@ -220,21 +220,21 @@ where
         Self::dot(self, self).sqrt()
     }
 
-    fn normalize(v: Self) -> Self {
-        v / v.length()
+    fn normalize(self) -> Self {
+        self / self.length()
     }
 }
 
 pub trait Dot<T> {
-    fn dot(a: Self, b: Self) -> T;
+    fn dot(self, b: Self) -> T;
 }
 
 impl<T> Dot<T> for Vec3<T>
 where
     T: Number,
 {
-    fn dot(a: Self, b: Self) -> T {
-        a.x * b.x + a.y * b.y + a.z * b.z
+    fn dot(self, b: Self) -> T {
+        self.x * b.x + self.y * b.y + self.z * b.z
     }
 }
 
