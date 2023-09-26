@@ -221,30 +221,35 @@ mod test {
             let h = height as f32;
 
             let x = (sample.x * w) as usize;
-            let y = (sample.z * h) as usize;
+            let y = (sample.y * h) as usize;
             assert!(x < width && y < height);
 
             let index = (y * width + x) as usize;
             let blue = Vec3::new(0.0, 0.0, 1.0);
             let red = Vec3::new(1.0, 0.0, 0.0);
-            buffer[index] = Vec3::lerp(blue, red, vec.y);
+            buffer[index] = Vec3::lerp(blue, red, vec.z);
         }
 
         to_image(buffer, width as u32, height as u32)
     }
 
     #[test]
-    #[ignore]
     fn test_cosine() {
         let image = create_image_from_distribution(200, 200, || cosine_weighted_hemisphere());
         let _ = image.save("cosine.png");
     }
 
     #[test]
-    #[ignore]
-    fn test_uniform_hemisphere_1() {
+    fn test_uniform_hemisphere() {
         let image = create_image_from_distribution(200, 200, || uniform_hemisphere());
         let _ = image.save("uniform_v1.png");
+    }
+
+    #[test]
+    fn test_ggx_hemisphere() {
+        let alpha = 0.2;
+        let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+        let _ = image.save("ggx.png");
     }
 
     #[test]
