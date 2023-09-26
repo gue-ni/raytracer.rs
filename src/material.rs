@@ -134,11 +134,10 @@ impl BRDF for Material {
             MaterialType::Transparent => {
                 
                 let mut rng = rand::thread_rng();
-                let rnd = rng.get_range(0.0..1.0);
-
+                let r1 = rng.gen_range(0.0..1.0);
                 let kr = fresnel(-wo, normal, self.ior);
 
-                if rnd < kr {
+                if r1 < kr {
                     let wi = refract(-wo, normal, self.ior);
                     (wi, self.albedo / (kr))
                 } else {
