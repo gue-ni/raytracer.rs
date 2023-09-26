@@ -127,28 +127,23 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f32) -> f32 {
     ggx1 * ggx2
 }
 
-#[allow(dead_code)]
-fn fresnel() -> f32 {
-    0.0
-}
-
 impl BRDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
             MaterialType::Transparent => {
+                
                 let mut rng = rand::thread_rng();
+                let r1 = rng.gen_range(0.0..1.0);
+                let kr = fresnel(-wo, normal, self.ior);
 
-                let transparency = 0.5;
-
-                let wi = if rng.gen_range(0.0..1.0) <= transparency {
-                    refract(-wo, normal, 1.0 / self.ior)
+                if r1 < kr {
+                    let wi = refract(-wo, normal, self.ior);
+                    (wi, self.albedo / (kr))
                 } else {
-                    reflect(-wo, normal)
-                };
-
-                let brdf = self.albedo;
-                (wi, brdf)
+                    let wi = reflect(-wo, normal);
+                    (wi, self.albedo / (1.0 - kr))
+                }
             }
             MaterialType::CosineWeighted => {
                 // Cosine-weighted hemisphere sampling
