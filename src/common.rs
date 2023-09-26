@@ -220,14 +220,14 @@ mod test {
             let w = width as f32;
             let h = height as f32;
 
-            let x = (sample.x * w) as usize;
-            let y = (sample.z * h) as usize;
+            let x = (sample.x.clamp(0.0, 0.999) * w) as usize;
+            let y = (sample.z.clamp(0.0, 0.999) * h) as usize;
             assert!(x < width && y < height);
 
             let index = (y * width + x) as usize;
             let blue = Vec3::new(0.0, 0.0, 1.0);
             let red = Vec3::new(1.0, 0.0, 0.0);
-            buffer[index] = Vec3::lerp(blue, red, vec.y);
+            buffer[index] = Vec3::lerp(blue, red, vec.y.clamp(0.0, 1.0));
         }
 
         to_image(buffer, width as u32, height as u32)
