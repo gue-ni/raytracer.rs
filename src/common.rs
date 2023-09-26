@@ -112,15 +112,13 @@ pub fn cosine_weighted_hemisphere() -> Vec3f {
 
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 // https://computergraphics.stackexchange.com/questions/4979/what-is-importance-sampling
-pub fn ggx_hemisphere(roughness: f32) -> Vec3f 
+pub fn ggx_hemisphere(roughness: f32) -> Vec3f {
     let mut rng = rand::thread_rng();
     let r1 = rng.gen_range(0.0..1.0);
     let r2 = rng.gen_range(0.0..1.0);
-    let phi = r1;
+    let phi = 2.0 * PI * r1;
     let a2 = roughness * roughness;
-    let theta = f32::acos(f32::sqrt(
-        a2 / (r2 * (a2 - 1.0) + 1.0)
-    ));
+    let theta = f32::acos(f32::sqrt(a2 / (r2 * (a2 - 1.0) + 1.0)));
     Vec3f::normalize(from_spherical(theta, phi))
 }
 
