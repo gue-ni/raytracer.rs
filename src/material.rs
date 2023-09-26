@@ -135,8 +135,8 @@ impl BSDF for Material {
                 let mut rng = rand::thread_rng();
                 let r1 = rng.gen_range(0.0..1.0);
 
-                //let fr = fresnel(-wo, normal, self.ior);
-                let fr = 1.0;
+                let fr = fresnel(-wo, normal, self.ior).clamp(0.0, 1.0);
+                //let fr = 1.0;
                 
                 if r1 <= fr {
                     let wi = refract(-wo, normal, self.ior);
