@@ -137,17 +137,19 @@ impl BRDF for Material {
         match self.material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
             MaterialType::Transparent => {
+                
                 let mut rng = rand::thread_rng();
+                let rnd = rng.get_range(0.0..1.0);
 
-                let transparency = 0.5;
+                let kr = fresnel(-wo, normal, self.ior);
 
-                let wi = if rng.gen_range(0.0..1.0) <= transparency {
-                    refract(-wo, normal, 1.0 / self.ior)
-                } else {
-                    reflect(-wo, normal)
-                };
+                let p = kr;
 
+                let mut wi: Vecf;
+                
+                wi = refract(-wo, normal, self.ior);
                 let brdf = self.albedo;
+                
                 (wi, brdf)
             }
             MaterialType::CosineWeighted => {
