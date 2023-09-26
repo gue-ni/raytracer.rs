@@ -1,14 +1,13 @@
 use crate::common::*;
 use crate::onb::Onb;
 use crate::vector::*;
+
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
-
-//
 use rand::Rng;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
-pub trait BRDF {
+pub trait BSDF {
     /// Returns outgoing vector and brdf multiplier
     /// 'normal' - Normal vector at hit point
     /// 'wo' - Direction vector toward camera
@@ -127,7 +126,7 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f32) -> f32 {
     ggx1 * ggx2
 }
 
-impl BRDF for Material {
+impl BSDF for Material {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
