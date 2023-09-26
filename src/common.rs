@@ -21,8 +21,7 @@ pub fn reflect(incident: Vec3f, normal: Vec3f) -> Vec3f {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
 #[allow(dead_code)]
 pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
-    /*
-    let mut cosi = Vec3f::dot(incident, normal).clamp(-1.0, 1.0);
+    let mut cosi = Vec3f::dot(incident, normal);
     let mut etai = 1.0;
     let mut etat = ior;
     let mut n = normal;
@@ -30,9 +29,7 @@ pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     if cosi < 0.0 {
         cosi = -cosi;
     } else {
-        let tmp = etai;
-        etai = etat;
-        etat = tmp;
+        (etai, etat) = (etat, etai)
         n = -normal;
     }
 
@@ -40,24 +37,46 @@ pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
 
     if k < 0.0 {
+        // total internal reflection, no refraction
         Vec3f::from(0.0)
     } else {
         incident * eta + n * (eta * cosi - k.sqrt())
     }
-    */
-        
-    // https://registry.khronos.org/OpenGL-Refpages/gl4/html/refract.xhtml
-    let k = 1.0 - eta * eta * (1.0 - Vec3::dot(normal, incident) * Vec3::dot(normal, incident));
-    if k < 0.0 {
-        Vec3::from(0.0)
-    } else {
-        incident * eta - normal * (eta * Vec3::dot(normal, incident) + f32::sqrt(k))        
-    }
-    
 }
 
-pub fn fresnel(_incident: Vec3f, _normal: Vec3f, _ior: f32) -> f32 {
-    0.0
+// https://registry.khronos.org/OpenGL-Refpages/gl4/html/refract.xhtml
+#[allow(dead_code)]
+pub fn refract_glsl(incident: Vec3f, normal: Vec3f, eta: f32) -> Vec3f {
+    let cos_incident = Vec3::dot(normal, incident);
+    let k = 1.0 - eta * eta * (1.0 - cos_incident * cos_incident);
+    if k < 0.0 {
+        // total internal reflection, no refraction
+        Vec3::from(0.0)
+    } else {
+        incident * eta - normal * (eta * cos_incident + k.sqrt())        
+    }
+}
+
+pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f32) -> f32 {      
+    let mut cosi = Vec3f::dot(incident, normal);
+    let mut etai = 1.0;
+    let mut etat = ior;
+
+    let sint = etai / etat * f32::sqrt(f32::max(0.0, 1.0 - cosi * cosi));
+    
+    // Total internal reflection
+    let kr = if sint >= 1.0 {
+        1.0
+    }
+    else {
+        let cost = f32::sqrt(f32::max(0.0, 1.0 - sint * sint));
+        cosi = cosi.abs();
+        let Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+        let Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+        (Rs * Rs + Rp * Rp) / 2.0
+    };
+
+    1.0 - kr  
 }
 
 /// Returns vector based on spherical coordinates
@@ -141,7 +160,8 @@ mod test {
             let normal = Vec3f::new(0.0, 1.0, 0.0);
             let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
             let outgoing = reflect(incident, normal);
-            assert_eq!(Vec3f::dot(incident, outgoing), 0.0); // right angle
+            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal)); 
+            assert_eq!(Vec3f::dot(incident, outgoing), 0.0);
             assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
         }
         {
@@ -167,10 +187,12 @@ mod test {
             
             let normal = Vec3f::new(0.0, 1.0, 0.0);
             let incident = Vec3f::new(0.707, -0.707, 0.0);
-            let outgoing = refract(incident, normal, eta);
+            let r1 = refract_glsl(incident, normal, eta);
+            let r2 = refract(incident, normal, ior);
             
             // Compare with value from glm implementation
-            assert_eq!(outgoing, Vec3f::new(0.471, -0.882, 0.0));
+            assert_eq!(r1, Vec3f::new(0.471, -0.882, 0.0));
+            assert_eq!(r1, r2);
         }
     }
 
