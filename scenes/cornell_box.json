@@ -105,9 +105,9 @@
 					"albedo": [1.0, 1.0, 1.0],
 					"emittance": 0,
 					"roughness": 0,
-					"ior": 0,
+					"ior": 1.5,
 					"metallic": 0,
-					"material": "Mirror"
+					"material": "Transparent"
 				}
 			},
 			{
