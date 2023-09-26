@@ -2,9 +2,9 @@ use crate::common::*;
 use crate::onb::Onb;
 use crate::vector::*;
 
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::PI;
-use rand::Rng;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
@@ -131,16 +131,15 @@ impl BSDF for Material {
         match self.material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),
             MaterialType::Transparent => {
-                
                 let mut rng = rand::thread_rng();
-                let r1 = rng.gen_range(0.0..1.0);
+                let r = rng.gen_range(0.0..1.0);
 
-                let fr = fresnel(-wo, normal, self.ior).clamp(0.0, 1.0);
+                let fr = fresnel(-wo, normal, self.ior);
                 //let fr = 1.0;
-                
-                if r1 <= fr {
+
+                if r <= fr {
                     let wi = refract(-wo, normal, self.ior);
-                    (wi, self.albedo * (fr))
+                    (wi, self.albedo * fr)
                 } else {
                     let wi = reflect(-wo, normal);
                     (wi, self.albedo * (1.0 - fr))
@@ -175,7 +174,7 @@ impl BSDF for Material {
 
                 //let wi = Onb::local_to_world(normal, ggx_hemisphere(self.roughness));
                 //let cos_theta = Vec3f::dot(normal, wi);
-                
+
                 // Halfway vector between wo and wi
                 let halfway = Vec3::normalize(wo + wi);
 
@@ -185,7 +184,7 @@ impl BSDF for Material {
                 let d = a2 / (PI * exp * exp);
                 let pdf = (d * Vec3::dot(halfway, normal)) / (4.0 * Vec3::dot(halfway, wo));
                 */
-                
+
                 let f0 = Vec3::lerp(Vec3::from(0.04), self.albedo, self.metallic);
 
                 // Schlick's Fresnel Approximation

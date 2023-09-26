@@ -40,11 +40,11 @@ pub fn main() {
         std::process::exit(1);
     }
 
-    let scene_path = &args[1];
-    let width = parse(&args[2]);
-    let height = parse(&args[3]);
-    let samples = parse(&args[4]);
-    let bounces = parse(&args[5]);
+    let width = parse(&args[1]);
+    let height = parse(&args[2]);
+    let samples = parse(&args[3]);
+    let bounces = parse(&args[4]);
+    let scene_path = &args[5];
 
     let json = match fs::read_to_string(scene_path) {
         Ok(value) => value,

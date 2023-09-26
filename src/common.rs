@@ -53,23 +53,22 @@ pub fn refract_glsl(incident: Vec3f, normal: Vec3f, eta: f32) -> Vec3f {
         // total internal reflection, no refraction
         Vec3::from(0.0)
     } else {
-        incident * eta - normal * (eta * cos_incident + k.sqrt())        
+        incident * eta - normal * (eta * cos_incident + k.sqrt())
     }
 }
 
-/// 
-pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f32) -> f32 {      
+///
+pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f32) -> f32 {
     let mut cosi = Vec3f::dot(incident, normal);
-    let mut etai = 1.0;
-    let mut etat = ior;
+    let etai = 1.0;
+    let etat = ior;
 
     let sint = etai / etat * f32::sqrt(f32::max(0.0, 1.0 - cosi * cosi));
-    
-    // Total internal reflection
+
     let kr = if sint >= 1.0 {
+        // Total internal reflection
         1.0
-    }
-    else {
+    } else {
         let cost = f32::sqrt(f32::max(0.0, 1.0 - sint * sint));
         cosi = cosi.abs();
         let rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
@@ -77,7 +76,7 @@ pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f32) -> f32 {
         (rs * rs + rp * rp) / 2.0
     };
 
-    1.0 - kr  
+    1.0 - kr
 }
 
 /// Returns vector based on spherical coordinates
@@ -168,44 +167,6 @@ mod test {
     use crate::onb::*;
     use std::fs;
 
-    #[test]
-    #[ignore]
-    fn test_reflect() {
-        {
-            let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
-            let outgoing = reflect(incident, normal);
-            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal)); 
-            assert_eq!(Vec3f::dot(incident, outgoing), 0.0);
-            assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
-        }
-    }
-
-    #[test]
-    #[ignore]
-    fn test_refract() {
-        {   
-            let ior = 1.5; // glass
-            let etai = 1.0; // air
-            let etat = ior;
-            let eta = etai / etat; // going from air into glass
-            
-            let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
-            
-            let r1 = refract_glsl(incident, normal, eta);
-            let r2 = refract(incident, normal, ior);
-            
-            // Compare with value from glm implementation
-            assert_eq!(r1, Vec3f::new(0.47140452, -0.8819171, 0.0));
-            assert_eq!(r1, r2);
-        }
-    }
-
-    #[test]
-    fn test_fresnel() {
-    }
-
     fn create_image_from_distribution(
         width: usize,
         height: usize,
@@ -222,51 +183,87 @@ mod test {
             let h = height as f32;
 
             let x = (sample.x.clamp(0.0, 0.999) * w) as usize;
-            let y = (sample.z.clamp(0.0, 0.999) * h) as usize;
+            let y = (sample.y.clamp(0.0, 0.999) * h) as usize;
             assert!(x < width && y < height);
 
             let index = (y * width + x) as usize;
             let blue = Vec3::new(0.0, 0.0, 1.0);
             let red = Vec3::new(1.0, 0.0, 0.0);
-            buffer[index] = Vec3::lerp(blue, red, vec.y.clamp(0.0, 1.0));
+            buffer[index] = Vec3::lerp(blue, red, vec.z.clamp(0.0, 1.0));
         }
 
         to_image(buffer, width as u32, height as u32)
     }
 
     #[test]
+    fn test_reflect() {
+        {
+            let normal = Vec3f::new(0.0, 1.0, 0.0);
+            let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
+            let outgoing = reflect(incident, normal);
+            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal));
+            assert_eq!(Vec3f::dot(incident, outgoing), 0.0);
+            assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
+        }
+    }
+
+    #[test]
+    fn test_refract() {
+        {
+            let ior = 1.5; // glass
+            let etai = 1.0; // air
+            let etat = ior;
+            let eta = etai / etat; // going from air into glass
+
+            let normal = Vec3f::new(0.0, 1.0, 0.0);
+            let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
+
+            let r1 = refract_glsl(incident, normal, eta);
+            let r2 = refract(incident, normal, ior);
+
+            // Compare with value from glm implementation
+            assert_eq!(r1, Vec3f::new(0.47140452, -0.8819171, 0.0));
+            assert_eq!(r1, r2);
+        }
+    }
+
+    #[test]
+    fn test_fresnel() {}
+
+    #[test]
     fn test_cosine() {
         let image = create_image_from_distribution(200, 200, || cosine_weighted_hemisphere());
-        let _ = image.save("cosine.png");
+        let _ = image.save("renders/cosine.png");
     }
 
     #[test]
     fn test_uniform_hemisphere() {
         let image = create_image_from_distribution(200, 200, || uniform_hemisphere());
-        let _ = image.save("uniform_v1.png");
+        let _ = image.save("renders/uniform_v1.png");
     }
 
     #[test]
     fn test_ggx_hemisphere() {
         {
+            let alpha = 0.0;
+            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+            let _ = image.save("renders/ggx_00.png");
+        }
+        {
             let alpha = 0.2;
             let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-            let _ = image.save("ggx_02.png");
+            let _ = image.save("renders/ggx_02.png");
+        }
+
+        {
+            let alpha = 0.5;
+            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
+            let _ = image.save("renders/ggx_05.png");
         }
         {
             let alpha = 1.0;
             let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-            let _ = image.save("ggx_10.png");
-        }
-        {
-            let alpha = 0.0;
-            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-            let _ = image.save("ggx_00.png");
-        }
-        {
-            let alpha = 0.5;
-            let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-            let _ = image.save("ggx_05.png");
+            let _ = image.save("renders/ggx_10.png");
         }
     }
 

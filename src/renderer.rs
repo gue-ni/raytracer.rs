@@ -41,7 +41,7 @@ impl Renderer {
     fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
         let material = scene.objects[hit.idx].material;
 
-        let light_pos = Vec3f::new(0.0, -3.5, 4.0);
+        let light_pos = Vec3f::new(0.0, -1.5, 4.0);
         let light_intensity = 1.0;
         let light_color = Vec3f::from(1.0) * light_intensity;
         let light_dir = Vec3f::normalize(light_pos - hit.point);
@@ -108,14 +108,14 @@ impl Renderer {
         let bias = Vec3::dot(wi, normal) * 0.001;
         let ray = Ray::new(hit.point + normal * bias, wi);
 
-        // Integral is of the form 'emittance + trace() * brdf * cos_theta / pdf'
+        // emittance + trace() * brdf * cos_theta / pdf
         emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
     }
 
     /// Trace ray into scene, returns color
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
-            if let Some(hit) = scene.hit(ray, 0.0001, f32::INFINITY) {
+            if let Some(hit) = scene.hit(ray, 0.001, f32::INFINITY) {
                 Self::naive_path_tracing(&hit, scene, ray, depth)
             } else {
                 scene.background
