@@ -135,14 +135,15 @@ impl BRDF for Material {
                 
                 let mut rng = rand::thread_rng();
                 let r1 = rng.gen_range(0.0..1.0);
-                let kr = fresnel(-wo, normal, self.ior);
 
-                if r1 < kr {
+                let fr = fresnel(-wo, normal, self.ior);
+
+                if r1 < fr {
                     let wi = refract(-wo, normal, self.ior);
-                    (wi, self.albedo / (kr))
+                    (wi, self.albedo * (fr))
                 } else {
                     let wi = reflect(-wo, normal);
-                    (wi, self.albedo / (1.0 - kr))
+                    (wi, self.albedo * (1.0 - fr))
                 }
             }
             MaterialType::CosineWeighted => {
