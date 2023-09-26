@@ -29,7 +29,7 @@ pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     if cosi < 0.0 {
         cosi = -cosi;
     } else {
-        (etai, etat) = (etat, etai)
+        (etai, etat) = (etat, etai;
         n = -normal;
     }
 
