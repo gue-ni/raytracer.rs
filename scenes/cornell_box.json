@@ -30,7 +30,7 @@
 				"comment": "Green Wall",
 				"geometry": { "center": [5002, 0, 5], "radius": 5000 },
 				"material": {
-					"albedo": [0, 0, 1],
+					"albedo": [0, 1, 0],
 					"emittance": 0,
 					"roughness": 0,
 					"ior": 0,
@@ -79,7 +79,7 @@
 				"geometry": { "center": [0, -6.95, 5], "radius": 5 },
 				"material": {
 					"albedo": [1, 1, 1],
-					"emittance": 15,
+					"emittance": 23,
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
@@ -105,9 +105,9 @@
 					"albedo": [1, 1, 1],
 					"emittance": 0,
 					"roughness": 0,
-					"ior": 1.2,
+					"ior": 0.0,
 					"metallic": 0,
-					"material": "Transparent"
+					"material": "Mirror"
 				}
 			},
 			{

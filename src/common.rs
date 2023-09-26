@@ -112,14 +112,22 @@ pub fn cosine_weighted_hemisphere() -> Vec3f {
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 // https://computergraphics.stackexchange.com/questions/4979/what-is-importance-sampling
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
-pub fn ggx_hemisphere(roughness: f64) -> Vec3f {
+pub fn ggx_hemisphere(wo: Vec3f, normal: Vec3f, roughness: f64) -> (Vec3f, f64) {
     let mut rng = rand::thread_rng();
     let r1 = rng.gen_range(0.0..1.0);
     let r2 = rng.gen_range(0.0..1.0);
     let phi = 2.0 * PI * r1;
     let a2 = roughness * roughness;
     let theta = f64::acos(f64::sqrt(a2 / (r2 * (a2 - 1.0) + 1.0)));
-    Vec3f::normalize(from_spherical(theta, phi))
+    let wi = Vec3f::normalize(from_spherical(theta, phi));
+    let halfway = Vec3::normalize(wo + wi);
+    let cos_theta = Vec3::dot(wi, normal);
+
+    let exp = (a2 - 1.0) * cos_theta * cos_theta + 1.0;
+    let d = a2 / (PI * exp * exp);
+    let pdf = (d * Vec3::dot(halfway, normal)) / (4.0 * Vec3::dot(halfway, wo));
+
+    (wi, pdf)
 }
 
 pub fn vector_on_sphere() -> Vec3f {
@@ -155,7 +163,8 @@ pub fn to_image(framebuffer: Vec<Vec3f>, width: u32, height: u32) -> RgbImage {
     let buffer: Vec<u8> = framebuffer
         .iter()
         .flat_map(|&pixel| [pixel.x, pixel.y, pixel.z])
-        .map(|value| (value.sqrt() * scale) as u8)
+        // .map(|value| (value.sqrt() * scale) as u8)
+        .map(|value| (value.powf(1.0 / 2.2) * scale) as u8)
         .collect();
 
     RgbImage::from_vec(width, height, buffer).unwrap()
@@ -247,9 +256,9 @@ mod test {
     #[test]
     fn test_ggx_hemisphere() {
         {
-            let alpha = 0.0;
+            let alpha = 0.1;
             let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-            let _ = image.save("renders/ggx_00.png");
+            let _ = image.save("renders/ggx_01.png");
         }
         {
             let alpha = 0.2;
@@ -263,9 +272,9 @@ mod test {
             let _ = image.save("renders/ggx_05.png");
         }
         {
-            let alpha = 1.0;
+            let alpha = 0.9;
             let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
-            let _ = image.save("renders/ggx_10.png");
+            let _ = image.save("renders/ggx_09.png");
         }
     }
 
