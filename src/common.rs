@@ -21,6 +21,7 @@ pub fn reflect(incident: Vec3f, normal: Vec3f) -> Vec3f {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
 #[allow(dead_code)]
 pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
+    /*
     let mut cosi = Vec3f::dot(incident, normal).clamp(-1.0, 1.0);
     let mut etai = 1.0;
     let mut etat = ior;
@@ -43,15 +44,16 @@ pub fn refract(incident: Vec3f, normal: Vec3f, ior: f32) -> Vec3f {
     } else {
         incident * eta + n * (eta * cosi - k.sqrt())
     }
-    /*
+    */
+        
     // https://registry.khronos.org/OpenGL-Refpages/gl4/html/refract.xhtml
-    let k = 1.0 - ior * ior * (1.0 - Vec3::dot(normal, incident) * Vec3::dot(normal, incident));
+    let k = 1.0 - eta * eta * (1.0 - Vec3::dot(normal, incident) * Vec3::dot(normal, incident));
     if k < 0.0 {
         Vec3::from(0.0)
     } else {
-        incident * ior - normal * (ior * Vec3::dot(normal, incident) + f32::sqrt(k))        
+        incident * eta - normal * (eta * Vec3::dot(normal, incident) + f32::sqrt(k))        
     }
-    */
+    
 }
 
 pub fn fresnel(_incident: Vec3f, _normal: Vec3f, _ior: f32) -> f32 {
@@ -137,20 +139,20 @@ mod test {
     fn test_reflect() {
         {
             let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incoming = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
-            let outgoing = reflect(incoming, normal);
-            assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); // right angle
+            let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
+            let outgoing = reflect(incident, normal);
+            assert_eq!(Vec3f::dot(incident, outgoing), 0.0); // right angle
             assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
         }
         {
             let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incoming = Vec3f::new(0.707, -0.707, 0.0);
-            let outgoing = reflect(incoming, normal);
+            let incident = Vec3f::new(0.707, -0.707, 0.0);
+            let outgoing = reflect(incident, normal);
             
             // law of reflection
-            assert_eq!(Vec3::dot(incoming, normal), Vec3::dot(outgoing, normal)); 
+            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal)); 
             // right angle
-            assert_eq!(Vec3f::dot(incoming, outgoing), 0.0); 
+            assert_eq!(Vec3f::dot(incident, outgoing), 0.0); 
             assert_eq!(outgoing, Vec3f::new(0.707, 707, 0.0));
         }
     }
@@ -158,12 +160,17 @@ mod test {
     #[test]
     fn test_refract() {
         {   
-            let ior = 1.2;
+            let ior = 1.5; // glass
+            let etai = 1.0; // air
+            let etat = ior;
+            let eta = etai / etat; // going from air into glass
+            
             let normal = Vec3f::new(0.0, 1.0, 0.0);
-            let incoming = Vec3f::new(0.707, -0.707, 0.0);
-            let outgoing = refract(incoming, normal, ior);
+            let incident = Vec3f::new(0.707, -0.707, 0.0);
+            let outgoing = refract(incident, normal, eta);
+            
             // Compare with value from glm implementation
-            assert_eq!(outgoing, Vec3f::new(0.849, -0.529, 0.0));
+            assert_eq!(outgoing, Vec3f::new(0.471, -0.882, 0.0));
         }
     }
 
