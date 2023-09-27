@@ -85,12 +85,11 @@ impl Renderer {
     #[allow(dead_code)]
     fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
         let object_id = hit.idx;
-        // Material properties
         let material = scene.objects[object_id].material;
         let emittance = material.albedo * material.emittance;
 
-        let mut direct = Vec3::from(0.0);
         let mut num_lights = 0;
+        let mut direct = Vec3::from(0.0);
 
         for light_id in &scene.lights {
             let light = scene.objects[*light_id];
@@ -98,40 +97,22 @@ impl Renderer {
             if *light_id != object_id {
 
                 let light_dir = (light.geometry.center - hit.point).normalize();
-                let shadow_ray = Ray::new(hit.point, light_dir);
-
+                let shadow_ray = Ray::new(hit.point + hit.normal * 0.001, light_dir);
                 
                 if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::EPSILON) {
                     
-                    // the light should be the closest
+                    // there should be nothing in between 'point' and the light
                     if light_hit.idx == *light_id {
-                        let light_normal = -light_dir;
-                        let light_emittance = light.material.albedo * light.material.emittance;
-                        let light_bsdf = light_emittance / PI;
+                        //let light_normal = -light_dir;
+                        //let light_emittance = light.material.albedo * light.material.emittance;
+                        //let light_bsdf = light_emittance / PI;
                         direct = Vec3::from(1.0);
                     }
                 }
             }
         }
 
-        //assert!();
-        //direct = direct / num_lights as f64;
-
-        // Direction toward camera
-        let wo = -incoming.direction;
-
-        // Orient normal correctly
-        //let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
-        let normal = hit.normal;
-
-        // Get outgoing ray direction and (brdf * cos_theta / pdf)
-        let (wi, brdf_multiplier) = material.sample(normal, wo);
-        let bias = Vec3::dot(wi, normal) * 0.001;
-        let ray = Ray::new(hit.point + normal * bias, wi);
-        let indirect = Self::trace(&ray, scene, depth - 1) * brdf_multiplier;
-
-        //direct * 0.5 + indirect * 0.5
-        //emittance + indirect
+        // TODO: global illumination
         direct
     }
 
@@ -149,22 +130,14 @@ impl Renderer {
         // Material properties
         let material = scene.objects[hit.idx].material;
         let emittance = material.albedo * material.emittance;
-
         // Direction toward camera
         let wo = -incoming.direction;
-
-        // Orient normal correctly
-        //let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
-        let normal = hit.normal;
-
         // Get outgoing ray direction and (brdf * cos_theta / pdf)
-        let (wi, brdf_multiplier) = material.sample(normal, wo);
-
+        let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
         // Reflected ray
-        let bias = Vec3::dot(wi, normal) * 0.001;
-        let ray = Ray::new(hit.point + normal * bias, wi);
-
-        // emittance + trace() * brdf * cos_theta / pdf
+        let bias = Vec3::dot(wi, hit.normal) * 0.001;
+        let ray = Ray::new(hit.point + hit.normal * bias, wi);
+        // Formula: emittance + trace() * brdf * cos_theta / pdf
         emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
     }
 
