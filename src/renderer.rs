@@ -84,28 +84,31 @@ impl Renderer {
     /// Path Tracing with Explicit/Direct Light Sampling
     #[allow(dead_code)]
     fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+        let object_id = hit.idx;
         // Material properties
-        let material = scene.objects[hit.idx].material;
+        let material = scene.objects[object_id].material;
         let emittance = material.albedo * material.emittance;
 
         let mut direct = Vec3::from(0.0);
         let mut num_lights = 0;
 
-        // Objects that have emittance > 0
-        for i in scene.lights {
-            let light = scene.objects[i];
-            if hit.idx != i {
-                num_lights += 1;
+        for light_id in &scene.lights {
+            let light = scene.objects[*light_id];
+
+            if *light_id != object_id {
 
                 let light_dir = (light.geometry.center - hit.point).normalize();
                 let shadow_ray = Ray::new(hit.point, light_dir);
 
+                
                 if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::EPSILON) {
-                    if light_hit.idx == i {
+                    
+                    // the light should be the closest
+                    if light_hit.idx == *light_id {
                         let light_normal = -light_dir;
                         let light_emittance = light.material.albedo * light.material.emittance;
                         let light_bsdf = light_emittance / PI;
-                        //direct += light_bsdf;
+                        direct = Vec3::from(1.0);
                     }
                 }
             }
