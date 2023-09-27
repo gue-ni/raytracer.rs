@@ -88,23 +88,22 @@ impl Renderer {
         let emittance = material.albedo * material.emittance;
 
         let mut direct = Vec3::from(0.0);
-        
+
         // Objects that have emittance > 0
-        for i in scene.objects.len() {
+        for i in 0..scene.objects.len() {
             let light = scene.objects[i];
             if 0.0 < light.material.emittance {
                 let light_dir = (light.geometry.center - hit.point).normalize();
                 let shadow_ray = Ray::new(hit.point, light_dir);
                 // Check if point is actually illuminted by this light
-                
-                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f32::EPSILON) {
-                    let light_emittance = light.material.albedo * object.material.emittance;
-                    let (_, light_bsdf) = light.material.bsdf(light_hit.normal, light_dir);
+
+                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::EPSILON) {
+                    let light_emittance = light.material.albedo * light.material.emittance;
+                    let (_, light_bsdf) = light.material.sample(light_hit.normal, light_dir);
                     direct += light_bsdf;
                 }
             }
         }
-        
 
         // Direction toward camera
         let wo = -incoming.direction;
@@ -119,20 +118,9 @@ impl Renderer {
         let ray = Ray::new(hit.point + normal * bias, wi);
         let indirect = Self::trace(&ray, scene, depth - 1) * brdf_multiplier;
 
-        direct * 0.5 + indirect * 0.5
-    }
-
-    /// Trace ray into scene, returns color
-    fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-        if depth > 0 {
-            if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                Self::naive_path_tracing(&hit, scene, ray, depth)
-            } else {
-                scene.background
-            }
-        } else {
-            Vec3f::from(0.0)
-        }
+        //direct * 0.5 + indirect * 0.5
+        emittance + indirect
+        //direct
     }
 
     /// Naive, unbiased monte-carlo path tracing
@@ -172,7 +160,7 @@ impl Renderer {
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                Self::naive_path_tracing(&hit, scene, ray, depth)
+                Self::path_tracing_dls(&hit, scene, ray, depth)
             } else {
                 scene.background
             }

@@ -139,12 +139,9 @@ impl BSDF for Material {
                 if r <= fr {
                     let wi = refract(-wo, normal, self.ior);
                     (wi, self.albedo * fr)
-
                 } else {
-
                     let wi = reflect(-wo, normal);
-                    (wi, self.albedo * (1.0 - fr) )
-
+                    (wi, self.albedo * (1.0 - fr))
                 }
             }
             MaterialType::Lambert => {
