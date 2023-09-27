@@ -58,6 +58,9 @@ pub struct Object {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
+    #[serde(skip)]
+    pub lights: Vec<usize>,
+    /// indices of the objects that emit light
     pub background: Vec3f,
     pub objects: Vec<Object>,
 }
@@ -65,8 +68,9 @@ pub struct Scene {
 impl Scene {
     pub fn new(background: Vec3f) -> Self {
         Self {
-            objects: Vec::new(),
             background,
+            objects: Vec::new(),
+            lights: Vec::new(),
         }
     }
 

@@ -90,27 +90,29 @@ impl Renderer {
 
         let mut direct = Vec3::from(0.0);
         let mut num_lights = 0;
-        
+
         // Objects that have emittance > 0
-        for i in 0..scene.objects.len() {
+        for i in scene.lights {
             let light = scene.objects[i];
-            if 0.0 < light.material.emittance {
+            if hit.idx != i {
                 num_lights += 1;
-                
+
                 let light_dir = (light.geometry.center - hit.point).normalize();
                 let shadow_ray = Ray::new(hit.point, light_dir);
 
-                if scene.hit(&shadow_ray, 0.001, f64::EPSILON).is_none() {
-                    let light_normal = -light_dir;
-                    let light_emittance = light.material.albedo * light.material.emittance;
-                    let light_bsdf = light_emittance / PI;
-                    direct += light_bsdf;
+                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::EPSILON) {
+                    if light_hit.idx == i {
+                        let light_normal = -light_dir;
+                        let light_emittance = light.material.albedo * light.material.emittance;
+                        let light_bsdf = light_emittance / PI;
+                        //direct += light_bsdf;
+                    }
                 }
             }
         }
 
-        assert!(0 < num_lights);
-        direct = direct / num_lights as f64;
+        //assert!();
+        //direct = direct / num_lights as f64;
 
         // Direction toward camera
         let wo = -incoming.direction;
@@ -167,7 +169,7 @@ impl Renderer {
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                Self::naive_path_tracing(&hit, scene, ray, depth)
+                Self::path_tracing_dls(&hit, scene, ray, depth)
             } else {
                 scene.background
             }
