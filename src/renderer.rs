@@ -88,22 +88,28 @@ impl Renderer {
         let emittance = material.albedo * material.emittance;
 
         let mut direct = Vec3::from(0.0);
-
+        let mut num_lights = 0;
+        
         // Objects that have emittance > 0
         for i in 0..scene.objects.len() {
             let light = scene.objects[i];
             if 0.0 < light.material.emittance {
+                num_lights += 1;
+                
                 let light_dir = (light.geometry.center - hit.point).normalize();
                 let shadow_ray = Ray::new(hit.point, light_dir);
-                // Check if point is actually illuminted by this light
 
-                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::EPSILON) {
+                if scene.hit(&shadow_ray, 0.001, f64::EPSILON).is_none() {
+                    let light_normal = -light_dir;
                     let light_emittance = light.material.albedo * light.material.emittance;
-                    let (_, light_bsdf) = light.material.sample(light_hit.normal, light_dir);
+                    let light_bsdf = light_emittance / PI;
                     direct += light_bsdf;
                 }
             }
         }
+
+        assert!(0 < num_lights);
+        direct = direct / num_lights;
 
         // Direction toward camera
         let wo = -incoming.direction;
