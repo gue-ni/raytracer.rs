@@ -80,8 +80,64 @@ impl Renderer {
         }
     }
 
+    /// Path Tracing with Explicit/Direct Light Sampling
+    #[allow(dead_code)]
+    fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+        // Material properties
+        let material = scene.objects[hit.idx].material;
+        let emittance = material.albedo * material.emittance;
+
+        let mut direct = Vec3::from(0.0);
+        
+        // Objects that have emittance > 0
+        for i in scene.objects.len() {
+            let light = scene.objects[i];
+            if 0.0 < light.material.emittance {
+                let light_dir = (light.geometry.center - hit.point).normalize();
+                let shadow_ray = Ray::new(hit.point, light_dir);
+                // Check if point is actually illuminted by this light
+                
+                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f32::EPSILON) {
+                    let light_emittance = light.material.albedo * object.material.emittance;
+                    let (_, light_bsdf) = light.material.bsdf(light_hit.normal, light_dir);
+                    direct += light_bsdf;
+                }
+            }
+        }
+        
+
+        // Direction toward camera
+        let wo = -incoming.direction;
+
+        // Orient normal correctly
+        //let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
+        let normal = hit.normal;
+
+        // Get outgoing ray direction and (brdf * cos_theta / pdf)
+        let (wi, brdf_multiplier) = material.sample(normal, wo);
+        let bias = Vec3::dot(wi, normal) * 0.001;
+        let ray = Ray::new(hit.point + normal * bias, wi);
+        let indirect = Self::trace(&ray, scene, depth - 1) * brdf_multiplier;
+
+        direct * 0.5 + indirect * 0.5
+    }
+
+    /// Trace ray into scene, returns color
+    fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
+        if depth > 0 {
+            if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
+                Self::naive_path_tracing(&hit, scene, ray, depth)
+            } else {
+                scene.background
+            }
+        } else {
+            Vec3f::from(0.0)
+        }
+    }
+
     /// Naive, unbiased monte-carlo path tracing
     /// This function implements the rendering equation using monte-carlo integration
+    ///
     /// Rendering Equation:
     /// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
     ///
@@ -112,7 +168,7 @@ impl Renderer {
         emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
     }
 
-    /// Trace ray into scene, returns color
+    /// Trace ray into scene, returns radiance
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
@@ -173,9 +229,7 @@ impl Renderer {
                     for sample in 0..samples {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
-
                             let ray = camera.ray(xy);
-
                             chunk[i] += Self::trace(&ray, scene, bounces) / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
