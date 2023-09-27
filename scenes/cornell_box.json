@@ -95,7 +95,7 @@
 					"roughness": 0.2,
 					"ior": 0,
 					"metallic": 0.5,
-					"material": "CookTorrance"
+					"material": "Physical"
 				}
 			},
 			{
@@ -105,9 +105,9 @@
 					"albedo": [1, 1, 1],
 					"emittance": 0,
 					"roughness": 0,
-					"ior": 0.0,
+					"ior": 1.5,
 					"metallic": 0,
-					"material": "Mirror"
+					"material": "Transparent"
 				}
 			},
 			{

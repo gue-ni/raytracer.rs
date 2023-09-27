@@ -10,7 +10,7 @@
 					"roughness": 0.2,
 					"ior": 0.0,
 					"metallic": 0.5,
-					"material": "CookTorrance"
+					"material": "Physical"
 				}
 			},
 			{
@@ -43,7 +43,7 @@
 					"roughness": 0.25,
 					"ior": 0.0,
 					"metallic": 0.85,
-					"material": "CookTorrance"
+					"material": "Physical"
 				}
 			},
 			{

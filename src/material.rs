@@ -23,7 +23,7 @@ pub enum MaterialType {
     /// Cosine-weighted Hemisphere Sampling (perfectly diffuse)
     Lambert,
     /// Cook-Torrance Reflection Model
-    CookTorrance,
+    Physical,
     ///
     Transparent,
 }
@@ -69,7 +69,7 @@ impl Material {
             metallic,
             emittance: 0.0,
             ior: 0.0,
-            material: MaterialType::CookTorrance,
+            material: MaterialType::Physical,
         }
     }
 
@@ -139,9 +139,12 @@ impl BSDF for Material {
                 if r <= fr {
                     let wi = refract(-wo, normal, self.ior);
                     (wi, self.albedo * fr)
+
                 } else {
+
                     let wi = reflect(-wo, normal);
-                    (wi, self.albedo * (1.0 - fr))
+                    (wi, self.albedo * (1.0 - fr) )
+
                 }
             }
             MaterialType::Lambert => {
@@ -160,7 +163,7 @@ impl BSDF for Material {
                 let brdf = self.albedo / PI;
                 (wi, brdf * cos_theta / pdf)
             }
-            MaterialType::CookTorrance => {
+            MaterialType::Physical => {
                 // Cook-Torrance Reflection Model
 
                 // let wi = Onb::local_to_world(normal, uniform_hemisphere());
