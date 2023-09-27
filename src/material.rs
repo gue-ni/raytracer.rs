@@ -8,6 +8,9 @@ use std::f64::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
+    fn pdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f64;
+    fn eval(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
+
     /// Returns outgoing vector and brdf multiplier
     /// 'normal' - Normal vector at hit point
     /// 'wo' - Direction vector toward camera
@@ -37,63 +40,6 @@ pub struct Material {
     pub ior: f64,
     pub metallic: f64,
     pub material: MaterialType,
-}
-
-impl Material {
-    pub fn diffuse(color: Vec3f) -> Self {
-        Material {
-            albedo: color,
-            emittance: 0.0,
-            roughness: 0.0,
-            ior: 0.0,
-            metallic: 0.0,
-            material: MaterialType::Lambert,
-        }
-    }
-
-    pub fn emissive(color: Vec3f, intensity: f64) -> Self {
-        Material {
-            albedo: color,
-            emittance: intensity,
-            roughness: 0.0,
-            ior: 0.0,
-            metallic: 0.0,
-            material: MaterialType::Lambert,
-        }
-    }
-
-    pub fn physical(color: Vec3f, roughness: f64, metallic: f64) -> Self {
-        Material {
-            albedo: color,
-            roughness,
-            metallic,
-            emittance: 0.0,
-            ior: 0.0,
-            material: MaterialType::Physical,
-        }
-    }
-
-    pub fn mirror(color: Vec3f) -> Self {
-        Material {
-            albedo: color,
-            emittance: 0.0,
-            roughness: 0.0,
-            ior: 0.0,
-            metallic: 0.0,
-            material: MaterialType::Mirror,
-        }
-    }
-
-    pub fn transparent(color: Vec3f) -> Self {
-        Material {
-            albedo: color,
-            emittance: 0.0,
-            roughness: 0.0,
-            ior: 1.52, //glass
-            metallic: 0.0,
-            material: MaterialType::Transparent,
-        }
-    }
 }
 
 /// Schlick's Fresnel Approximation
@@ -127,6 +73,22 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f64) -> f64 {
 }
 
 impl BSDF for Material {
+    fn pdf(&self, normal: Vec3f, _wo: Vec3f, wi: Vec3f) -> f64 {
+        match self.material {
+            MaterialType::Lambert => {
+                let cos_theta = Vec3f::dot(normal, wi);
+                cos_theta / PI
+            }
+            _ => panic!("not implemented"),
+        }
+    }
+    fn eval(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
+        match self.material {
+            MaterialType::Lambert => self.albedo / PI,
+            _ => panic!("not implemented"),
+        }
+    }
+
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f) {
         match self.material {
             MaterialType::Mirror => (reflect(-wo, normal), self.albedo),

@@ -86,34 +86,64 @@ impl Renderer {
     fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
         let object_id = hit.idx;
         let material = scene.objects[object_id].material;
-        let emittance = material.albedo * material.emittance;
 
-        let mut num_lights = 0;
-        let mut direct = Vec3::from(0.0);
+        let mut _direct = Vec3::from(0.0);
+        let mut _num_lights = 0;
 
+        // why do i need a reference here?
         for light_id in &scene.lights {
             let light = scene.objects[*light_id];
 
             if *light_id != object_id {
+                let light_vec = light.geometry.center - hit.point;
+                let light_dir = light_vec.normalize();
 
-                let light_dir = (light.geometry.center - hit.point).normalize();
+                // what is the difference here?
                 let shadow_ray = Ray::new(hit.point + hit.normal * 0.001, light_dir);
-                
-                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::EPSILON) {
-                    
-                    // there should be nothing in between 'point' and the light
+                // why does this look kinda shaded?
+                //let shadow_ray = Ray::new(hit.point, light_dir);
+
+                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
+                    // we hit the light -> not in shadow
                     if light_hit.idx == *light_id {
-                        //let light_normal = -light_dir;
-                        //let light_emittance = light.material.albedo * light.material.emittance;
-                        //let light_bsdf = light_emittance / PI;
-                        direct = Vec3::from(1.0);
+                        let li = light.material.albedo * light.material.emittance;
+
+                        let cos_theta_x = Vec3::dot(hit.normal, -light_dir);
+                        let cos_theta_y = Vec3::dot(light_hit.normal, -light_dir); // because it is a sphere
+                                                                                   //assert!(cos_theta_y > 0.0);
+                                                                                   //assert!(cos_theta_x > 0.0);
+
+                        let distance = light_vec.length();
+                        let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
+                        let p = 1.0
+                            / Vec3::dot(light_hit.point - hit.point, hit.point - light_hit.point);
+
+                        //_direct += li * cos_theta_x * (cos_theta_y / (distance * distance)) * area
+                        _direct += li * cos_theta_x * p * area
+                        //_direct += li *  cos_theta_x * cos_theta_y * (area / (distance * distance))
                     }
                 }
             }
         }
 
-        // TODO: global illumination
-        direct
+        let wo = -incoming.direction;
+        let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
+        let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
+        let ray = Ray::new(hit.point + hit.normal * bias, wi);
+
+        let emittance = if depth == 0 {
+            //material.albedo * material.emittance
+            Vec3::from(0.0)
+        } else {
+            Vec3::from(0.0)
+        };
+        let _diffuse = emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier;
+
+        // Global Illumination
+
+        let weight = 1.0;
+
+        (_diffuse * (1.0 - weight)) + (_direct * weight)
     }
 
     /// Naive, unbiased monte-carlo path tracing
@@ -135,17 +165,21 @@ impl Renderer {
         // Get outgoing ray direction and (brdf * cos_theta / pdf)
         let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
         // Reflected ray
-        let bias = Vec3::dot(wi, hit.normal) * 0.001;
+        let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
         let ray = Ray::new(hit.point + hit.normal * bias, wi);
         // Formula: emittance + trace() * brdf * cos_theta / pdf
-        emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
+        emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
     /// Trace ray into scene, returns radiance
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-        if depth > 0 {
+        if depth < 5 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                Self::path_tracing_dls(&hit, scene, ray, depth)
+                if cfg!(all()) {
+                    Self::path_tracing_dls(&hit, scene, ray, depth)
+                } else {
+                    Self::naive_path_tracing(&hit, scene, ray, depth)
+                }
             } else {
                 scene.background
             }
@@ -220,9 +254,9 @@ impl Renderer {
     pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
         let multithreading = true;
         if multithreading {
-            Self::render_multithreaded(camera, scene, samples, bounces)
+            Self::render_multithreaded(camera, scene, samples, 0)
         } else {
-            Self::render_singlethread(camera, scene, samples, bounces)
+            Self::render_singlethread(camera, scene, samples, 0)
         }
     }
 }

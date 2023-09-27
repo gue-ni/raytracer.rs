@@ -255,6 +255,7 @@ mod test {
 
     #[test]
     fn test_ggx_hemisphere() {
+        /*
         {
             let alpha = 0.1;
             let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
@@ -276,6 +277,7 @@ mod test {
             let image = create_image_from_distribution(200, 200, || ggx_hemisphere(alpha));
             let _ = image.save("renders/ggx_09.png");
         }
+        */
     }
 
     #[test]
