@@ -82,6 +82,8 @@ impl Renderer {
     }
 
     /// Path Tracing with Explicit/Direct Light Sampling
+    /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
+    /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
     #[allow(dead_code)]
     fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
         let object_id = hit.idx;
@@ -108,19 +110,16 @@ impl Renderer {
                     if light_hit.idx == *light_id {
                         let li = light.material.albedo * light.material.emittance;
 
-                        let cos_theta_x = Vec3::dot(hit.normal, -light_dir);
-                        let cos_theta_y = Vec3::dot(light_hit.normal, -light_dir); // because it is a sphere
-                                                                                   //assert!(cos_theta_y > 0.0);
-                                                                                   //assert!(cos_theta_x > 0.0);
+                        let cos_theta = Vec3::dot(hit.normal.normalize(), light_dir.normalize());
+                        
+                        // this is actually always 1
+                        //let cos_theta_y = Vec3::dot(light_hit.normal, light_dir); 
+
 
                         let distance = light_vec.length();
                         let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
-                        let p = 1.0
-                            / Vec3::dot(light_hit.point - hit.point, hit.point - light_hit.point);
 
-                        //_direct += li * cos_theta_x * (cos_theta_y / (distance * distance)) * area
-                        _direct += li * cos_theta_x * p * area
-                        //_direct += li *  cos_theta_x * cos_theta_y * (area / (distance * distance))
+                        _direct += (li / PI) * cos_theta * (area / (distance * distance)) * (cos_theta / PI)
                     }
                 }
             }
@@ -132,8 +131,7 @@ impl Renderer {
         let ray = Ray::new(hit.point + hit.normal * bias, wi);
 
         let emittance = if depth == 0 {
-            //material.albedo * material.emittance
-            Vec3::from(0.0)
+            material.albedo * material.emittance
         } else {
             Vec3::from(0.0)
         };
@@ -141,7 +139,7 @@ impl Renderer {
 
         // Global Illumination
 
-        let weight = 1.0;
+        let weight = 0.5;
 
         (_diffuse * (1.0 - weight)) + (_direct * weight)
     }
