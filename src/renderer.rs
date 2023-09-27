@@ -6,6 +6,7 @@ use crate::ray::*;
 use crate::vector::*;
 
 use image::RgbImage;
+use std::f64::consts::PI;
 
 //
 //use rand::Rng;
@@ -109,7 +110,7 @@ impl Renderer {
         }
 
         assert!(0 < num_lights);
-        direct = direct / num_lights;
+        direct = direct / num_lights as f64;
 
         // Direction toward camera
         let wo = -incoming.direction;
@@ -125,8 +126,8 @@ impl Renderer {
         let indirect = Self::trace(&ray, scene, depth - 1) * brdf_multiplier;
 
         //direct * 0.5 + indirect * 0.5
-        emittance + indirect
-        //direct
+        //emittance + indirect
+        direct
     }
 
     /// Naive, unbiased monte-carlo path tracing
@@ -166,7 +167,7 @@ impl Renderer {
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                Self::path_tracing_dls(&hit, scene, ray, depth)
+                Self::naive_path_tracing(&hit, scene, ray, depth)
             } else {
                 scene.background
             }
