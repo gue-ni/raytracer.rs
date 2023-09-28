@@ -168,7 +168,11 @@ impl Renderer {
         let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
         let ray = Ray::new(hit.point + hit.normal * bias, wi);
         // Formula: emittance + trace() * brdf * cos_theta / pdf
-        emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
+        let pdf = material.pdf(normal, wo, wi);
+        let bsdf = material.eval(normal, wo, wi);
+        let cos_theta = normal.dot(wi);
+        emittance + Self::trace(&ray, scene, depth + 1) * bsdf * cos_theta / pdf
+        //emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
     /// Trace ray into scene, returns radiance
