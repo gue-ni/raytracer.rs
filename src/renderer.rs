@@ -81,6 +81,12 @@ impl Renderer {
         }
     }
 
+    /// Direct Lighting Integrator
+    #[allow(dead_code)]
+    fn direct_lighting(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+        Vec3::from(0.0)
+    }
+
     /// Path Tracing with Explicit/Direct Light Sampling
     #[allow(dead_code)]
     fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
@@ -109,10 +115,8 @@ impl Renderer {
                         let li = light.material.albedo * light.material.emittance;
 
                         let cos_theta_x = Vec3::dot(hit.normal, -light_dir);
-                        let cos_theta_y = Vec3::dot(light_hit.normal, -light_dir); // because it is a sphere
-                                                                                   //assert!(cos_theta_y > 0.0);
-                                                                                   //assert!(cos_theta_x > 0.0);
-
+                        let cos_theta_y = Vec3::dot(light_hit.normal, -light_dir); 
+                        
                         let distance = light_vec.length();
                         let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
                         let p = 1.0
@@ -132,17 +136,13 @@ impl Renderer {
         let ray = Ray::new(hit.point + hit.normal * bias, wi);
 
         let emittance = if depth == 0 {
-            //material.albedo * material.emittance
-            Vec3::from(0.0)
+            material.albedo * material.emittance
         } else {
             Vec3::from(0.0)
         };
         let _diffuse = emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier;
 
-        // Global Illumination
-
         let weight = 1.0;
-
         (_diffuse * (1.0 - weight)) + (_direct * weight)
     }
 
@@ -175,11 +175,7 @@ impl Renderer {
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth < 5 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                if cfg!(all()) {
-                    Self::path_tracing_dls(&hit, scene, ray, depth)
-                } else {
-                    Self::naive_path_tracing(&hit, scene, ray, depth)
-                }
+                Self::path_tracing_dls(&hit, scene, ray, depth)
             } else {
                 scene.background
             }
