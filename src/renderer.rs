@@ -175,18 +175,18 @@ impl Renderer {
         //emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
-    fn trace_loop(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+    fn trace_loop(hit: &HitRecord, scene: &Scene, incident: &Ray, max_depth: u32) -> Vec3f {
         let radiance = Vec3::from(0.0);
         let throughput = Vec3::from(1.0);
 
-        let mut ray = incoming;
+        let mut ray = incident;
         
-        for _ in 0..depth {
+        for depth in 0..max_depth {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY)  {
                 let material = scene.objects[hit.idx].material;
                 let albedo = material.albedo;
                 let emittance = albedo * material.emittance;
-
+                
                 let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
 
                 radiance += emittance * throughput;
@@ -197,6 +197,7 @@ impl Renderer {
             } else {
                 radiance += scene.background * throughput;
                 break;
+            }
         }
 
         radiance
