@@ -179,7 +179,7 @@ impl Renderer {
         let mut ray = incident.clone();
         
         for depth in 0..max_depth {
-            if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY)  {
+            if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY)  {
                 let material = scene.objects[hit.idx].material;
                 let albedo = material.albedo;
                 let emittance = albedo * material.emittance;
