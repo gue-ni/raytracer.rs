@@ -265,7 +265,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            chunk[i] += Self::trace(&ray, scene, bounces) / (samples as f64);
+                            chunk[i] += Self::trace_loop(&ray, scene, bounces) / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
                             print_progress(sample, samples);
