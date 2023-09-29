@@ -89,42 +89,6 @@ impl Renderer {
         let object_id = hit.idx;
         let material = scene.objects[object_id].material;
 
-        let mut _direct = Vec3::from(0.0);
-        let mut _num_lights = 0;
-
-        // why do i need a reference here?
-        for light_id in &scene.lights {
-            let light = scene.objects[*light_id];
-
-            if *light_id != object_id {
-                let light_vec = light.geometry.center - hit.point;
-                let light_dir = light_vec.normalize();
-
-                // what is the difference here?
-                let shadow_ray = Ray::new(hit.point + hit.normal * 0.001, light_dir);
-                // why does this look kinda shaded?
-                //let shadow_ray = Ray::new(hit.point, light_dir);
-
-                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
-                    // we hit the light -> not in shadow
-                    if light_hit.idx == *light_id {
-                        let li = light.material.albedo * light.material.emittance;
-
-                        let cos_theta = Vec3::dot(hit.normal.normalize(), light_dir.normalize());
-                        
-                        // this is actually always 1
-                        //let cos_theta_y = Vec3::dot(light_hit.normal, light_dir); 
-
-
-                        let distance = light_vec.length();
-                        let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
-
-                        _direct += (li / PI) * cos_theta * (area / (distance * distance)) * (cos_theta / PI)
-                    }
-                }
-            }
-        }
-
         let wo = -incoming.direction;
         let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
         let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
@@ -136,6 +100,45 @@ impl Renderer {
             Vec3::from(0.0)
         };
         let _diffuse = emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier;
+
+
+        let mut _direct = Vec3::from(0.0);
+        let mut _num_lights = 0;
+
+        // why do i need a reference here?
+        for light_id in &scene.lights {
+            let light = scene.objects[*light_id];
+
+            if *light_id != object_id {
+                let light_vec = light.geometry.center - hit.point;
+                let distance = light_vec.length();
+                let light_dir = light_vec / distance;
+
+                // what is the difference here?
+                let shadow_ray = Ray::new(hit.point + hit.normal * 0.001, light_dir);
+                // why does this look kinda shaded?
+                //let shadow_ray = Ray::new(hit.point, light_dir);
+
+                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
+                    // we hit the light -> not in shadow
+                    if light_hit.idx == *light_id {
+                        let li = ((light.material.albedo * light.material.emittance) / PI) / (1.0 / PI);
+
+                        let cos_theta = Vec3::dot(hit.normal, light_dir);
+                        
+                        let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
+
+                        // this kinda works but it shouldn't
+                        _direct += (li / PI) * cos_theta * (area / (distance * distance)) * (cos_theta / PI)
+
+
+                        //_direct += material.eval(hit.normal, wo, wi) * li 
+                        //_direct += li * brdf_multiplier; 
+                    }
+                }
+            }
+        }
+
 
         // Global Illumination
 
@@ -173,7 +176,7 @@ impl Renderer {
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth < 5 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                if cfg!(all()) {
+                if cfg!(any()) {
                     Self::path_tracing_dls(&hit, scene, ray, depth)
                 } else {
                     Self::naive_path_tracing(&hit, scene, ray, depth)

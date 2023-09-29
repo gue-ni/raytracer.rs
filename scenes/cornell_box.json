@@ -79,7 +79,7 @@
 				"geometry": { "center": [0, -6.95, 5], "radius": 5 },
 				"material": {
 					"albedo": [1, 1, 1],
-					"emittance": 23,
+					"emittance": 12,
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
@@ -95,7 +95,7 @@
 					"roughness": 0.2,
 					"ior": 0,
 					"metallic": 0.5,
-					"material": "Physical"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -107,7 +107,7 @@
 					"roughness": 0,
 					"ior": 1.5,
 					"metallic": 0,
-					"material": "Transparent"
+					"material": "Lambert"
 				}
 			},
 			{
