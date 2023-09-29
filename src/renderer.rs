@@ -173,12 +173,12 @@ impl Renderer {
 
     fn trace_loop(incident: &Ray, scene: &Scene, max_depth: u32) -> Vec3f {
 
-        let radiance = Vec3::from(0.0);
-        let throughput = Vec3::from(1.0);
+        let mut radiance = Vec3::from(0.0);
+        let mut throughput = Vec3::from(1.0);
 
         let mut ray = incident.clone();
         
-        for depth in 0..max_depth {
+        for _depth in 0..max_depth {
             if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY)  {
                 let material = scene.objects[hit.idx].material;
                 let albedo = material.albedo;
