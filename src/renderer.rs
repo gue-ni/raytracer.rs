@@ -81,6 +81,12 @@ impl Renderer {
         }
     }
 
+    /// Direct Lighting Integrator
+    #[allow(dead_code)]
+    fn direct_lighting(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+        Vec3::from(0.0)
+    }
+
     /// Path Tracing with Explicit/Direct Light Sampling
     /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
     /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
@@ -168,19 +174,45 @@ impl Renderer {
         // Reflected ray
         let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
         let ray = Ray::new(hit.point + hit.normal * bias, wi);
-        // Formula: emittance + trace() * brdf * cos_theta / pdf
+
         emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
+
+    fn trace_loop(incident: &Ray, scene: &Scene, max_depth: u32) -> Vec3f {
+
+        let mut radiance = Vec3::from(0.0);
+        let mut throughput = Vec3::from(1.0);
+
+        let mut ray = incident.clone();
+        
+        for _depth in 0..5 {
+            if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY)  {
+                let material = scene.objects[hit.idx].material;
+                let albedo = material.albedo;
+                let emittance = albedo * material.emittance;
+                
+                let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
+
+                radiance += emittance * throughput;
+                throughput *= brdf_multiplier;
+                
+                ray = Ray::new(hit.point + hit.normal * 0.001, wi);
+            
+            } else {
+                radiance += scene.background * throughput;
+                break;
+            }
+        }
+
+        radiance
+    }
+
 
     /// Trace ray into scene, returns radiance
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth < 5 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                if cfg!(any()) {
-                    Self::path_tracing_dls(&hit, scene, ray, depth)
-                } else {
-                    Self::naive_path_tracing(&hit, scene, ray, depth)
-                }
+                Self::naive_path_tracing(&hit, scene, ray, depth)
             } else {
                 scene.background
             }
@@ -238,7 +270,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            chunk[i] += Self::trace(&ray, scene, bounces) / (samples as f64);
+                            chunk[i] += Self::trace_loop(&ray, scene, bounces) / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
                             print_progress(sample, samples);
