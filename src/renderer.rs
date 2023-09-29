@@ -167,19 +167,16 @@ impl Renderer {
         // Reflected ray
         let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
         let ray = Ray::new(hit.point + hit.normal * bias, wi);
-        // Formula: emittance + trace() * brdf * cos_theta / pdf
-        let pdf = material.pdf(normal, wo, wi);
-        let bsdf = material.eval(normal, wo, wi);
-        let cos_theta = normal.dot(wi);
-        emittance + Self::trace(&ray, scene, depth + 1) * bsdf * cos_theta / pdf
-        //emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
+
+        emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
-    fn trace_loop(hit: &HitRecord, scene: &Scene, incident: &Ray, max_depth: u32) -> Vec3f {
+    fn trace_loop(incident: &Ray, scene: &Scene, max_depth: u32) -> Vec3f {
+
         let radiance = Vec3::from(0.0);
         let throughput = Vec3::from(1.0);
 
-        let mut ray = incident;
+        let mut ray = incident.clone();
         
         for depth in 0..max_depth {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY)  {
@@ -192,7 +189,7 @@ impl Renderer {
                 radiance += emittance * throughput;
                 throughput *= brdf_multiplier;
                 
-                ray = Ray::new(hit.point + normal * 0.001, wi);
+                ray = Ray::new(hit.point + hit.normal * 0.001, wi);
             
             } else {
                 radiance += scene.background * throughput;
