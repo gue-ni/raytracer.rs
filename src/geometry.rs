@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub struct HitRecord {
-    pub t: f32,
+    pub t: f64,
     pub normal: Vec3f,
     pub point: Vec3f,
     pub idx: usize,
@@ -15,7 +15,7 @@ pub struct HitRecord {
 impl Default for HitRecord {
     fn default() -> Self {
         HitRecord {
-            t: f32::INFINITY,
+            t: f64::INFINITY,
             normal: Vec3f::from(0.0),
             point: Vec3f::from(0.0),
             idx: 0,
@@ -26,12 +26,12 @@ impl Default for HitRecord {
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Sphere {
     pub center: Vec3f,
-    pub radius: f32,
+    pub radius: f64,
 }
 
 impl Sphere {
     #[allow(dead_code)]
-    pub fn new(center: Vec3f, radius: f32) -> Self {
+    pub fn new(center: Vec3f, radius: f64) -> Self {
         Sphere { center, radius }
     }
 }
@@ -58,6 +58,9 @@ pub struct Object {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
+    #[serde(skip)]
+    pub lights: Vec<usize>,
+    /// indices of the objects that emit light
     pub background: Vec3f,
     pub objects: Vec<Object>,
 }
@@ -65,8 +68,9 @@ pub struct Scene {
 impl Scene {
     pub fn new(background: Vec3f) -> Self {
         Self {
-            objects: Vec::new(),
             background,
+            objects: Vec::new(),
+            lights: Vec::new(),
         }
     }
 
@@ -77,11 +81,11 @@ impl Scene {
 
 pub trait Hittable {
     /// Returns HitRecord if ray intersects geometry
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord>;
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
         let m = ray.origin - self.center;
         let b = Vec3::dot(m, ray.direction);
         let c = Vec3::dot(m, m) - self.radius * self.radius;
@@ -95,10 +99,10 @@ impl Hittable for Sphere {
             return None;
         }
 
-        let mut t = -b - f32::sqrt(discr);
+        let mut t = -b - f64::sqrt(discr);
 
         if t < 0.0 {
-            t = -b + f32::sqrt(discr);
+            t = -b + f64::sqrt(discr);
         }
 
         if min_t < t && t < max_t {
@@ -116,7 +120,7 @@ impl Hittable for Sphere {
 }
 
 impl Hittable for Triangle {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
         let v0v1 = self.1 - self.0;
         let v0v2 = self.2 - self.0;
         let v1v2 = self.2 - self.1;
@@ -125,7 +129,7 @@ impl Hittable for Triangle {
         let normal = Vec3f::normalize(Vec3f::cross(v0v1, v0v2));
         let ndot = Vec3f::dot(normal, ray.direction);
 
-        if f32::abs(ndot) < f32::EPSILON {
+        if f64::abs(ndot) < f64::EPSILON {
             return None;
         }
 
@@ -168,7 +172,7 @@ impl Hittable for Triangle {
 }
 
 impl Hittable for Mesh {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
         for triangle in &self.triangles {
             let hit_record = triangle.hit(ray, min_t, max_t);
             if hit_record.is_some() {
@@ -180,7 +184,7 @@ impl Hittable for Mesh {
 }
 
 impl Hittable for Geometry {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
         match self {
             Geometry::MESH(g) => g.hit(ray, min_t, max_t),
             Geometry::SPHERE(g) => g.hit(ray, min_t, max_t),
@@ -189,7 +193,7 @@ impl Hittable for Geometry {
 }
 
 impl Hittable for Scene {
-    fn hit(&self, ray: &Ray, min_t: f32, max_t: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
         let mut closest = HitRecord::default();
         closest.t = max_t;
 
@@ -221,7 +225,7 @@ mod test {
     fn test_sphere_hit() {
         let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
         let ray = Ray::new(Vec3f::new(0.0, 0.0, 0.0), Vec3f::new(0.0, 0.0, 1.0));
-        if let Some(hit) = sphere.hit(&ray, 0.0, f32::INFINITY) {
+        if let Some(hit) = sphere.hit(&ray, 0.0, f64::INFINITY) {
             assert_eq!(hit.t, 4.0);
             assert_eq!(hit.point, Vec3f::new(0.0, 0.0, 4.0));
             assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
@@ -234,7 +238,7 @@ mod test {
     fn test_sphere_hit_inside() {
         let sphere = Sphere::new(Vec3f::from(0.0), 3.0);
         let ray = Ray::towards(sphere.center, Vec3::new(0.0, 0.0, 1.0));
-        if let Some(hit) = sphere.hit(&ray, 0.0, f32::INFINITY) {
+        if let Some(hit) = sphere.hit(&ray, 0.0, f64::INFINITY) {
             assert_eq!(hit.t, 3.0);
             assert_eq!(hit.point, Vec3f::new(0.0, 0.0, 3.0));
             // what should the normal be in this case?
@@ -252,7 +256,7 @@ mod test {
             Vec3f::new(0.5, 0.0, 5.0),
         );
         let ray = Ray::new(Vec3f::new(0.0, 0.5, 0.0), Vec3f::new(0.0, 0.0, 1.0));
-        let hit = triangle.hit(&ray, 0.0, f32::INFINITY).unwrap();
+        let hit = triangle.hit(&ray, 0.0, f64::INFINITY).unwrap();
         assert_eq!(hit.t, 5.0);
         assert_eq!(hit.point, Vec3f::new(0.0, 0.5, 5.0));
         assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
@@ -278,7 +282,7 @@ mod test {
 
         let ray = Ray::new(Vec3f::new(0.0, 0.0, -5.0), Vec3f::new(0.0, 0.0, 1.0));
 
-        let possible_hit = quad.hit(&ray, 0.0, f32::INFINITY);
+        let possible_hit = quad.hit(&ray, 0.0, f64::INFINITY);
         assert!(possible_hit.is_some());
 
         let hit = possible_hit.unwrap();
@@ -291,7 +295,7 @@ mod test {
         let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
         let ray_1 = Ray::towards(Vec3::new(0.0, 0.0, 0.0), sphere.center);
 
-        let hit_1 = sphere.hit(&ray_1, 0.0, f32::INFINITY).unwrap();
+        let hit_1 = sphere.hit(&ray_1, 0.0, f64::INFINITY).unwrap();
 
         println!("{:?}", sphere);
         println!("{:?}", ray_1);
@@ -309,7 +313,7 @@ mod test {
         let ray_2 = Ray::new(hit_1.point + hit_1.normal * -0.001, refracted);
         println!("{:?}", ray_2);
 
-        let hit_2 = sphere.hit(&ray_2, 0.0, f32::INFINITY).unwrap();
+        let hit_2 = sphere.hit(&ray_2, 0.0, f64::INFINITY).unwrap();
 
         println!("hit_2 = {:?}", hit_2);
     }
@@ -334,7 +338,7 @@ mod test {
                     "roughness": 1.0,
                     "ior": 1.0,
                     "metallic": 1.0,
-                    "material": "CosineWeighted"
+                    "material": "Lambert"
                 }
             }"#;
             let _object: Object = serde_json::from_str(json).unwrap();
@@ -355,7 +359,7 @@ mod test {
                             "roughness": 1.0,
                             "ior": 1.0,
                             "metallic": 1.0,
-                            "material": "CosineWeighted"
+                            "material": "Lambert"
                         }
                     }
                 ]

@@ -11,7 +11,7 @@ impl Ray {
         Ray { origin, direction }
     }
 
-    pub fn point_at(&self, t: f32) -> Vec3f {
+    pub fn point_at(&self, t: f64) -> Vec3f {
         self.origin + self.direction * t
     }
 

@@ -21,10 +21,11 @@ jobs:
     - name: Run tests
       run: cargo test --verbose -- --show-output
     - name: Render Test Image
-      run: cargo run --release -- scenes/cornell_box.json 512 512 256 5
+      run: cargo run --release -- 256 256 256 5 scenes/cornell_box.json
     
     - uses: actions/upload-artifact@v3
       with:
         name: render-artifact
         path: |
           *.png
+          renders/*.png

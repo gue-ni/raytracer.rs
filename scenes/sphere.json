@@ -9,12 +9,12 @@
 					"center": [0, 0, 5.0]
 				},
 				"material": {
-					"albedo": [1,0,0],
+					"albedo": [1, 0, 0],
 					"emittance": 0,
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -28,7 +28,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			}
 		]

@@ -28,7 +28,7 @@ pub trait Number:
 {
 }
 
-impl Number for f32 {}
+impl Number for f64 {}
 impl Number for i32 {}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -209,7 +209,7 @@ where
     T: Number + SquareRoot,
 {
     fn length(self) -> T;
-    fn normalize(v: Self) -> Self;
+    fn normalize(self) -> Self;
 }
 
 impl<T> Magnitude<T> for Vec3<T>
@@ -220,37 +220,37 @@ where
         Self::dot(self, self).sqrt()
     }
 
-    fn normalize(v: Self) -> Self {
-        v / v.length()
+    fn normalize(self) -> Self {
+        self / self.length()
     }
 }
 
 pub trait Dot<T> {
-    fn dot(a: Self, b: Self) -> T;
+    fn dot(self, b: Self) -> T;
 }
 
 impl<T> Dot<T> for Vec3<T>
 where
     T: Number,
 {
-    fn dot(a: Self, b: Self) -> T {
-        a.x * b.x + a.y * b.y + a.z * b.z
+    fn dot(self, b: Self) -> T {
+        self.x * b.x + self.y * b.y + self.z * b.z
     }
 }
 
 pub trait Cross<T> {
-    fn cross(a: Self, b: Self) -> Self;
+    fn cross(self, b: Self) -> Self;
 }
 
 impl<T> Cross<T> for Vec3<T>
 where
     T: Number,
 {
-    fn cross(a: Self, b: Self) -> Self {
+    fn cross(self, b: Self) -> Self {
         Self::new(
-            a.y * b.z - a.z * b.y,
-            a.z * b.x - a.x * b.z,
-            a.x * b.y - a.y * b.x,
+            self.y * b.z - self.z * b.y,
+            self.z * b.x - self.x * b.z,
+            self.x * b.y - self.y * b.x,
         )
     }
 }
@@ -402,8 +402,8 @@ where
 impl From<(u32, u32)> for Vec2f {
     fn from(item: (u32, u32)) -> Self {
         Self {
-            x: item.0 as f32,
-            y: item.1 as f32,
+            x: item.0 as f64,
+            y: item.1 as f64,
         }
     }
 }
@@ -411,8 +411,8 @@ impl From<(u32, u32)> for Vec2f {
 impl From<Vec2u> for Vec2f {
     fn from(item: Vec2u) -> Self {
         Self {
-            x: item.x as f32,
-            y: item.y as f32,
+            x: item.x as f64,
+            y: item.y as f64,
         }
     }
 }
@@ -535,16 +535,16 @@ where
     }
 }
 
-pub type Vec3f = Vec3<f32>;
+pub type Vec3f = Vec3<f64>;
 pub type Vec3i = Vec3<i32>;
 pub type Vec3u = Vec3<u32>;
 
-pub type Vec2f = Vec2<f32>;
+pub type Vec2f = Vec2<f64>;
 pub type Vec2i = Vec2<i32>;
 pub type Vec2u = Vec2<u32>;
 
-pub type Mat3f = Mat3<f32>;
-pub type Mat4f = Mat4<f32>;
+pub type Mat3f = Mat3<f64>;
+pub type Mat4f = Mat4<f64>;
 
 #[cfg(test)]
 mod tests {

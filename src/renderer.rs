@@ -6,6 +6,7 @@ use crate::ray::*;
 use crate::vector::*;
 
 use image::RgbImage;
+use std::f64::consts::PI;
 
 //
 //use rand::Rng;
@@ -20,7 +21,7 @@ fn get_xy(index: u32, width: u32) -> (u32, u32) {
 }
 
 fn print_progress(current_sample: u32, total_samples: u32) {
-    let percentage = current_sample as f32 / total_samples as f32 * 100.0;
+    let percentage = current_sample as f64 / total_samples as f64 * 100.0;
     println!(
         "Progress: {:3.1?} % ({}/{})",
         percentage, current_sample, total_samples
@@ -41,13 +42,13 @@ impl Renderer {
     fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
         let material = scene.objects[hit.idx].material;
 
-        let light_pos = Vec3f::new(0.0, -3.5, 4.0);
+        let light_pos = Vec3f::new(0.0, -1.5, 4.0);
         let light_intensity = 1.0;
         let light_color = Vec3f::from(1.0) * light_intensity;
         let light_dir = Vec3f::normalize(light_pos - hit.point);
 
         let ray = Ray::new(hit.point, light_dir);
-        let _shadow = match scene.hit(&ray, 0.0, f32::INFINITY) {
+        let _shadow = match scene.hit(&ray, 0.0, f64::INFINITY) {
             Some(_) => 1.0,
             None => 0.0,
         };
@@ -66,13 +67,13 @@ impl Renderer {
 
                 let ambient = light_color * ka;
 
-                let cos_theta = f32::max(Vec3f::dot(hit.normal, light_dir), 0.0);
+                let cos_theta = f64::max(Vec3f::dot(hit.normal, light_dir), 0.0);
                 let diffuse = light_color * cos_theta * kd;
 
                 let view_dir = -incoming.direction;
                 let halfway_dir = Vec3f::normalize(light_dir + view_dir);
                 let specular = light_color
-                    * f32::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha)
+                    * f64::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha)
                     * ks;
 
                 (ambient + (diffuse + specular) * _shadow) * material.albedo
@@ -80,8 +81,82 @@ impl Renderer {
         }
     }
 
+    /// Direct Lighting Integrator
+    #[allow(dead_code)]
+    fn direct_lighting(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+        Vec3::from(0.0)
+    }
+
+    /// Path Tracing with Explicit/Direct Light Sampling
+    /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
+    /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
+    #[allow(dead_code)]
+    fn path_tracing_dls(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
+        let object_id = hit.idx;
+        let material = scene.objects[object_id].material;
+
+        let wo = -incoming.direction;
+        let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
+        let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
+        let ray = Ray::new(hit.point + hit.normal * bias, wi);
+
+        let emittance = if depth == 0 {
+            material.albedo * material.emittance
+        } else {
+            Vec3::from(0.0)
+        };
+        let _diffuse = emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier;
+
+        let mut _direct = Vec3::from(0.0);
+        let mut _num_lights = 0;
+
+        // why do i need a reference here?
+        for light_id in &scene.lights {
+            let light = scene.objects[*light_id];
+
+            if *light_id != object_id {
+                let light_vec = light.geometry.center - hit.point;
+                let distance = light_vec.length();
+                let light_dir = light_vec / distance;
+
+                // what is the difference here?
+                let shadow_ray = Ray::new(hit.point + hit.normal * 0.001, light_dir);
+                // why does this look kinda shaded?
+                //let shadow_ray = Ray::new(hit.point, light_dir);
+
+                if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
+                    // we hit the light -> not in shadow
+                    if light_hit.idx == *light_id {
+                        let li =
+                            ((light.material.albedo * light.material.emittance) / PI) / (1.0 / PI);
+
+                        let cos_theta = Vec3::dot(hit.normal, light_dir);
+
+                        let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
+
+                        // this kinda works but it shouldn't
+                        _direct += (li / PI)
+                            * cos_theta
+                            * (area / (distance * distance))
+                            * (cos_theta / PI)
+
+                        //_direct += material.eval(hit.normal, wo, wi) * li
+                        //_direct += li * brdf_multiplier;
+                    }
+                }
+            }
+        }
+
+        // Global Illumination
+
+        let weight = 0.5;
+
+        (_diffuse * (1.0 - weight)) + (_direct * weight)
+    }
+
     /// Naive, unbiased monte-carlo path tracing
     /// This function implements the rendering equation using monte-carlo integration
+    ///
     /// Rendering Equation:
     /// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
     ///
@@ -93,29 +168,50 @@ impl Renderer {
         // Material properties
         let material = scene.objects[hit.idx].material;
         let emittance = material.albedo * material.emittance;
-
         // Direction toward camera
         let wo = -incoming.direction;
-
-        // Orient normal correctly
-        //let normal = hit.normal * Vec3::dot(hit.normal, wo).signum();
-        let normal = hit.normal;
-
         // Get outgoing ray direction and (brdf * cos_theta / pdf)
-        let (wi, brdf_multiplier) = material.sample(normal, wo);
-
+        let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
         // Reflected ray
-        let bias = Vec3::dot(wi, normal) * 0.001;
-        let ray = Ray::new(hit.point + normal * bias, wi);
+        let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
+        let ray = Ray::new(hit.point + hit.normal * bias, wi);
 
-        // Integral is of the form 'emittance + trace() * brdf * cos_theta / pdf'
-        emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
+        emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
-    /// Trace ray into scene, returns color
+    fn trace_loop(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
+        let mut radiance = Vec3::from(0.0);
+        let mut throughput = Vec3::from(1.0);
+
+        assert!(0 < max_bounce);
+
+        let mut ray = incident.clone();
+
+        for _bounce in 0..max_bounce {
+            if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY) {
+                let material = scene.objects[hit.idx].material;
+                let albedo = material.albedo;
+                let emittance = albedo * material.emittance;
+
+                let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
+
+                radiance += emittance * throughput;
+                throughput *= brdf_multiplier;
+
+                ray = Ray::new(hit.point + hit.normal * 0.001, wi);
+            } else {
+                radiance += scene.background * throughput;
+                break;
+            }
+        }
+
+        radiance
+    }
+
+    /// Trace ray into scene, returns radiance
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-        if depth > 0 {
-            if let Some(hit) = scene.hit(ray, 0.0001, f32::INFINITY) {
+        if depth < 5 {
+            if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
                 Self::naive_path_tracing(&hit, scene, ray, depth)
             } else {
                 scene.background
@@ -137,7 +233,7 @@ impl Renderer {
                 for x in 0..width {
                     let ray = camera.ray((x, y));
                     framebuffer[(y * width + x) as usize] +=
-                        Self::trace(&ray, scene, bounces) / (samples as f32);
+                        Self::trace(&ray, scene, bounces) / (samples as f64);
                 }
             }
             if sample % 5 == 0 {
@@ -173,10 +269,8 @@ impl Renderer {
                     for sample in 0..samples {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
-
                             let ray = camera.ray(xy);
-
-                            chunk[i] += Self::trace(&ray, scene, bounces) / (samples as f32);
+                            chunk[i] += Self::trace_loop(&ray, scene, bounces) / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
                             print_progress(sample, samples);
@@ -195,7 +289,7 @@ impl Renderer {
         if multithreading {
             Self::render_multithreaded(camera, scene, samples, bounces)
         } else {
-            Self::render_singlethread(camera, scene, samples, bounces)
+            Self::render_singlethread(camera, scene, samples, 0)
         }
     }
 }

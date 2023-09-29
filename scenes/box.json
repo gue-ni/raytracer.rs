@@ -5,23 +5,23 @@
 			{
 				"geometry": { "center": [-3.45, 2.0, 8.5], "radius": 1.0 },
 				"material": {
-					"albedo": [0.99, 0.09, 0.09],
-					"emittance": 0.0,
-					"roughness": 0.0,
-					"ior": 0.0,
-					"metallic": 0.0,
-					"material": "CosineWeighted"
-				}
-			},
-			{
-				"geometry": { "center": [-1.1500001, 2.0, 8.5], "radius": 1.0 },
-				"material": {
 					"albedo": [1.0, 0.5803922, 0.16078432],
 					"emittance": 0.0,
 					"roughness": 0.2,
 					"ior": 0.0,
 					"metallic": 0.5,
-					"material": "CookTorrance"
+					"material": "Physical"
+				}
+			},
+			{
+				"geometry": { "center": [-1.1500001, 2.0, 8.5], "radius": 1.0 },
+				"material": {
+					"albedo": [1,1,1],
+					"emittance": 0.0,
+					"roughness": 0.0,
+					"ior": 1.5,
+					"metallic": 0.0,
+					"material": "Transparent"
 				}
 			},
 			{
@@ -43,29 +43,29 @@
 					"roughness": 0.25,
 					"ior": 0.0,
 					"metallic": 0.85,
-					"material": "CookTorrance"
+					"material": "Physical"
 				}
 			},
 			{
 				"geometry": { "center": [-1.5, -1.75, 7.0], "radius": 0.75 },
 				"material": {
 					"albedo": [0.27058825, 0.7254902, 0.827451],
-					"emittance": 8.0,
+					"emittance": 10.0,
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
 				"geometry": { "center": [1.5, -1.75, 10.0], "radius": 0.75 },
 				"material": {
 					"albedo": [0.73333335, 0.20392157, 0.60784316],
-					"emittance": 8.0,
+					"emittance": 10.0,
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -76,7 +76,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -87,7 +87,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -98,7 +98,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 
@@ -110,7 +110,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -121,7 +121,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -132,7 +132,7 @@
 					"roughness": 0.0,
 					"ior": 0.0,
 					"metallic": 0.0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			}
 		]

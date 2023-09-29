@@ -40,11 +40,11 @@ pub fn main() {
         std::process::exit(1);
     }
 
-    let scene_path = &args[1];
-    let width = parse(&args[2]);
-    let height = parse(&args[3]);
-    let samples = parse(&args[4]);
-    let bounces = parse(&args[5]);
+    let width = parse(&args[1]);
+    let height = parse(&args[2]);
+    let samples = parse(&args[3]);
+    let bounces = parse(&args[4]);
+    let scene_path = &args[5];
 
     let json = match fs::read_to_string(scene_path) {
         Ok(value) => value,
@@ -58,6 +58,14 @@ pub fn main() {
 
     let camera = Camera::new(config.camera.position, (width, height));
 
+    let mut scene = config.scene;
+
+    for i in 0..scene.objects.len() {
+        if 0.0 < scene.objects[i].material.emittance {
+            scene.lights.push(i);
+        }
+    }
+
     println!("Config: {}", scene_path);
     println!(
         "Resolution: ({}, {}), Samples: {}, Bounces: {}",
@@ -65,7 +73,7 @@ pub fn main() {
     );
 
     let now = Instant::now();
-    let image = Renderer::render(&camera, &config.scene, samples, bounces);
+    let image = Renderer::render(&camera, &scene, samples, bounces);
     let elapsed = now.elapsed();
 
     println!("Rendered {} pixels in {:.2?}", width * height, elapsed);

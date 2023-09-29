@@ -11,7 +11,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -23,7 +23,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -35,7 +35,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -47,7 +47,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -59,7 +59,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -71,19 +71,19 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
 				"comment": "Light",
 				"geometry": { "center": [0, -6.95, 5], "radius": 5 },
 				"material": {
-					"albedo": [1.0, 1.0, 1.0],
+					"albedo": [1, 1, 1],
 					"emittance": 12,
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -95,19 +95,19 @@
 					"roughness": 0.2,
 					"ior": 0,
 					"metallic": 0.5,
-					"material": "CookTorrance"
+					"material": "Lambert"
 				}
 			},
 			{
 				"comment": "Mirror Sphere",
 				"geometry": { "center": [1.0, 1.25, 5.0], "radius": 0.75 },
 				"material": {
-					"albedo": [1.0, 1.0, 1.0],
+					"albedo": [1, 1, 1],
 					"emittance": 0,
 					"roughness": 0,
 					"ior": 1.5,
 					"metallic": 0,
-					"material": "Transparent"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -119,7 +119,7 @@
 					"roughness": 0,
 					"ior": 0,
 					"metallic": 0,
-					"material": "CosineWeighted"
+					"material": "Lambert"
 				}
 			}
 		]
