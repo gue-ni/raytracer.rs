@@ -146,8 +146,8 @@ impl Renderer {
 
                         let point_on_light = {
                             let normal = vector_on_sphere();
-                            //light.geometry.center + normal * light.geometry.radius
-                            light.geometry.center
+                            light.geometry.center + normal * light.geometry.radius
+                            //light.geometry.center
                         };
 
                         let shadow_ray = Ray::new(point, Vec3::normalize(point_on_light - point));
@@ -161,7 +161,6 @@ impl Renderer {
                                     let radius2 = light.geometry.radius * light.geometry.radius;
                                     let area = 4.0 * PI * radius2;
                                     let distance2 = light_hit.t * light_hit.t;
-
                                     distance2 / (f64::abs(cos_theta) * area)
                                 };
 
