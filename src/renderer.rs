@@ -187,18 +187,31 @@ impl Renderer {
 
         let mut ray = incident.clone();
 
-        for _bounce in 0..max_bounce {
+        for bounce in 0..max_bounce {
             if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY) {
                 let material = scene.objects[hit.idx].material;
                 let albedo = material.albedo;
                 let emittance = albedo * material.emittance;
 
                 let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
+                let p = hit.point + hit.normal * 0.001;
 
-                radiance += emittance * throughput;
+                if bounce == 0 {
+                    radiance += emittance * throughput;
+                }
+
+                // direct light sampling 
+                for &i in &scene.lights {
+                    let light = scene.objects[i];
+                    let lv = light.geometry.center - hit.point;
+                    let shadow_ray = Ray::new(p, lv.normalize());
+                }
+                
+
+                
                 throughput *= brdf_multiplier;
 
-                ray = Ray::new(hit.point + hit.normal * 0.001, wi);
+                ray = Ray::new(p, wi);
             } else {
                 radiance += scene.background * throughput;
                 break;
