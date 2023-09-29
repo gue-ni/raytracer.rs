@@ -133,44 +133,40 @@ impl Renderer {
         for bounce in 0..max_bounce {
             if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY) {
                 let material = scene.objects[hit.idx].material;
-                let emittance = material.albedo * material.emittance;
                 let point = hit.point + hit.normal * 0.001;
 
                 if bounce == 0 {
-                    radiance += emittance * throughput;
+                    radiance += (material.albedo * material.emittance) * throughput;
                 }
 
                 for &i in &scene.lights {
-                    // we should not illuminate ourself
-                    if hit.idx == i {
-                        //continue;
-                    }
+                    if hit.idx != i {
+                        let light = scene.objects[i];
+                        let emission = light.material.albedo * light.material.emittance;
 
-                    let light = scene.objects[i];
-                    let emission = light.material.albedo * light.material.emittance;
+                        let point_on_light = {
+                            let normal = vector_on_sphere();
+                            //light.geometry.center + normal * light.geometry.radius
+                            light.geometry.center
+                        };
 
-                    let point_on_light = {
-                        let normal = vector_on_sphere();
-                        //light.geometry.center + normal * light.geometry.radius
-                        light.geometry.center
-                    };
+                        let shadow_ray = Ray::new(point, Vec3::normalize(point_on_light - point));
 
-                    let shadow_ray = Ray::new(point, Vec3::normalize(point_on_light - point));
+                        if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
+                            if light_hit.idx == i {
+                                let brdf = material.albedo / PI;
+                                let cos_theta = Vec3::dot(hit.normal, shadow_ray.direction);
 
-                    if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
-                        if light_hit.idx == i {
-                            let brdf = material.albedo / PI;
-                            let cos_theta = Vec3::dot(hit.normal, -shadow_ray.direction);
+                                let pdf = {
+                                    let radius2 = light.geometry.radius * light.geometry.radius;
+                                    let area = 4.0 * PI * radius2;
+                                    let distance2 = light_hit.t * light_hit.t;
 
-                            let pdf = {
-                                let radius2 = light.geometry.radius * light.geometry.radius;
-                                let area = 4.0 * PI * radius2;
-                                let distance2 = light_hit.t * light_hit.t;
+                                    distance2 / (f64::abs(cos_theta) * area)
+                                };
 
-                                distance2 / (f64::abs(cos_theta) * area)
-                            };
-
-                            radiance += throughput * brdf * cos_theta * emission / pdf;
+                                radiance += throughput * emission * cos_theta * brdf / pdf;
+                            }
                         }
                     }
                 }
