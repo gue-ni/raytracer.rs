@@ -107,7 +107,6 @@ impl Renderer {
         };
         let _diffuse = emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier;
 
-
         let mut _direct = Vec3::from(0.0);
         let mut _num_lights = 0;
 
@@ -128,23 +127,25 @@ impl Renderer {
                 if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
                     // we hit the light -> not in shadow
                     if light_hit.idx == *light_id {
-                        let li = ((light.material.albedo * light.material.emittance) / PI) / (1.0 / PI);
+                        let li =
+                            ((light.material.albedo * light.material.emittance) / PI) / (1.0 / PI);
 
                         let cos_theta = Vec3::dot(hit.normal, light_dir);
-                        
+
                         let area = 4.0 * PI * light.geometry.radius * light.geometry.radius;
 
                         // this kinda works but it shouldn't
-                        _direct += (li / PI) * cos_theta * (area / (distance * distance)) * (cos_theta / PI)
+                        _direct += (li / PI)
+                            * cos_theta
+                            * (area / (distance * distance))
+                            * (cos_theta / PI)
 
-
-                        //_direct += material.eval(hit.normal, wo, wi) * li 
-                        //_direct += li * brdf_multiplier; 
+                        //_direct += material.eval(hit.normal, wo, wi) * li
+                        //_direct += li * brdf_multiplier;
                     }
                 }
             }
         }
-
 
         // Global Illumination
 
@@ -178,26 +179,26 @@ impl Renderer {
         emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
-    fn trace_loop(incident: &Ray, scene: &Scene, max_depth: u32) -> Vec3f {
-
+    fn trace_loop(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
 
+        assert!(0 < max_bounce);
+
         let mut ray = incident.clone();
-        
-        for _depth in 0..5 {
-            if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY)  {
+
+        for _bounce in 0..max_bounce {
+            if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY) {
                 let material = scene.objects[hit.idx].material;
                 let albedo = material.albedo;
                 let emittance = albedo * material.emittance;
-                
+
                 let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
 
                 radiance += emittance * throughput;
                 throughput *= brdf_multiplier;
-                
+
                 ray = Ray::new(hit.point + hit.normal * 0.001, wi);
-            
             } else {
                 radiance += scene.background * throughput;
                 break;
@@ -206,7 +207,6 @@ impl Renderer {
 
         radiance
     }
-
 
     /// Trace ray into scene, returns radiance
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
@@ -287,7 +287,7 @@ impl Renderer {
     pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
         let multithreading = true;
         if multithreading {
-            Self::render_multithreaded(camera, scene, samples, 0)
+            Self::render_multithreaded(camera, scene, samples, bounces)
         } else {
             Self::render_singlethread(camera, scene, samples, 0)
         }
