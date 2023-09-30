@@ -144,16 +144,18 @@ impl Renderer {
                         let light = scene.objects[i];
                         let emission = light.material.albedo * light.material.emittance;
 
-                        let point_on_light = {
+                        let (point_on_light, light_normal) = {
                             let normal = vector_on_sphere();
-                            light.geometry.center + normal * light.geometry.radius
-                            //light.geometry.center
+                            let point = light.geometry.center + normal * light.geometry.radius;
+                            (point, normal)
                         };
 
                         let shadow_ray = Ray::new(point, Vec3::normalize(point_on_light - point));
 
                         if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
-                            if light_hit.idx == i {
+                            if light_hit.idx == i
+                                && 0.0 < Vec3::dot(light_normal, -shadow_ray.direction)
+                            {
                                 let brdf = material.albedo / PI;
                                 let cos_theta = Vec3::dot(hit.normal, shadow_ray.direction);
 
@@ -169,6 +171,7 @@ impl Renderer {
                         }
                     }
                 }
+
                 let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
                 let brdf = material.albedo / PI;
                 let cos_theta = Vec3::dot(hit.normal, -wi);
@@ -186,7 +189,7 @@ impl Renderer {
         radiance
     }
 
-    fn trace_loop(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
+    fn trace_loop_1(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
 
