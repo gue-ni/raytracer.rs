@@ -30,6 +30,12 @@ fn print_progress(current_sample: u32, total_samples: u32) {
     );
 }
 
+fn power_heuristic(numf: f64, f_pdf: f64, numg: f64, g_pdf: f64) -> f64 {
+    let f = numf * f_pdf;
+    let g = numg * g_pdf;
+    (f * f) / (f * f + g * g)
+}
+
 pub struct Renderer;
 
 impl Renderer {
@@ -113,20 +119,14 @@ impl Renderer {
         emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
-    fn sample_light(sphere: &Sphere) -> (Vec3f, f64) {
-        let point = vector_on_sphere() * sphere.radius;
-        let pdf = 1.0 / (2.0 * PI);
-        (sphere.center + point, pdf)
-    }
-
     /// Path Tracing with Explicit/Direct Light Sampling
     /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
     /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
+    /// For some reason this only works if the entire light sphere is visible
+    #[allow(dead_code)]
     fn trace_loop_2(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
-
-        assert!(0 < max_bounce);
 
         let mut ray = incident.clone();
 
@@ -135,8 +135,15 @@ impl Renderer {
                 let material = scene.objects[hit.idx].material;
                 let point = hit.point + hit.normal * 0.001;
 
+                let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
+                let brdf = material.albedo / PI;
+                let cos_theta = Vec3::dot(hit.normal, -wi);
+                let pdf = cos_theta / PI;
+
+                throughput *= brdf * cos_theta / pdf;
+
                 if bounce == 0 {
-                    radiance += (material.albedo * material.emittance) * throughput;
+                    radiance += throughput * (material.albedo * material.emittance);
                 }
 
                 for &i in &scene.lights {
@@ -145,7 +152,7 @@ impl Renderer {
                         let emission = light.material.albedo * light.material.emittance;
 
                         let (point_on_light, light_normal) = {
-                            let normal = vector_on_sphere();
+                            let normal = vector_on_sphere().normalize();
                             let point = light.geometry.center + normal * light.geometry.radius;
                             (point, normal)
                         };
@@ -155,6 +162,7 @@ impl Renderer {
                         if let Some(light_hit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
                             if light_hit.idx == i
                                 && 0.0 < Vec3::dot(light_normal, -shadow_ray.direction)
+                                && bounce < max_bounce - 1
                             {
                                 let brdf = material.albedo / PI;
                                 let cos_theta = Vec3::dot(hit.normal, shadow_ray.direction);
@@ -163,7 +171,9 @@ impl Renderer {
                                     let radius2 = light.geometry.radius * light.geometry.radius;
                                     let area = 4.0 * PI * radius2;
                                     let distance2 = light_hit.t * light_hit.t;
-                                    distance2 / (f64::abs(cos_theta) * area)
+                                    let cos_theta_light =
+                                        Vec3::dot(light_normal, -shadow_ray.direction);
+                                    distance2 / (f64::abs(cos_theta_light) * area)
                                 };
 
                                 radiance += throughput * emission * cos_theta * brdf / pdf;
@@ -171,13 +181,6 @@ impl Renderer {
                         }
                     }
                 }
-
-                let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
-                let brdf = material.albedo / PI;
-                let cos_theta = Vec3::dot(hit.normal, -wi);
-                let pdf = cos_theta / PI;
-
-                throughput *= brdf * cos_theta / pdf;
 
                 ray = Ray::new(point, wi);
             } else {
@@ -189,6 +192,7 @@ impl Renderer {
         radiance
     }
 
+    #[allow(dead_code)]
     fn trace_loop_1(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
@@ -202,9 +206,15 @@ impl Renderer {
                 let material = scene.objects[hit.idx].material;
                 let emittance = material.albedo * material.emittance;
 
-                let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
+                //let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
 
-                throughput *= brdf_multiplier;
+                let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
+                let brdf = material.albedo / PI;
+                let cos_theta = Vec3::dot(hit.normal, -wi);
+                let pdf = cos_theta / PI;
+
+                throughput *= brdf * cos_theta / pdf;
+
                 radiance += emittance * throughput;
 
                 ray = Ray::new(hit.point + hit.normal * 0.001, wi);
@@ -218,6 +228,7 @@ impl Renderer {
     }
 
     /// Trace ray into scene, returns radiance
+    #[allow(dead_code)]
     fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
             if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
@@ -279,7 +290,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            chunk[i] += Self::trace_loop_2(&ray, scene, bounces) / (samples as f64);
+                            chunk[i] += Self::trace_loop_1(&ray, scene, bounces) / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
                             print_progress(sample, samples);
