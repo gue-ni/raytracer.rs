@@ -133,18 +133,26 @@ impl Renderer {
         for bounce in 0..max_bounce {
             if let Some(hit) = scene.hit(&ray, 0.001, f64::INFINITY) {
                 let material = scene.objects[hit.idx].material;
+
                 let point = hit.point + hit.normal * 0.001;
-
                 let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
-                let brdf = material.albedo / PI;
-                let cos_theta = Vec3::dot(hit.normal, -wi);
-                let pdf = cos_theta / PI;
 
-                throughput *= brdf * cos_theta / pdf;
+                ray = Ray::new(point, wi);
+
+                /*
+                if material.emittance > 0.0 {
+                    radiance += throughput * (material.albedo * material.emittance) ;
+                    return radiance;
+                }
+                */
 
                 if bounce == 0 {
                     radiance += throughput * (material.albedo * material.emittance);
                 }
+
+                throughput *= material.albedo;
+
+                assert_eq!(scene.lights.len(), 1);
 
                 for &i in &scene.lights {
                     if hit.idx != i {
@@ -164,25 +172,41 @@ impl Renderer {
                                 && 0.0 < Vec3::dot(light_normal, -shadow_ray.direction)
                                 && bounce < max_bounce - 1
                             {
-                                let brdf = material.albedo / PI;
-                                let cos_theta = Vec3::dot(hit.normal, shadow_ray.direction);
+                                if true {
+                                    let cos_theta = Vec3::dot(hit.normal, shadow_ray.direction);
 
-                                let pdf = {
-                                    let radius2 = light.geometry.radius * light.geometry.radius;
-                                    let area = 4.0 * PI * radius2;
-                                    let distance2 = light_hit.t * light_hit.t;
-                                    let cos_theta_light =
-                                        Vec3::dot(light_normal, -shadow_ray.direction);
-                                    distance2 / (f64::abs(cos_theta_light) * area)
-                                };
+                                    let pdf = {
+                                        let radius2 = light.geometry.radius * light.geometry.radius;
+                                        let area = 4.0 * PI * radius2;
+                                        let distance2 = light_hit.t * light_hit.t;
+                                        let cos_theta_light =
+                                            Vec3::dot(light_normal, -shadow_ray.direction).clamp(0.0, 1.0);
+                                        distance2 / (cos_theta_light * area)
+                                    };
 
-                                radiance += throughput * emission * cos_theta * brdf / pdf;
+                                    let brdf = material.albedo / PI;
+
+                                    radiance += throughput * emission * cos_theta * brdf / pdf;
+                                } else {
+                                    let weight = {
+                                        let radius2 = light.geometry.radius * light.geometry.radius;
+                                        let distance2 = light_hit.t * light_hit.t;
+
+                                        let cos_a_max =
+                                            f64::sqrt(1.0 - (radius2 / distance2).clamp(0.0, 1.0));
+
+                                        2.0 * (1.0 - cos_a_max)
+                                    };
+
+                                    radiance += (throughput * emission)
+                                        * (weight
+                                            * Vec3::dot(hit.normal, shadow_ray.direction)
+                                                .clamp(0.0, 1.0));
+                                }
                             }
                         }
                     }
                 }
-
-                ray = Ray::new(point, wi);
             } else {
                 radiance += scene.background * throughput;
                 break;
@@ -209,12 +233,11 @@ impl Renderer {
                 //let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
 
                 let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
-                let brdf = material.albedo / PI;
-                let cos_theta = Vec3::dot(hit.normal, -wi);
-                let pdf = cos_theta / PI;
+                //let brdf = material.albedo / PI;
+                //let cos_theta = Vec3::dot(hit.normal, -wi);
+                //let pdf = cos_theta / PI;
 
-                throughput *= brdf * cos_theta / pdf;
-
+                throughput *= material.albedo;
                 radiance += emittance * throughput;
 
                 ray = Ray::new(hit.point + hit.normal * 0.001, wi);
