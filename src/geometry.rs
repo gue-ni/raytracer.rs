@@ -23,6 +23,12 @@ impl Default for HitRecord {
     }
 }
 
+impl HitRecord {
+    pub fn new(t: f64, normal: Vec3f, point: Vec3f, idx: usize) -> Self {
+        t, normal, point, idx
+    }
+}
+
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Sphere {
     pub center: Vec3f,
@@ -107,12 +113,7 @@ impl Hittable for Sphere {
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
-            Some(HitRecord {
-                t,
-                normal: (point - self.center) / self.radius,
-                point,
-                idx: 0,
-            })
+            Some(HitRecord::new(t, (point - self.center) / self.radius, point, 0))
         } else {
             None
         }
@@ -162,12 +163,7 @@ impl Hittable for Triangle {
             return None;
         }
 
-        Some(HitRecord {
-            t,
-            normal,
-            point,
-            idx: 0,
-        })
+        Some(HitRecord::new(t, normal, point, 0))
     }
 }
 
