@@ -139,13 +139,6 @@ impl Renderer {
 
                 ray = Ray::new(point, wi);
 
-                /*
-                if material.emittance > 0.0 {
-                    radiance += throughput * (material.albedo * material.emittance) ;
-                    return radiance;
-                }
-                */
-
                 if bounce == 0 {
                     radiance += throughput * (material.albedo * material.emittance);
                 }
@@ -159,6 +152,7 @@ impl Renderer {
                         let light = scene.objects[i];
                         let emission = light.material.albedo * light.material.emittance;
 
+                        // sample point on light
                         let (point_on_light, light_normal) = {
                             let normal = vector_on_sphere().normalize();
                             let point = light.geometry.center + normal * light.geometry.radius;
@@ -180,7 +174,8 @@ impl Renderer {
                                         let area = 4.0 * PI * radius2;
                                         let distance2 = light_hit.t * light_hit.t;
                                         let cos_theta_light =
-                                            Vec3::dot(light_normal, -shadow_ray.direction).clamp(0.0, 1.0);
+                                            Vec3::dot(light_normal, -shadow_ray.direction)
+                                                .clamp(0.0, 1.0);
                                         distance2 / (cos_theta_light * area)
                                     };
 
@@ -204,6 +199,8 @@ impl Renderer {
                                                 .clamp(0.0, 1.0));
                                 }
                             }
+                        } else {
+                            //assert!(false);
                         }
                     }
                 }
@@ -275,8 +272,8 @@ impl Renderer {
             for y in 0..height {
                 for x in 0..width {
                     let ray = camera.ray((x, y));
-                    framebuffer[(y * width + x) as usize] +=
-                        Self::trace(&ray, scene, bounces) / (samples as f64);
+                    let color = Self::trace(&ray, scene, bounces) / (samples as f64);
+                    framebuffer[(y * width + x) as usize] += color;
                 }
             }
             if sample % 5 == 0 {
@@ -313,7 +310,11 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            chunk[i] += Self::trace_loop_1(&ray, scene, bounces) / (samples as f64);
+                            let color = Self::trace_loop_2(&ray, scene, bounces);
+
+                            // assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
+
+                            chunk[i] += color / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
                             print_progress(sample, samples);
