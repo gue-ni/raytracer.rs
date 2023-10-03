@@ -5,20 +5,31 @@ use crate::vector::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
-pub struct HitRecord {
+pub struct Hit {
     pub t: f64,
     pub normal: Vec3f,
     pub point: Vec3f,
     pub idx: usize,
 }
 
-impl Default for HitRecord {
+impl Default for Hit {
     fn default() -> Self {
-        HitRecord {
+        Hit {
             t: f64::INFINITY,
             normal: Vec3f::from(0.0),
             point: Vec3f::from(0.0),
             idx: 0,
+        }
+    }
+}
+
+impl Hit {
+    pub fn new(t: f64, normal: Vec3f, point: Vec3f, idx: usize) -> Self {
+        Self {
+            t,
+            normal,
+            point,
+            idx,
         }
     }
 }
@@ -59,8 +70,7 @@ pub struct Object {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
     #[serde(skip)]
-    pub lights: Vec<usize>,
-    /// indices of the objects that emit light
+    pub lights: Vec<usize>, // indices of the objects that emit light
     pub background: Vec3f,
     pub objects: Vec<Object>,
 }
@@ -80,12 +90,12 @@ impl Scene {
 }
 
 pub trait Hittable {
-    /// Returns HitRecord if ray intersects geometry
-    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord>;
+    /// Returns Hit if ray intersects geometry
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit>;
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         let m = ray.origin - self.center;
         let b = Vec3::dot(m, ray.direction);
         let c = Vec3::dot(m, m) - self.radius * self.radius;
@@ -107,12 +117,7 @@ impl Hittable for Sphere {
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
-            Some(HitRecord {
-                t,
-                normal: (point - self.center) / self.radius,
-                point,
-                idx: 0,
-            })
+            Some(Hit::new(t, (point - self.center) / self.radius, point, 0))
         } else {
             None
         }
@@ -120,7 +125,7 @@ impl Hittable for Sphere {
 }
 
 impl Hittable for Triangle {
-    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         let v0v1 = self.1 - self.0;
         let v0v2 = self.2 - self.0;
         let v1v2 = self.2 - self.1;
@@ -162,17 +167,12 @@ impl Hittable for Triangle {
             return None;
         }
 
-        Some(HitRecord {
-            t,
-            normal,
-            point,
-            idx: 0,
-        })
+        Some(Hit::new(t, normal, point, 0))
     }
 }
 
 impl Hittable for Mesh {
-    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         for triangle in &self.triangles {
             let hit_record = triangle.hit(ray, min_t, max_t);
             if hit_record.is_some() {
@@ -184,7 +184,7 @@ impl Hittable for Mesh {
 }
 
 impl Hittable for Geometry {
-    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         match self {
             Geometry::MESH(g) => g.hit(ray, min_t, max_t),
             Geometry::SPHERE(g) => g.hit(ray, min_t, max_t),
@@ -193,8 +193,8 @@ impl Hittable for Geometry {
 }
 
 impl Hittable for Scene {
-    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<HitRecord> {
-        let mut closest = HitRecord::default();
+    fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
+        let mut closest = Hit::default();
         closest.t = max_t;
 
         for (i, object) in self.objects.iter().enumerate() {
