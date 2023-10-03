@@ -41,82 +41,8 @@ pub struct Renderer;
 impl Renderer {
     /// Visualize Normal Vector
     #[allow(dead_code)]
-    fn visualize_normal(hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
+    fn visualize_normal(hit: &Hit, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
         (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
-    }
-
-    /// Whitted Ray-Tracing
-    #[allow(dead_code)]
-    fn ray_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
-        let material = scene.objects[hit.idx].material;
-
-        let light_pos = Vec3f::new(0.0, -1.5, 4.0);
-        let light_intensity = 1.0;
-        let light_color = Vec3f::from(1.0) * light_intensity;
-        let light_dir = Vec3f::normalize(light_pos - hit.point);
-
-        let ray = Ray::new(hit.point, light_dir);
-        let _shadow = match scene.hit(&ray, 0.0, f64::INFINITY) {
-            Some(_) => 1.0,
-            None => 0.0,
-        };
-
-        match material.material {
-            MaterialType::Mirror => {
-                let reflected = reflect(incoming.direction, hit.normal);
-                let ray = Ray::new(hit.point, reflected);
-                material.albedo * Self::trace(&ray, scene, depth - 1) * 0.9
-            }
-            _ => {
-                let ka = 0.25;
-                let kd = 1.0;
-                let ks = 1.0;
-                let alpha = 16.0;
-
-                let ambient = light_color * ka;
-
-                let cos_theta = f64::max(Vec3f::dot(hit.normal, light_dir), 0.0);
-                let diffuse = light_color * cos_theta * kd;
-
-                let view_dir = -incoming.direction;
-                let halfway_dir = Vec3f::normalize(light_dir + view_dir);
-                let specular = light_color
-                    * f64::max(Vec3f::dot(hit.normal, halfway_dir), 0.0).powf(alpha)
-                    * ks;
-
-                (ambient + (diffuse + specular) * _shadow) * material.albedo
-            }
-        }
-    }
-
-    /// Direct Lighting Integrator
-    #[allow(dead_code)]
-    fn direct_lighting(_hit: &HitRecord, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
-        Vec3::from(0.0)
-    }
-
-    /// Naive, unbiased monte-carlo path tracing
-    /// This function implements the rendering equation using monte-carlo integration
-    ///
-    /// Rendering Equation:
-    /// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
-    ///
-    /// Monte-Carlo:
-    /// L(p, wo) = Le + 1/N * Σ (fr(wo, wi) * cos(theta) / pdf(wi))
-    ///
-    #[allow(dead_code)]
-    fn naive_path_tracing(hit: &HitRecord, scene: &Scene, incoming: &Ray, depth: u32) -> Vec3f {
-        // Material properties
-        let material = scene.objects[hit.idx].material;
-        let emittance = material.albedo * material.emittance;
-        // Direction toward camera
-        let wo = -incoming.direction;
-        // Get outgoing ray direction and (brdf * cos_theta / pdf)
-        let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
-        // Reflected ray
-        let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
-        let ray = Ray::new(hit.point + hit.normal * bias, wi);
-        emittance + Self::trace(&ray, scene, depth + 1) * brdf_multiplier
     }
 
     /// Path Tracing with Explicit/Direct Light Sampling
@@ -227,14 +153,9 @@ impl Renderer {
                 let material = scene.objects[hit.idx].material;
                 let emittance = material.albedo * material.emittance;
 
-                //let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
+                let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
 
-                let wi = Onb::local_to_world(hit.normal, cosine_weighted_hemisphere());
-                //let brdf = material.albedo / PI;
-                //let cos_theta = Vec3::dot(hit.normal, -wi);
-                //let pdf = cos_theta / PI;
-
-                throughput *= material.albedo;
+                throughput *= brdf_multiplier;
                 radiance += emittance * throughput;
 
                 ray = Ray::new(hit.point + hit.normal * 0.001, wi);
@@ -247,12 +168,30 @@ impl Renderer {
         radiance
     }
 
-    /// Trace ray into scene, returns radiance
+    /// Naive, unbiased monte-carlo path tracing
+    /// This function implements the rendering equation using monte-carlo integration
+    ///
+    /// Rendering Equation:
+    /// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
+    ///
+    /// Monte-Carlo:
+    /// L(p, wo) = Le + 1/N * Σ (fr(wo, wi) * cos(theta) / pdf(wi))
+    ///
     #[allow(dead_code)]
-    fn trace(ray: &Ray, scene: &Scene, depth: u32) -> Vec3f {
+    fn trace(incoming: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth > 0 {
-            if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-                Self::naive_path_tracing(&hit, scene, ray, depth)
+            if let Some(hit) = scene.hit(incoming, 0.001, f64::INFINITY) {
+                // Material properties
+                let material = scene.objects[hit.idx].material;
+                let emittance = material.albedo * material.emittance;
+                // Direction toward camera
+                let wo = -incoming.direction;
+                // Get outgoing ray direction and (brdf * cos_theta / pdf)
+                let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
+                // Reflected ray
+                let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
+                let ray = Ray::new(hit.point + hit.normal * bias, wi);
+                emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
             } else {
                 scene.background
             }
@@ -297,8 +236,7 @@ impl Renderer {
         let mut framebuffer = vec![Vec3f::from(0.0); (width * height) as usize];
 
         // leave one thread for operating the computer : )
-        //let worker_count = usize::max(available_parallelism().unwrap().get() - 1, 2);
-        let worker_count = available_parallelism().unwrap().get();
+        let worker_count = usize::max(available_parallelism().unwrap().get() - 1, 2);
         let chunk_size = framebuffer.len() / worker_count;
 
         println!("workers = {}", worker_count);
@@ -310,7 +248,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            let color = Self::trace_loop_2(&ray, scene, bounces);
+                            let color = Self::trace_loop_1(&ray, scene, bounces);
 
                             // assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
 
