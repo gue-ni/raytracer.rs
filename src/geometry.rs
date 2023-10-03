@@ -70,8 +70,7 @@ pub struct Object {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
     #[serde(skip)]
-    pub lights: Vec<usize>,
-    /// indices of the objects that emit light
+    pub lights: Vec<usize>, // indices of the objects that emit light
     pub background: Vec3f,
     pub objects: Vec<Object>,
 }

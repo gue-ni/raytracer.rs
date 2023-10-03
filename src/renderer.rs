@@ -9,9 +9,6 @@ use crate::vector::*;
 use image::RgbImage;
 use std::f64::consts::PI;
 
-//
-//use rand::Rng;
-
 use std::thread;
 use std::thread::available_parallelism;
 use std::vec;
@@ -30,12 +27,6 @@ fn print_progress(current_sample: u32, total_samples: u32) {
     );
 }
 
-fn power_heuristic(numf: f64, f_pdf: f64, numg: f64, g_pdf: f64) -> f64 {
-    let f = numf * f_pdf;
-    let g = numg * g_pdf;
-    (f * f) / (f * f + g * g)
-}
-
 pub struct Renderer;
 
 impl Renderer {
@@ -43,6 +34,7 @@ impl Renderer {
     #[allow(dead_code)]
     fn visualize_normal(hit: &Hit, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
         (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
+        //(hit.normal + 0.5) * 0.5
     }
 
     /// Path Tracing with Explicit/Direct Light Sampling
@@ -50,7 +42,7 @@ impl Renderer {
     /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
     /// For some reason this only works if the entire light sphere is visible
     #[allow(dead_code)]
-    fn trace_loop_2(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
+    fn path_tracing_nee(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
 
@@ -93,7 +85,8 @@ impl Renderer {
                                 && bounce < max_bounce - 1
                             {
                                 if true {
-                                    let cos_theta = Vec3::dot(hit.normal, shadow_ray.direction);
+                                    let cos_theta =
+                                        Vec3::dot(hit.normal, shadow_ray.direction).clamp(0.0, 1.0);
 
                                     let pdf = {
                                         let radius2 = light.geometry.radius * light.geometry.radius;
@@ -140,7 +133,7 @@ impl Renderer {
     }
 
     #[allow(dead_code)]
-    fn trace_loop_1(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
+    fn path_tracing(incident: &Ray, scene: &Scene, max_bounce: u32) -> Vec3f {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
 
@@ -178,25 +171,20 @@ impl Renderer {
     /// L(p, wo) = Le + 1/N * Σ (fr(wo, wi) * cos(theta) / pdf(wi))
     ///
     #[allow(dead_code)]
-    fn trace(incoming: &Ray, scene: &Scene, depth: u32) -> Vec3f {
-        if depth > 0 {
-            if let Some(hit) = scene.hit(incoming, 0.001, f64::INFINITY) {
-                // Material properties
-                let material = scene.objects[hit.idx].material;
-                let emittance = material.albedo * material.emittance;
-                // Direction toward camera
-                let wo = -incoming.direction;
-                // Get outgoing ray direction and (brdf * cos_theta / pdf)
-                let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
-                // Reflected ray
-                let bias = Vec3::dot(wi, hit.normal).signum() * 0.001;
-                let ray = Ray::new(hit.point + hit.normal * bias, wi);
-                emittance + Self::trace(&ray, scene, depth - 1) * brdf_multiplier
-            } else {
-                scene.background
-            }
+    fn path_tracing_recursive(incident: &Ray, scene: &Scene, depth: u32) -> Vec3f {
+        if depth == 0 {
+            return Vec3::from(0.0);
+        }
+
+        if let Some(hit) = scene.hit(incident, 0.001, f64::INFINITY) {
+            let material = scene.objects[hit.idx].material;
+            let emittance = material.albedo * material.emittance;
+            let (reflected, brdf_multiplier) = material.sample(hit.normal, -incident.direction);
+            let bias = Vec3::dot(reflected, hit.normal).signum() * 0.001;
+            let ray = Ray::new(hit.point + hit.normal * bias, reflected);
+            emittance + Self::path_tracing_recursive(&ray, scene, depth - 1) * brdf_multiplier
         } else {
-            Vec3f::from(0.0)
+            scene.background
         }
     }
 
@@ -211,7 +199,7 @@ impl Renderer {
             for y in 0..height {
                 for x in 0..width {
                     let ray = camera.ray((x, y));
-                    let color = Self::trace(&ray, scene, bounces) / (samples as f64);
+                    let color = Self::path_tracing(&ray, scene, bounces) / (samples as f64);
                     framebuffer[(y * width + x) as usize] += color;
                 }
             }
@@ -248,10 +236,8 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            let color = Self::trace_loop_1(&ray, scene, bounces);
-
-                            // assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
-
+                            let color = Self::path_tracing_nee(&ray, scene, bounces);
+                            assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                             chunk[i] += color / (samples as f64);
                         }
                         if worker == 0 && sample % 5 == 0 {
