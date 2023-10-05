@@ -71,7 +71,7 @@ impl Renderer {
         direct_light
     }
 
-    fn path_tracing_dsa(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
+    fn path_tracing_dls(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
         if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
             let material = scene.objects[hit.idx].material;
             let point = hit.point + hit.normal * 0.001;
@@ -296,7 +296,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            let color = Self::path_tracing_nee(&ray, scene, bounces);
+                            let color = Self::path_tracing_dls(&ray, scene, bounces);
                             assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                             chunk[i] += color / (samples as f64);
                         }
