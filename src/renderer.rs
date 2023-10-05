@@ -37,6 +37,17 @@ impl Renderer {
         //(hit.normal + 0.5) * 0.5
     }
 
+    fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
+        let mut direct_light = Vec3::from(0.0);
+        
+        for &i in &scene.lights {
+            let light = scene.objects[i];
+            
+        }
+
+        direct_light
+    }
+
     fn path_tracing_dsa(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
         if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
             let material = scene.objects[hit.idx].material;
@@ -44,7 +55,7 @@ impl Renderer {
             let wo = -ray.direction;
 
             let mut color = material.albedo * material.emittance;
-            color += sample_lights(scene, hit.normal, point, wo);
+            color += sample_lights(scene, &hit, wo);
             
             if 0 < bounce {
                 let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
