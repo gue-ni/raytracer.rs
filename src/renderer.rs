@@ -37,6 +37,15 @@ impl Renderer {
         //(hit.normal + 0.5) * 0.5
     }
 
+    /// Returns direction to light and distance
+    fn sample_light(object: &Object, point: Vec3f) -> (Vec3f, f64) {
+        let sphere = object.geometry;
+        let point_on_light = sphere.center + vector_on_sphere() * sphere.radius;
+        let light_dir = point_on_light - point;
+        let distance = light_dir.length();
+        (light_dir / distance, distance)
+    }
+
     fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
         let mut direct_light = Vec3::from(0.0);
         
@@ -44,7 +53,14 @@ impl Renderer {
         
         for &i in &scene.lights {
             let light = scene.objects[i];
-            
+            let (direction, distance) = sample_light(&light, hit.point);
+            let shadow_ray = Ray::new(hit.point, direction);
+
+            if let Some(lhit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
+                if hit.idx != lhit.idx && distance <= lhit.t {
+                    //direct_light += ();
+                }
+            }
         }
 
         direct_light
