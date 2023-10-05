@@ -10,6 +10,8 @@ use std::f64::consts::PI;
 pub trait BSDF {
     fn pdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f64;
     fn eval(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
+    //fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, pdf);
+
 
     /// Returns outgoing vector and brdf multiplier
     /// 'normal' - Normal vector at hit point
@@ -82,6 +84,7 @@ impl BSDF for Material {
             _ => panic!("not implemented"),
         }
     }
+    
     fn eval(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
