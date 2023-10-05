@@ -40,7 +40,8 @@ impl Renderer {
     /// Returns direction to light and distance
     fn sample_light(object: &Object, point: Vec3f) -> (Vec3f, f64) {
         let sphere = object.geometry;
-        let point_on_light = sphere.center + vector_on_sphere() * sphere.radius;
+        let normal = vector_on_sphere();
+        let point_on_light = sphere.center + normal * sphere.radius;
         let light_dir = point_on_light - point;
         let distance = light_dir.length();
         (light_dir / distance, distance)
@@ -52,8 +53,12 @@ impl Renderer {
         let material = scene.objects[hit.idx].material;
         
         for &i in &scene.lights {
+            if i == hit.idx {
+                continue;
+            }
+            
             let light = scene.objects[i];
-            let (direction, distance) = sample_light(&light, hit.point);
+            let (direction, distance) = Self::sample_light(&light, hit.point);
             let shadow_ray = Ray::new(hit.point, direction);
 
             if let Some(lhit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
@@ -74,7 +79,7 @@ impl Renderer {
 
             let mut color = material.albedo * material.emittance;
             
-            color += sample_lights(scene, &hit, wo);
+            color += Self::sample_lights(scene, &hit, wo);
             
             if 0 < bounce {
                 let (wi, pdf) = material.sample_f(hit.normal, wo);
