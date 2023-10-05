@@ -8,10 +8,11 @@ use std::f64::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
-    fn pdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f64;
-    fn eval(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
-    //fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, pdf);
+    /// 
+    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
 
+    /// Returns a outgoing direction and the corresponding PDF
+    fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f64);
 
     /// Returns outgoing vector and brdf multiplier
     /// 'normal' - Normal vector at hit point
@@ -85,7 +86,7 @@ impl BSDF for Material {
         }
     }
     
-    fn eval(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
+    fn bsdf(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
             _ => panic!("not implemented"),
