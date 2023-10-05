@@ -100,7 +100,7 @@ pub fn uniform_hemisphere() -> Vec3f {
 }
 
 pub fn cosine_weighted(normal: Vec3f) -> Vec3f {
-    Vec3f::normalize(normal + vector_on_sphere())
+    Vec3f::normalize(normal + point_on_sphere())
 }
 
 /// Cosine weighted sample from hemisphere
@@ -134,7 +134,7 @@ pub fn ggx_hemisphere(wo: Vec3f, normal: Vec3f, roughness: f64) -> (Vec3f, f64) 
     (wi, pdf)
 }
 
-pub fn vector_on_sphere() -> Vec3f {
+pub fn point_on_sphere() -> Vec3f {
     let r = 1.0;
     let mut rng = rand::thread_rng();
     Vec3f::normalize(Vec3f::new(
@@ -144,13 +144,26 @@ pub fn vector_on_sphere() -> Vec3f {
     ))
 }
 
+/*
+pub fn point_on_circle() -> Vec2f {
+    let mut rng = rand::thread_rng();
+    let phi = rng.gen_range(0.0..1.0);
+    let theta = rng.gen_range(0.0..1.0);
+    let sin_phi = phi.sin();
+    let cos_phi = phi.cos();
+    let sin_theta = theta.sin();
+    let cos_theta = theta.cos();
+    Vec2f::new(cos_phi * sin_theta, sin_phi * sin_theta)
+}
+*/
+
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
-        let omega = vector_on_sphere();
-        if Vec3f::dot(omega, normal) > 0.0 {
-            omega
-        } else {
-            -omega
-        }
+    let omega = point_on_sphere();
+    if Vec3f::dot(omega, normal) > 0.0 {
+        omega
+    } else {
+        -omega
+    }
 }
 
 pub fn from_hex(color: u32) -> Vec3f {

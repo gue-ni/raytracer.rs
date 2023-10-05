@@ -198,12 +198,9 @@ impl Hittable for Scene {
         closest.t = max_t;
 
         for (i, object) in self.objects.iter().enumerate() {
-            match object.geometry.hit(ray, min_t, closest.t) {
-                None => {}
-                Some(hit) => {
-                    closest = hit;
-                    closest.idx = i;
-                }
+            if let Some(hit) = object.geometry.hit(ray, min_t, closest.t) {
+                closest = hit;
+                closest.idx = i;
             }
         }
 

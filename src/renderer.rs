@@ -38,32 +38,45 @@ impl Renderer {
     }
 
     /// Returns direction to light and distance
-    fn sample_light(object: &Object, point: Vec3f) -> (Vec3f, f64) {
+    fn sample_light(object: &Object, point: Vec3f) -> (Vec3f, f64, Vec3f) {
         let sphere = object.geometry;
-        let normal = vector_on_sphere();
+        let normal = point_on_sphere();
         let point_on_light = sphere.center + normal * sphere.radius;
         let light_dir = point_on_light - point;
         let distance = light_dir.length();
-        (light_dir / distance, distance)
+        (light_dir / distance, distance, normal)
     }
 
     fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
         let mut direct_light = Vec3::from(0.0);
-        
+
         let material = scene.objects[hit.idx].material;
-        
+
         for &i in &scene.lights {
             if i == hit.idx {
                 continue;
             }
-            
+
             let light = scene.objects[i];
-            let (direction, distance) = Self::sample_light(&light, hit.point);
+            let (direction, distance, normal) = Self::sample_light(&light, hit.point);
             let shadow_ray = Ray::new(hit.point, direction);
 
             if let Some(lhit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
-                if hit.idx != lhit.idx && distance <= lhit.t {
-                    //direct_light += ();
+                if hit.idx != lhit.idx && distance <= lhit.t && 0.0 < Vec3::dot(normal, -direction)
+                {
+                    let emission = light.material.albedo * light.material.emittance;
+                    let cos_theta = Vec3::dot(hit.normal, direction).abs();
+
+                    let pdf = {
+                        let distance2 = distance * distance;
+                        let radius2 = light.geometry.radius * light.geometry.radius;
+                        let area = 4.0 * PI * radius2;
+                        distance2 / (area * cos_theta)
+                    };
+
+                    let bsdf = material.bsdf(hit.normal, wo, -direction);
+
+                    direct_light += bsdf * emission / (pdf);
                 }
             }
         }
@@ -78,12 +91,13 @@ impl Renderer {
             let wo = -ray.direction;
 
             let mut color = material.albedo * material.emittance;
-            
-            // color += Self::sample_lights(scene, &hit, wo);
-            
+
+            //let mut color = Vec3::from(0.0);
+            //color += Self::sample_lights(scene, &hit, wo);
+
             if 0 < bounce {
                 let (wi, pdf) = material.sample_f(hit.normal, wo);
-                let bsdf = material.bsdf(hit.normal, wo, wi); 
+                let bsdf = material.bsdf(hit.normal, wo, wi);
                 let cos_theta = Vec3::dot(hit.normal, wi).abs();
                 let ray = Ray::new(point, wi);
                 color += Self::path_tracing_dls(&ray, scene, bounce - 1) * bsdf * cos_theta / pdf;
@@ -94,8 +108,6 @@ impl Renderer {
             scene.background
         }
     }
-
-    
 
     /// Path Tracing with Explicit/Direct Light Sampling
     /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
@@ -132,7 +144,7 @@ impl Renderer {
 
                         // sample point on light
                         let (point_on_light, light_normal) = {
-                            let normal = vector_on_sphere().normalize();
+                            let normal = point_on_sphere().normalize();
                             let point = light.geometry.center + normal * light.geometry.radius;
                             (point, normal)
                         };
@@ -256,6 +268,7 @@ impl Renderer {
                 for x in 0..width {
                     let ray = camera.ray((x, y));
                     let color = Self::path_tracing(&ray, scene, bounces) / (samples as f64);
+                    assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                     framebuffer[(y * width + x) as usize] += color;
                 }
             }
