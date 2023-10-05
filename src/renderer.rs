@@ -37,6 +37,29 @@ impl Renderer {
         //(hit.normal + 0.5) * 0.5
     }
 
+    fn path_tracing_dsa(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
+        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
+            let material = scene.objects[hit.idx].material;
+            let point = hit.point + hit.normal * 0.001;
+            let wo = -ray.direction;
+
+            let mut color = material.albedo * material.emittance;
+            color += sample_lights(scene, hit.normal, point, wo);
+            
+            if 0 < bounce {
+                let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
+                let reflected = Ray::new(point, wi);
+                color += brdf_multiplier * Self::path_tracing_dsa(&reflected, scene, bounce - 1);
+            }
+
+            color
+        } else {
+            scene.background
+        }
+    }
+
+    
+
     /// Path Tracing with Explicit/Direct Light Sampling
     /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
     /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
