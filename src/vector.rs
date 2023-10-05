@@ -65,6 +65,15 @@ where
     }
 }
 
+impl<T> Default for Vec3<T>
+where
+    T: Number + std::default::Default,
+{
+    fn default() -> Self {
+        Self::new(T::default(), T::default(), T::default())
+    }
+}
+
 impl<T> Add for Vec3<T>
 where
     T: Number,
