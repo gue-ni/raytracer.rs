@@ -76,11 +76,13 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f64) -> f64 {
 }
 
 impl BSDF for Material {
-    fn pdf(&self, normal: Vec3f, _wo: Vec3f, wi: Vec3f) -> f64 {
+    fn sample_f(&self, normal: Vec3f, _wo: Vec3f) -> (Vec3f, f64) {
         match self.material {
             MaterialType::Lambert => {
+                let wi = cosine_weighted(normal);
                 let cos_theta = Vec3f::dot(normal, wi);
-                cos_theta / PI
+                let pdf = cos_theta / PI;
+                (wi, pdf)
             }
             _ => panic!("not implemented"),
         }
