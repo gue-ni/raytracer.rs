@@ -77,9 +77,11 @@ impl Renderer {
             color += sample_lights(scene, &hit, wo);
             
             if 0 < bounce {
-                let (wi, brdf_multiplier) = material.sample(hit.normal, wo);
+                let (wi, pdf) = material.sample_f(hit.normal, wo);
+                let bsdf = material.bsdf(hit.normal, wo, wi); 
+                let cos_theta = Vec3::dot(hit.normal, wi).abs();
                 let ray = Ray::new(point, wi);
-                color += brdf_multiplier * Self::path_tracing_dsa(&ray, scene, bounce - 1);
+                color += Self::path_tracing_dsa(&ray, scene, bounce - 1) * bsdf * cos_theta / pdf;
             }
 
             color
