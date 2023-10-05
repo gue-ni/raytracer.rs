@@ -37,6 +37,66 @@ impl Renderer {
         //(hit.normal + 0.5) * 0.5
     }
 
+    /// Returns direction to light and distance
+    fn sample_light(object: &Object, point: Vec3f) -> (Vec3f, f64) {
+        let sphere = object.geometry;
+        let normal = vector_on_sphere();
+        let point_on_light = sphere.center + normal * sphere.radius;
+        let light_dir = point_on_light - point;
+        let distance = light_dir.length();
+        (light_dir / distance, distance)
+    }
+
+    fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
+        let mut direct_light = Vec3::from(0.0);
+        
+        let material = scene.objects[hit.idx].material;
+        
+        for &i in &scene.lights {
+            if i == hit.idx {
+                continue;
+            }
+            
+            let light = scene.objects[i];
+            let (direction, distance) = Self::sample_light(&light, hit.point);
+            let shadow_ray = Ray::new(hit.point, direction);
+
+            if let Some(lhit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
+                if hit.idx != lhit.idx && distance <= lhit.t {
+                    //direct_light += ();
+                }
+            }
+        }
+
+        direct_light
+    }
+
+    fn path_tracing_dls(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
+        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
+            let material = scene.objects[hit.idx].material;
+            let point = hit.point + hit.normal * 0.001;
+            let wo = -ray.direction;
+
+            let mut color = material.albedo * material.emittance;
+            
+            // color += Self::sample_lights(scene, &hit, wo);
+            
+            if 0 < bounce {
+                let (wi, pdf) = material.sample_f(hit.normal, wo);
+                let bsdf = material.bsdf(hit.normal, wo, wi); 
+                let cos_theta = Vec3::dot(hit.normal, wi).abs();
+                let ray = Ray::new(point, wi);
+                color += Self::path_tracing_dls(&ray, scene, bounce - 1) * bsdf * cos_theta / pdf;
+            }
+
+            color
+        } else {
+            scene.background
+        }
+    }
+
+    
+
     /// Path Tracing with Explicit/Direct Light Sampling
     /// https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling?noredirect=1&lq=1
     /// https://computergraphics.stackexchange.com/questions/4288/path-weight-for-direct-light-sampling
@@ -232,7 +292,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            let color = Self::path_tracing(&ray, scene, bounces);
+                            let color = Self::path_tracing_dls(&ray, scene, bounces);
                             assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                             chunk[i] += color / (samples as f64);
                         }

@@ -95,7 +95,7 @@
 					"roughness": 0.2,
 					"ior": 0,
 					"metallic": 0.5,
-					"material": "Physical"
+					"material": "Lambert"
 				}
 			},
 			{
@@ -107,7 +107,7 @@
 					"roughness": 0,
 					"ior": 1.5,
 					"metallic": 0,
-					"material": "Transparent"
+					"material": "Lambert"
 				}
 			},
 			{

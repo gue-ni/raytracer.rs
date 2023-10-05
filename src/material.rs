@@ -8,8 +8,11 @@ use std::f64::consts::PI;
 
 /// Bidirectional Scattering Distribution Function (BSDF)
 pub trait BSDF {
-    fn pdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> f64;
-    fn eval(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
+    /// 
+    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f;
+
+    /// Returns a outgoing direction and the corresponding PDF
+    fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f64);
 
     /// Returns outgoing vector and brdf multiplier
     /// 'normal' - Normal vector at hit point
@@ -73,16 +76,19 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f64) -> f64 {
 }
 
 impl BSDF for Material {
-    fn pdf(&self, normal: Vec3f, _wo: Vec3f, wi: Vec3f) -> f64 {
+    fn sample_f(&self, normal: Vec3f, _wo: Vec3f) -> (Vec3f, f64) {
         match self.material {
             MaterialType::Lambert => {
+                let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
                 let cos_theta = Vec3f::dot(normal, wi);
-                cos_theta / PI
+                let pdf = cos_theta / PI;
+                (wi, pdf)
             }
             _ => panic!("not implemented"),
         }
     }
-    fn eval(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
+    
+    fn bsdf(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
             _ => panic!("not implemented"),

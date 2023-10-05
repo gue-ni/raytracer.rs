@@ -99,6 +99,10 @@ pub fn uniform_hemisphere() -> Vec3f {
     Vec3f::normalize(from_spherical(theta, phi))
 }
 
+pub fn cosine_weighted(normal: Vec3f) -> Vec3f {
+    Vec3f::normalize(normal + vector_on_sphere())
+}
+
 /// Cosine weighted sample from hemisphere
 pub fn cosine_weighted_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
@@ -141,12 +145,12 @@ pub fn vector_on_sphere() -> Vec3f {
 }
 
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
-    loop {
         let omega = vector_on_sphere();
         if Vec3f::dot(omega, normal) > 0.0 {
-            break omega;
+            omega
+        } else {
+            -omega
         }
-    }
 }
 
 pub fn from_hex(color: u32) -> Vec3f {
