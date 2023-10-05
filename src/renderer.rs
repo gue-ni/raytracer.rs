@@ -79,14 +79,14 @@ impl Renderer {
 
             let mut color = material.albedo * material.emittance;
             
-            color += Self::sample_lights(scene, &hit, wo);
+            // color += Self::sample_lights(scene, &hit, wo);
             
             if 0 < bounce {
                 let (wi, pdf) = material.sample_f(hit.normal, wo);
                 let bsdf = material.bsdf(hit.normal, wo, wi); 
                 let cos_theta = Vec3::dot(hit.normal, wi).abs();
                 let ray = Ray::new(point, wi);
-                color += Self::path_tracing_dsa(&ray, scene, bounce - 1) * bsdf * cos_theta / pdf;
+                color += Self::path_tracing_dls(&ray, scene, bounce - 1) * bsdf * cos_theta / pdf;
             }
 
             color
