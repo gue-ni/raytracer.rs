@@ -101,6 +101,7 @@ impl Renderer {
                                     let brdf = material.albedo / PI;
 
                                     radiance += throughput * emission * cos_theta * brdf / pdf;
+                                    //radiance += throughput * emission * cos_theta * brdf / pdf;
                                 } else {
                                     let weight = {
                                         let radius2 = light.geometry.radius * light.geometry.radius;
@@ -137,8 +138,6 @@ impl Renderer {
         let mut radiance = Vec3::from(0.0);
         let mut throughput = Vec3::from(1.0);
 
-        assert!(0 < max_bounce);
-
         let mut ray = incident.clone();
 
         for _ in 0..max_bounce {
@@ -146,12 +145,12 @@ impl Renderer {
                 let material = scene.objects[hit.idx].material;
                 let emittance = material.albedo * material.emittance;
 
-                let (wi, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
+                let (reflected, brdf_multiplier) = material.sample(hit.normal, -ray.direction);
 
                 throughput *= brdf_multiplier;
                 radiance += emittance * throughput;
 
-                ray = Ray::new(hit.point + hit.normal * 0.001, wi);
+                ray = Ray::new(hit.point + hit.normal * 0.001, reflected);
             } else {
                 radiance += scene.background * throughput;
                 break;
@@ -163,13 +162,10 @@ impl Renderer {
 
     /// Naive, unbiased monte-carlo path tracing
     /// This function implements the rendering equation using monte-carlo integration
-    ///
     /// Rendering Equation:
     /// L(p, wo) = Le + ∫ Li(p, wi) fr(wo, wi) cos(theta) dw
-    ///
     /// Monte-Carlo:
     /// L(p, wo) = Le + 1/N * Σ (fr(wo, wi) * cos(theta) / pdf(wi))
-    ///
     #[allow(dead_code)]
     fn path_tracing_recursive(incident: &Ray, scene: &Scene, depth: u32) -> Vec3f {
         if depth == 0 {
@@ -236,7 +232,7 @@ impl Renderer {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
                             let ray = camera.ray(xy);
-                            let color = Self::path_tracing_nee(&ray, scene, bounces);
+                            let color = Self::path_tracing(&ray, scene, bounces);
                             assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                             chunk[i] += color / (samples as f64);
                         }
