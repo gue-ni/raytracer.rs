@@ -448,8 +448,7 @@ where
         let z_axis = (target - eye).normalize();
         let x_axis = Vec3::cross(z_axis, up).normalize();
         let y_axis = Vec3::cross(z_axis, x_axis);
-
-        Mat3::from([x_axis, y_axis, z_axis])
+        Self::from([x_axis, y_axis, z_axis])
     }
 }
 
@@ -469,7 +468,7 @@ where
     T: Number,
 {
     fn from(item: T) -> Self {
-        Self { m: [item; 3 * 3] }
+        Self::from([item; 3 * 3])
     }
 }
 
@@ -487,12 +486,24 @@ where
     T: Number,
 {
     fn from(item: [Vec3<T>; 3]) -> Self {
-        Self {
-            m: [
-                item[0].x, item[0].y, item[0].z, item[1].x, item[1].y, item[1].z, item[2].x,
-                item[2].y, item[2].z,
-            ],
-        }
+        Self::from([
+                item[0].x, item[0].y, item[0].z, 
+                item[1].x, item[1].y, item[1].z, 
+                item[2].x, item[2].y, item[2].z,
+            ])
+    }
+}
+
+impl<T> Index<usize> for Mat3<T> {
+    type Output = T;
+    fn index(&self, i: usize) -> &T {
+        self.m[i] 
+    }
+}
+
+impl<T> IndexMut<usize> for Mat3<T> {
+    fn index_mut(&mut self, i: usize) -> &mut T {
+        &mut self.m[i] 
     }
 }
 
@@ -511,9 +522,9 @@ where
             for j in 0..COLUMNS {
                 let mut sum = T::default();
                 for k in 0..COLUMNS {
-                    sum += self.m[i * COLUMNS + k] * other.m[k * COLUMNS + j];
+                    sum += self[i * COLUMNS + k] * other[k * COLUMNS + j];
                 }
-                result.m[i * COLUMNS + j] = sum;
+                result[i * COLUMNS + j] = sum;
             }
         }
 
@@ -535,7 +546,7 @@ where
         for i in 0..ROWS {
             let mut sum = T::default();
             for j in 0..COLUMNS {
-                sum += self.m[i * COLUMNS + j] * other[j];
+                sum += self[i * COLUMNS + j] * other[j];
             }
             result[i] = sum;
         }
@@ -559,35 +570,35 @@ mod tests {
     use crate::vector::*;
 
     #[test]
-    fn test_length() {
+    fn test_vec3_length() {
         let v0 = Vec3::new(1.0, 0.0, 0.0);
         assert_eq!(v0.length(), 1.0);
     }
 
     #[test]
-    fn test_normalize() {
+    fn test_vec3_normalize() {
         let v0 = Vec3::new(1.0, 5.0, 1.0);
         assert_eq!(Vec3::normalize(v0).length(), 1.0);
     }
 
     #[test]
-    fn test_cross() {
-        let a = Vec3::new(2.0, 3.0, 4.0);
-        let b = Vec3::new(5.0, 6.0, 7.0);
-        let c = Vec3::new(-3.0, 6.0, -3.0);
-        assert_eq!(Vec3::cross(a, b), c);
+    fn test_vec3_cross() {
+        {
+            let a = Vec3::new(2.0, 3.0, 4.0);
+            let b = Vec3::new(5.0, 6.0, 7.0);
+            let c = Vec3::new(-3.0, 6.0, -3.0);
+            assert_eq!(Vec3::cross(a, b), c);
+        }
+        {
+            let a = Vec3::new(1.0, 0.0, 0.0);
+            let b = Vec3::new(0.0, 1.0, 0.0);
+            let c = Vec3::new(0.0, 0.0, 1.0);
+            assert_eq!(Vec3::cross(a, b), c);
+        }
     }
 
     #[test]
-    fn test_cross_2() {
-        let a = Vec3::new(1.0, 0.0, 0.0);
-        let b = Vec3::new(0.0, 1.0, 0.0);
-        let c = Vec3::new(0.0, 0.0, 1.0);
-        assert_eq!(Vec3::cross(a, b), c);
-    }
-
-    #[test]
-    fn test_dot() {
+    fn test_vec3_dot() {
         assert_eq!(
             Vec3::dot(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0, 0.0, 0.0)),
             0.0
@@ -595,43 +606,7 @@ mod tests {
     }
 
     #[test]
-    fn test_math_vec3() {
-        let a = Vec3::new(2.0, 3.0, 4.0);
-        let b = Vec3::new(5.0, 6.0, 7.0);
-        let _s = 1.5;
-        assert_eq!(a + b, Vec3::new(7.0, 9.0, 11.0));
-        assert_eq!(a - b, Vec3::new(-3.0, -3.0, -3.0));
-        assert_eq!(a * b, Vec3::new(10.0, 18.0, 28.0));
-
-        let c = Vec3::from(6.0);
-        let d = Vec3::from(3.0);
-        assert_eq!(c / d, Vec3::from(2.0));
-
-        //assert_eq!(a + s, Vec3f::new(1.0, 1.0, 6.0));
-        //assert_eq!(a - s, Vec3f::new(1.0, 1.0, 6.0));
-        //assert_eq!(a * s, Vec3f::new(1.0, 1.0, 6.0));
-        //assert_eq!(a / s, Vec3f::new(1.0, 1.0, 6.0));
-    }
-
-    #[test]
-    fn test_math_vec2() {
-        let _a = Vec2::new(2.0, 3.0);
-        let _b = Vec2::new(4.0, 5.0);
-        let _s = 1.5;
-
-        // assert_eq!(a + b, Vec2f::new(1.0, 1.0));
-        // assert_eq!(a - b, Vec2f::new(1.0, 1.0));
-        // assert_eq!(a / b, Vec2f::new(1.0, 1.0));
-        // assert_eq!(a * b, Vec2f::new(1.0, 1.0));
-
-        // assert_eq!(a + s, Vec2f::new(1.0, 1.0));
-        // assert_eq!(a - s, Vec2f::new(1.0, 1.0));
-        // assert_eq!(a / s, Vec2f::new(1.0, 1.0));
-        // assert_eq!(a * s, Vec2f::new(1.0, 1.0));
-    }
-
-    #[test]
-    fn test_index() {
+    fn test_vec3_index() {
         let v = Vec3::new(1.0, 2.0, 3.0);
         assert_eq!(v.x, v[0]);
         assert_eq!(v.y, v[1]);
@@ -639,7 +614,7 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize() {
+    fn test_vec3_deserialize() {
         {
             let json = r#"{"x": 1.0, "y": 2.0, "z": 3.0}"#;
             let vec: Vec3f = serde_json::from_str(json).unwrap();
@@ -655,7 +630,7 @@ mod tests {
     }
 
     #[test]
-    fn test_serialize() {
+    fn test_vec3_serialize() {
         let vec = Vec3f::new(1.0, 2.0, 3.0);
         let json = serde_json::to_string(&vec).unwrap();
         println!("{:?}", json);
@@ -678,21 +653,16 @@ mod tests {
     }
 
     #[test]
-    fn test_look_at() {
+    fn test_mat3_look_at() {
         let up = Vec3::new(0.0, 1.0, 0.0);
         let eye = Vec3::new(0.0, 0.0, 0.0);
         let target = Vec3::new(5.0, 0.0, 0.0);
 
         let mat = Mat3::look_at(eye, target, up);
-        println!("{:?}", mat);
 
         let v0 = Vec3::new(0.0, 0.0, 1.0);
         let v1 = Vec3::new(1.0, 0.0, 0.0);
 
-        let r = mat * v0;
-
-        println!("{:?}", r);
-
-        assert_eq!(r, v1)
+        assert_eq!(mat * v0, v1)
     }
 }

@@ -16,6 +16,9 @@ pub struct Camera {
 
     #[serde(skip)]
     pub aperture: f64,
+
+    #[serde(skip)]
+    pub matrix: Mat3,
 }
 
 impl Camera {
@@ -25,6 +28,17 @@ impl Camera {
             resolution: Vec2f::from(res),
             focal_length: 3.0,
             aperture: 0.1,
+            matrix: Mat3::from(1.0),
+        }
+    }
+
+    pub fn look_at(position: Vec3f, target: Vec3f, res: (u32, u32)) -> Self {
+        Camera {
+            position,
+            resolution: Vec2f::from(res),
+            focal_length: 3.0,
+            aperture: 0.1,
+            matrix: Mat3::look_at(position, target, Vec3::new(0.0, 1.0, 0.0)),
         }
     }
 
@@ -35,8 +49,10 @@ impl Camera {
 
         let uv = (Vec2f::from(pixel) - self.resolution * 0.5) / self.resolution.y;
         let origin = self.position + Vec3f::new(r1, 0.0, r2) * 0.001;
-        let target = Vec3f::new(uv.x, uv.y, 1.0);
-        Ray::new(origin, Vec3f::normalize(target - origin))
+        let target = Vec3::new(uv.x, uv.y, 1.0);
+        let direction = Vec3::normalize(target - origin);
+
+        Ray::new(origin, direction)
     }
 
     pub fn ray(&self, pixel: (u32, u32)) -> Ray {
@@ -51,7 +67,7 @@ impl Camera {
         let origin = self.position + jitter;
         let direction = Vec3::normalize(focal_point - origin);
 
-        Ray::new(origin, direction)
+        Ray::new(origin, matrix * direction)
     }
 }
 
