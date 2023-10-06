@@ -220,6 +220,10 @@ where
         Self::dot(self, self).sqrt()
     }
 
+    fn length2(self) -> T {
+        Self::dot(self, self)
+    }
+
     fn normalize(self) -> Self {
         self / self.length()
     }
