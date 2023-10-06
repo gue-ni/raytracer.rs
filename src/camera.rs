@@ -24,7 +24,7 @@ impl Camera {
             position,
             resolution: Vec2f::from(res),
             focal_length: 1.0,
-            aperture: 0.001
+            aperture: 0.005
         }
     }
 
@@ -41,12 +41,14 @@ impl Camera {
 
     pub fn ray(&self, pixel: (u32, u32)) -> Ray {
         let ray = self.ray_without_dof(pixel);
-        let focal_point = ray.point_at(focal_length);
-
-        let point_on_aperture = point_on_circle() * aperture;
+        let focal_point = ray.point_at(self.focal_length);
         
-        let origin = Vec3::new(point_on_aperture.x, point_on_aperture.y, 0.0);
-        let direction = Vec3f::normalize(focal_point - origin);
+        let mut rng = rand::thread_rng();
+
+        let jitter = Vec3::new(rng.gen_range(-0.5..0.5), rng.gen_range(-0.5..0.5), 0.0) * self.aperture;
+                
+        let origin = self.position + jitter;
+        let direction = Vec3::normalize(focal_point - origin);
 
         Ray::new(origin, direction)
     }
