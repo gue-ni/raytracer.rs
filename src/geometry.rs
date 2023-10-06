@@ -5,6 +5,7 @@ use crate::vector::*;
 use serde::{Deserialize, Serialize};
 use std::io;
 use std::fs::File;
+use std::f64::consts::PI;
 
 #[derive(Debug)]
 pub struct Hit {
@@ -50,6 +51,10 @@ impl Sphere {
     #[allow(dead_code)]
     pub fn new(center: Vec3f, radius: f64) -> Self {
         Sphere { center, radius }
+    }
+
+    pub fn surface_area(&self) -> f64 {
+        4.0 * PI * self.radius * self.radius
     }
 }
 
