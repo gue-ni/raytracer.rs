@@ -58,7 +58,7 @@ pub fn main() {
 
     let camera = Camera::new(config.camera.position, (width, height));
 
-    let mut scene = config.scene;
+    let scene = config.scene;
 
     /*
     for i in 0..scene.objects.len() {

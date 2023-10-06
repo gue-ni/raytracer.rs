@@ -4,8 +4,6 @@ use crate::vector::*;
 
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
-use std::fs::File;
-use std::io;
 
 #[derive(Debug)]
 pub struct Hit {

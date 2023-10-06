@@ -60,7 +60,7 @@ impl<T> From<[T; 3]> for Vec3<T>
 where
     T: Number,
 {
-    fn from(item: [T: 3]) -> Self {
+    fn from(item: [T; 3]) -> Self {
         Self::new(item[0], item[1], item[2])
     }
 }
@@ -440,22 +440,16 @@ pub struct Mat3<T> {
     pub m: [T; 3 * 3],
 }
 
-impl<T> Mat3<T> 
-where 
-    T: Number,
+impl<T> Mat3<T>
+where
+    T: Number + SquareRoot,
 {
     pub fn look_at(eye: Vec3<T>, target: Vec3<T>, up: Vec3<T>) -> Self {
         let z_axis = (target - eye).normalize();
-        let x_axis = Vec3::cross(up, z_axis).normalize();
+        let x_axis = Vec3::cross(z_axis, up).normalize();
         let y_axis = Vec3::cross(z_axis, x_axis);
-        
-        Mat3::from(
-            [
-                x_axis.x, x_axis.y, x_axis.z,
-                y_axis.x, y_axis.y, y_axis.z,
-                z_axis.x, z_axis.y, z_axis.z,
-            ]
-        )
+
+        Mat3::from([x_axis, y_axis, z_axis])
     }
 }
 
@@ -485,6 +479,20 @@ where
 {
     fn from(item: [T; 3 * 3]) -> Self {
         Self { m: item }
+    }
+}
+
+impl<T> From<[Vec3<T>; 3]> for Mat3<T>
+where
+    T: Number,
+{
+    fn from(item: [Vec3<T>; 3]) -> Self {
+        Self {
+            m: [
+                item[0].x, item[0].y, item[0].z, item[1].x, item[1].y, item[1].z, item[2].x,
+                item[2].y, item[2].z,
+            ],
+        }
     }
 }
 
@@ -519,7 +527,7 @@ where
 {
     type Output = Vec3<T>;
     fn mul(self, other: Vec3<T>) -> Vec3<T> {
-        let mut result = Vec3<T>::default();
+        let mut result = Vec3::<T>::default();
 
         const ROWS: usize = 3;
         const COLUMNS: usize = 3;
@@ -536,65 +544,6 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Mat4<T> {
-    pub m: [T; 4 * 4],
-}
-
-impl<T> Default for Mat4<T>
-where
-    T: Number + std::default::Default,
-{
-    fn default() -> Self {
-        Self {
-            m: [T::default(); 4 * 4],
-        }
-    }
-}
-
-impl<T> From<T> for Mat4<T>
-where
-    T: Number,
-{
-    fn from(item: T) -> Self {
-        Self { m: [item; 4 * 4] }
-    }
-}
-
-impl<T> From<[T; 4 * 4]> for Mat4<T>
-where
-    T: Number,
-{
-    fn from(item: [T; 4 * 4]) -> Self {
-        Self { m: item }
-    }
-}
-
-impl<T> Mul for Mat4<T>
-where
-    T: Number + std::default::Default + AddAssign,
-{
-    type Output = Self;
-    fn mul(self, other: Self) -> Self {
-        let mut result = Self::default();
-
-        const ROWS: usize = 4;
-        const COLUMNS: usize = 4;
-
-        for i in 0..ROWS {
-            for j in 0..COLUMNS {
-                let mut sum = T::default();
-                for k in 0..COLUMNS {
-                    sum += self.m[i * COLUMNS + k] * other.m[k * COLUMNS + j];
-                }
-                result.m[i * COLUMNS + j] = sum;
-            }
-        }
-
-        result
-    }
-}
-
 pub type Vec3f = Vec3<f64>;
 pub type Vec3i = Vec3<i32>;
 pub type Vec3u = Vec3<u32>;
@@ -604,7 +553,6 @@ pub type Vec2i = Vec2<i32>;
 pub type Vec2u = Vec2<u32>;
 
 pub type Mat3f = Mat3<f64>;
-pub type Mat4f = Mat4<f64>;
 
 #[cfg(test)]
 mod tests {
@@ -723,12 +671,8 @@ mod tests {
 
     #[test]
     fn test_mat3_vec3_mult() {
-        let a = Mat3::from([
-            1.0,2.0,3.0,
-            4.0,5.0,6.0,
-            7.0,8.0,9.0
-        ]);
-        let b = Vec3::from([2.0, 1.0, 3.0])
+        let a = Mat3::from([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]);
+        let b = Vec3::from([2.0, 1.0, 3.0]);
         let c = Vec3::from([13.0, 31.0, 49.0]);
         assert_eq!(a * b, c);
     }

@@ -2,12 +2,11 @@ use crate::camera::*;
 use crate::common::*;
 use crate::geometry::*;
 use crate::material::*;
-use crate::onb::*;
+
 use crate::ray::*;
 use crate::vector::*;
 
 use image::RgbImage;
-use std::f64::consts::PI;
 
 use std::thread;
 use std::thread::available_parallelism;
