@@ -37,8 +37,8 @@ impl Renderer {
         //(hit.normal + 0.5) * 0.5
     }
 
-    /// Returns direction to light and distance
-    fn sample_light(object: &Object, point: Vec3f) -> (Vec3f, f64, Vec3f) {
+    /// Returns direction to light, distance and normal
+    fn sample_light(object: &Light, point: Vec3f) -> (Vec3f, f64, Vec3f) {
         let sphere = object.geometry;
         let normal = point_on_sphere();
         let point_on_light = sphere.center + normal * sphere.radius;
@@ -52,32 +52,27 @@ impl Renderer {
 
         let material = scene.objects[hit.idx].material;
 
-        for &i in &scene.lights {
-            if i == hit.idx {
-                continue;
-            }
+        for light in scene.lights {
 
-            let light = scene.objects[i];
             let (direction, distance, normal) = Self::sample_light(&light, hit.point);
             let shadow_ray = Ray::new(hit.point, direction);
 
-            if let Some(lhit) = scene.hit(&shadow_ray, 0.001, f64::INFINITY) {
-                if hit.idx != lhit.idx && distance <= lhit.t && 0.0 < Vec3::dot(normal, -direction)
-                {
-                    let emission = light.material.albedo * light.material.emittance;
-                    let cos_theta = Vec3::dot(hit.normal, direction).abs();
+            let closest = scene.hit(&shadow_ray, 0.001, f64::INFINITY);
 
-                    let pdf = {
-                        let distance2 = distance * distance;
-                        let radius2 = light.geometry.radius * light.geometry.radius;
-                        let area = 4.0 * PI * radius2;
-                        distance2 / (area * cos_theta)
-                    };
+            if closest.is_none() || closest.t > distance {
+                let emission = light.emission;
+                let cos_theta = Vec3::dot(hit.normal, direction).abs();
 
-                    let bsdf = material.bsdf(hit.normal, wo, -direction);
+                let pdf = {
+                    let distance2 = distance * distance;
+                    let radius2 = light.geometry.radius * light.geometry.radius;
+                    let area = 4.0 * PI * radius2;
+                    distance2 / (area * cos_theta)
+                };
 
-                    direct_light += bsdf * emission / (pdf);
-                }
+                let bsdf = material.bsdf(hit.normal, wo, direction);
+
+                direct_light += bsdf * emission / (pdf);
             }
         }
 
@@ -92,8 +87,8 @@ impl Renderer {
 
             let mut color = material.albedo * material.emittance;
 
-            //let mut color = Vec3::from(0.0);
-            //color += Self::sample_lights(scene, &hit, wo);
+           // let mut color = Vec3::from(0.0);
+            color += Self::sample_lights(scene, &hit, wo);
 
             if 0 < bounce {
                 let (wi, pdf) = material.sample_f(hit.normal, wo);

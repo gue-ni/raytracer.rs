@@ -60,11 +60,13 @@ pub fn main() {
 
     let mut scene = config.scene;
 
+    /*
     for i in 0..scene.objects.len() {
         if 0.0 < scene.objects[i].material.emittance {
             scene.lights.push(i);
         }
     }
+    */
 
     println!("Config: {}", scene_path);
     println!(

@@ -34,6 +34,10 @@ impl Hit {
             idx,
         }
     }
+
+    pub fn get_point(&self) -> Vec3f {
+        self.point + self.normal * 0.001
+    }
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -120,9 +124,8 @@ pub struct Light {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
-    #[serde(skip)]
-    pub lights: Vec<usize>, // indices of the objects that emit light
     pub background: Vec3f,
+    pub lights: Vec<Light>, 
     pub objects: Vec<Object>,
 }
 
@@ -409,6 +412,15 @@ mod test {
                             "metallic": 1.0,
                             "material": "Lambert"
                         }
+                    }
+                ],
+                "lights": [
+                    {
+                        "geometry": {
+                            "radius": 0.5,
+                            "center": [0.0, 4.0, 0.0]
+                        },
+                        "emission": [10,10,5]
                     }
                 ]
             }"#;
