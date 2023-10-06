@@ -113,7 +113,7 @@ impl Renderer {
         for sample in 0..samples {
             for y in 0..height {
                 for x in 0..width {
-                    let ray = camera.ray((x, y));
+                    let ray = camera.get_ray((x, y));
                     let color = Self::path_tracing(&ray, scene, bounces) / (samples as f64);
                     assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                     framebuffer[(y * width + x) as usize] += color;

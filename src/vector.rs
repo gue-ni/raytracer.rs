@@ -436,19 +436,36 @@ impl From<Vec2u> for Vec2f {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Mat3<T> {
+pub struct Mat3<T>
+where
+    T: Number,
+{
     pub m: [T; 3 * 3],
 }
 
 impl<T> Mat3<T>
 where
-    T: Number + SquareRoot,
+    T: Number + SquareRoot + std::default::Default,
 {
     pub fn look_at(eye: Vec3<T>, target: Vec3<T>, up: Vec3<T>) -> Self {
         let z_axis = (target - eye).normalize();
         let x_axis = Vec3::cross(z_axis, up).normalize();
         let y_axis = Vec3::cross(z_axis, x_axis);
         Self::from([x_axis, y_axis, z_axis])
+    }
+
+    pub fn diagonal(value: T) -> Self {
+        Self::from([
+            value,
+            T::default(),
+            T::default(),
+            T::default(),
+            value,
+            T::default(),
+            T::default(),
+            T::default(),
+            value,
+        ])
     }
 }
 
@@ -487,23 +504,28 @@ where
 {
     fn from(item: [Vec3<T>; 3]) -> Self {
         Self::from([
-                item[0].x, item[0].y, item[0].z, 
-                item[1].x, item[1].y, item[1].z, 
-                item[2].x, item[2].y, item[2].z,
-            ])
+            item[0].x, item[0].y, item[0].z, item[1].x, item[1].y, item[1].z, item[2].x, item[2].y,
+            item[2].z,
+        ])
     }
 }
 
-impl<T> Index<usize> for Mat3<T> {
+impl<T> Index<usize> for Mat3<T>
+where
+    T: Number,
+{
     type Output = T;
     fn index(&self, i: usize) -> &T {
-        self.m[i] 
+        &self.m[i]
     }
 }
 
-impl<T> IndexMut<usize> for Mat3<T> {
+impl<T> IndexMut<usize> for Mat3<T>
+where
+    T: Number,
+{
     fn index_mut(&mut self, i: usize) -> &mut T {
-        &mut self.m[i] 
+        &mut self.m[i]
     }
 }
 

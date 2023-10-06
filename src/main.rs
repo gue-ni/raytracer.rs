@@ -56,17 +56,21 @@ pub fn main() {
         Err(error) => panic!("Failed to parse scene: {:?}", error),
     };
 
-    let camera = Camera::new(config.camera.position, (width, height));
+    let camera = Camera::new(
+        config.camera.position,
+        config.camera.target,
+        config.camera.fov,
+        (width, height),
+    );
+    /*
+    let camera = Camera::look_at(
+        config.camera.position,
+        config.camera.target,
+        (width, height),
+    );
+    */
 
     let scene = config.scene;
-
-    /*
-    for i in 0..scene.objects.len() {
-        if 0.0 < scene.objects[i].material.emittance {
-            scene.lights.push(i);
-        }
-    }
-    */
 
     println!("Config: {}", scene_path);
     println!(
