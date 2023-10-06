@@ -56,6 +56,15 @@ where
     }
 }
 
+impl<T> From<[T; 3]> for Vec3<T>
+where
+    T: Number,
+{
+    fn from(item: [T: 3]) -> Self {
+        Self::new(item[0], item[1], item[2])
+    }
+}
+
 impl<T> From<T> for Vec3<T>
 where
     T: Number,
@@ -431,6 +440,25 @@ pub struct Mat3<T> {
     pub m: [T; 3 * 3],
 }
 
+impl<T> Mat3<T> 
+where 
+    T: Number,
+{
+    pub fn look_at(eye: Vec3<T>, target: Vec3<T>, up: Vec3<T>) -> Self {
+        let z_axis = (target - eye).normalize();
+        let x_axis = Vec3::cross(up, z_axis).normalize();
+        let y_axis = Vec3::cross(z_axis, x_axis);
+        
+        Mat3::from(
+            [
+                x_axis.x, x_axis.y, x_axis.z,
+                y_axis.x, y_axis.y, y_axis.z,
+                z_axis.x, z_axis.y, z_axis.z,
+            ]
+        )
+    }
+}
+
 impl<T> Default for Mat3<T>
 where
     T: Number + std::default::Default,
@@ -479,6 +507,29 @@ where
                 }
                 result.m[i * COLUMNS + j] = sum;
             }
+        }
+
+        result
+    }
+}
+
+impl<T> Mul<Vec3<T>> for Mat3<T>
+where
+    T: Number + std::default::Default + AddAssign,
+{
+    type Output = Vec3<T>;
+    fn mul(self, other: Vec3<T>) -> Vec3<T> {
+        let mut result = Vec3<T>::default();
+
+        const ROWS: usize = 3;
+        const COLUMNS: usize = 3;
+
+        for i in 0..ROWS {
+            let mut sum = T::default();
+            for j in 0..COLUMNS {
+                sum += self.m[i * COLUMNS + j] * other[j];
+            }
+            result[i] = sum;
         }
 
         result
@@ -640,14 +691,6 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_mult() {
-        let a = Mat3::from([2.0, 7.0, 3.0, 1.0, 5.0, 8.0, 0.0, 4.0, 1.0]);
-        let b = Mat3::from([3.0, 0.0, 1.0, 2.0, 1.0, 0.0, 1.0, 2.0, 4.0]);
-        let c = Mat3::from([23.0, 13.0, 14.0, 21.0, 21.0, 33.0, 9.0, 6.0, 4.0]);
-        assert_eq!(a * b, c);
-    }
-
-    #[test]
     fn test_deserialize() {
         {
             let json = r#"{"x": 1.0, "y": 2.0, "z": 3.0}"#;
@@ -668,5 +711,44 @@ mod tests {
         let vec = Vec3f::new(1.0, 2.0, 3.0);
         let json = serde_json::to_string(&vec).unwrap();
         println!("{:?}", json);
+    }
+
+    #[test]
+    fn test_mat3_mat3_mult() {
+        let a = Mat3::from([2.0, 7.0, 3.0, 1.0, 5.0, 8.0, 0.0, 4.0, 1.0]);
+        let b = Mat3::from([3.0, 0.0, 1.0, 2.0, 1.0, 0.0, 1.0, 2.0, 4.0]);
+        let c = Mat3::from([23.0, 13.0, 14.0, 21.0, 21.0, 33.0, 9.0, 6.0, 4.0]);
+        assert_eq!(a * b, c);
+    }
+
+    #[test]
+    fn test_mat3_vec3_mult() {
+        let a = Mat3::from([
+            1.0,2.0,3.0,
+            4.0,5.0,6.0,
+            7.0,8.0,9.0
+        ]);
+        let b = Vec3::from([2.0, 1.0, 3.0])
+        let c = Vec3::from([13.0, 31.0, 49.0]);
+        assert_eq!(a * b, c);
+    }
+
+    #[test]
+    fn test_look_at() {
+        let up = Vec3::new(0.0, 1.0, 0.0);
+        let eye = Vec3::new(0.0, 0.0, 0.0);
+        let target = Vec3::new(5.0, 0.0, 0.0);
+
+        let mat = Mat3::look_at(eye, target, up);
+        println!("{:?}", mat);
+
+        let v0 = Vec3::new(0.0, 0.0, 1.0);
+        let v1 = Vec3::new(1.0, 0.0, 0.0);
+
+        let r = mat * v0;
+
+        println!("{:?}", r);
+
+        assert_eq!(r, v1)
     }
 }
