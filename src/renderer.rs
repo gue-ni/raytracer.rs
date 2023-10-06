@@ -50,17 +50,19 @@ impl Renderer {
     fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
         let mut direct_light = Vec3::from(0.0);
 
+        let point = hit.get_point();
+
         let material = scene.objects[hit.idx].material;
 
         for &light in &scene.lights {
             let (direction, distance, normal) = Self::sample_light(&light, hit.point);
-            let shadow_ray = Ray::new(hit.point, direction);
+            let shadow_ray = Ray::new(point, direction);
 
             let cos_theta = Vec3::dot(normal, -direction);
 
             let closest = scene.hit(&shadow_ray, 0.001, f64::INFINITY);
 
-            if (closest.is_none() || closest.unwrap().t > distance) && 0.0 < cos_theta {
+            if (closest.is_none() || distance < closest.unwrap().t) && 0.0 < cos_theta {
                 let emission = light.emission;
 
                 let pdf = {
@@ -71,22 +73,21 @@ impl Renderer {
 
                 let bsdf = material.bsdf(hit.normal, wo, direction);
 
-                direct_light += bsdf * emission / pdf;
+                direct_light += bsdf * Vec3::dot(hit.normal, direction).abs() * emission / pdf;
             }
         }
 
-        direct_light
+        direct_light / (scene.lights.len() as f64)
     }
 
     fn path_tracing(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
         if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
             let material = scene.objects[hit.idx].material;
-            let point = hit.point + hit.normal * 0.001;
+            let point = hit.get_point();
             let wo = -ray.direction;
 
             let mut color = material.albedo * material.emittance;
 
-            // let mut color = Vec3::from(0.0);
             color += Self::sample_lights(scene, &hit, wo);
 
             if 0 < bounce {
