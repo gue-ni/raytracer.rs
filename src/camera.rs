@@ -10,6 +10,12 @@ pub struct Camera {
 
     #[serde(skip)]
     pub resolution: Vec2f,
+
+    #[serde(skip)]
+    pub focal_length: f64,
+
+    #[serde(skip)]
+    pub aperture: f64
 }
 
 impl Camera {
@@ -17,10 +23,12 @@ impl Camera {
         Camera {
             position,
             resolution: Vec2f::from(res),
+            focal_length: 1.0,
+            aperture: 0.001
         }
     }
 
-    pub fn ray(&self, pixel: (u32, u32)) -> Ray {
+    pub fn ray_without_dof(&self, pixel: (u32, u32)) -> Ray {
         let mut rng = rand::thread_rng();
         let r1 = rng.gen_range(-1.0..1.0);
         let r2 = rng.gen_range(-1.0..1.0);
@@ -29,6 +37,18 @@ impl Camera {
         let origin = self.position + Vec3f::new(r1, 0.0, r2) * 0.001;
         let target = Vec3f::new(uv.x, uv.y, 1.0);
         Ray::new(origin, Vec3f::normalize(target - origin))
+    }
+
+    pub fn ray(&self, pixel: (u32, u32)) -> Ray {
+        let ray = self.ray_without_dof(pixel);
+        let focal_point = ray.point_at(focal_length);
+
+        let point_on_aperture = point_on_circle() * aperture;
+        
+        let origin = Vec3::new(point_on_aperture.x, point_on_aperture.y, 0.0);
+        let direction = Vec3f::normalize(focal_point - origin);
+
+        Ray::new(origin, direction)
     }
 }
 

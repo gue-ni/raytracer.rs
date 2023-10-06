@@ -144,18 +144,12 @@ pub fn point_on_sphere() -> Vec3f {
     ))
 }
 
-/*
 pub fn point_on_circle() -> Vec2f {
     let mut rng = rand::thread_rng();
-    let phi = rng.gen_range(0.0..1.0);
-    let theta = rng.gen_range(0.0..1.0);
-    let sin_phi = phi.sin();
-    let cos_phi = phi.cos();
-    let sin_theta = theta.sin();
-    let cos_theta = theta.cos();
-    Vec2f::new(cos_phi * sin_theta, sin_phi * sin_theta)
+    let r = rng.gen_range(0.0..1.0);
+    let theta = r * PI * 2.0;
+    Vec2f::new(theta.cos(), theta.sin())
 }
-*/
 
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
     let omega = point_on_sphere();
