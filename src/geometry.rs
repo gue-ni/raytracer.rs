@@ -3,6 +3,8 @@ use crate::ray::Ray;
 use crate::vector::*;
 
 use serde::{Deserialize, Serialize};
+use std::io;
+use std::fs::File;
 
 #[derive(Debug)]
 pub struct Hit {
@@ -56,6 +58,49 @@ pub struct Mesh {
     triangles: Vec<Triangle>,
 }
 
+impl Mesh {
+    pub fn new() -> Self {
+        Self { triangles: vec![] }
+    }
+
+    pub fn from_obj(path: &str) -> io::Result<Mesh> {
+        let mut mesh = Mesh::new();
+
+        let mut vertices: Vec<Vec3f> = Vec::new();
+
+        let file = File::open(path)?;
+        let reader = fs::BufReader::new(file);
+
+        for line in reader.lines() {
+            let line = line?;
+
+            if line.starts_with('#') || line.is_empty() {
+                continue;
+            }
+
+            let items = line.split_ascii_whitespace().collect();
+            println!(":?", items);
+
+            match items[0] {
+                "v" => {
+                    let v = Vec3::new(
+                        items[1].parse::<f64>(),
+                        items[2].parse::<f64>(),
+                        items[3].parse::<f64>()
+                    );
+                    vertices.push(v);
+
+                },
+                "f" => {
+                },
+                _ => (),
+            }
+        }
+
+        Ok(mesh)
+    }
+}
+
 pub enum Geometry {
     MESH(Mesh),
     SPHERE(Sphere),
@@ -65,6 +110,12 @@ pub enum Geometry {
 pub struct Object {
     pub geometry: Sphere,
     pub material: Material,
+}
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub struct Light {
+    pub geometry: Sphere,
+    pub emission: Vec3f,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
