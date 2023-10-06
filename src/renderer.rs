@@ -52,8 +52,7 @@ impl Renderer {
 
         let material = scene.objects[hit.idx].material;
 
-        for light in scene.lights {
-
+        for &light in &scene.lights {
             let (direction, distance, normal) = Self::sample_light(&light, hit.point);
             let shadow_ray = Ray::new(hit.point, direction);
 
@@ -61,7 +60,7 @@ impl Renderer {
 
             let closest = scene.hit(&shadow_ray, 0.001, f64::INFINITY);
 
-            if (closest.is_none() || closest.t > distance) && 0.0 < cos_theta {
+            if (closest.is_none() || closest.unwrap().t > distance) && 0.0 < cos_theta {
                 let emission = light.emission;
 
                 let pdf = {
@@ -87,7 +86,7 @@ impl Renderer {
 
             let mut color = material.albedo * material.emittance;
 
-           // let mut color = Vec3::from(0.0);
+            // let mut color = Vec3::from(0.0);
             color += Self::sample_lights(scene, &hit, wo);
 
             if 0 < bounce {

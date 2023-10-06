@@ -3,9 +3,9 @@ use crate::ray::Ray;
 use crate::vector::*;
 
 use serde::{Deserialize, Serialize};
-use std::io;
-use std::fs::File;
 use std::f64::consts::PI;
+use std::fs::File;
+use std::io;
 
 #[derive(Debug)]
 pub struct Hit {
@@ -76,6 +76,7 @@ impl Mesh {
 
     // fn parse_vertex() -> Vec3f {}
 
+    /*
     pub fn from_obj(path: &str) -> io::Result<Mesh> {
         let mut mesh = Mesh::new();
 
@@ -114,6 +115,7 @@ impl Mesh {
 
         Ok(mesh)
     }
+    */
 }
 
 pub enum Geometry {
@@ -136,7 +138,7 @@ pub struct Light {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
     pub background: Vec3f,
-    pub lights: Vec<Light>, 
+    pub lights: Vec<Light>,
     pub objects: Vec<Object>,
 }
 
