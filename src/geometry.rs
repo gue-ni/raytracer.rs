@@ -72,6 +72,10 @@ impl Mesh {
         Self { triangles: vec![] }
     }
 
+    // fn parse_face() -> Triangle {}
+
+    // fn parse_vertex() -> Vec3f {}
+
     pub fn from_obj(path: &str) -> io::Result<Mesh> {
         let mut mesh = Mesh::new();
 
@@ -99,8 +103,10 @@ impl Mesh {
                     );
                     vertices.push(v);
 
+                    //vertices.push(parse_vertex(...));
                 },
                 "f" => {
+                    //mesh.triangles.push(parse_face(...));
                 },
                 _ => (),
             }
