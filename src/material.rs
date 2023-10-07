@@ -83,7 +83,11 @@ impl BSDF for Material {
                 let cos_theta = Vec3f::dot(normal, wi);
                 let pdf = cos_theta / PI;
                 (wi, pdf)
-            }
+            },
+            MaterialType::Mirror => {
+                let wi = reflect(-wo, normal);
+                (wi, 1.0)
+            },
             _ => panic!("not implemented"),
         }
     }
@@ -91,6 +95,9 @@ impl BSDF for Material {
     fn bsdf(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
+            MaterialType::Mirror => {
+                self.albedo / PI 
+            },
             _ => panic!("not implemented"),
         }
     }
