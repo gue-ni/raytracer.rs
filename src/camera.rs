@@ -49,9 +49,6 @@ impl Camera {
         let height = 2.0 * half_height;
         let width = 2.0 * half_width;
 
-        //xIncVector = (U*2*halfWidth)/xResolution;
-        //yIncVector = (V*2*halfHeight)/yResolution;
-
         let bottom_left = self.target - (right * half_width) - (up * half_height);
 
         let view_point = bottom_left + (right * width * coord.x) + (up * height * coord.y);
@@ -103,15 +100,11 @@ mod test {
 
     #[test]
     fn test_get_ray() {
-        let eye = Vec3::new(0.0, 1.0, 0.0);
-        let target = Vec3::new(0.0, 0.0, 5.0);
-        let resolution: (u32, u32) = (512, 512);
-        let fov = 45.0;
+        let eye = Vec3::new(0.0, 1.0, 1.0);
+        let target = Vec3::new(0.0, 0.0, 1.0);
 
-        let camera = Camera::new(eye, target, fov, resolution);
-
+        let camera = Camera::new(eye, target, 45.0, (512, 512));
         let pixel = (256, 256);
-
         let ray = camera.get_ray(pixel);
 
         println!("{:?}", ray);
