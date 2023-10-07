@@ -84,7 +84,7 @@
 					"roughness": 0.2,
 					"ior": 0,
 					"metallic": 0.5,
-					"material": "Lambert"
+					"material": "Transparent"
 				}
 			},
 			{
@@ -96,7 +96,7 @@
 					"roughness": 0,
 					"ior": 1.5,
 					"metallic": 0,
-					"material": "Lambert"
+					"material": "Mirror"
 				}
 			},
 			{
@@ -120,5 +120,5 @@
 			}
 		]
 	},
-	"camera": { "position": [0, 0, 0] }
+	"camera": { "position": [0, 0, 0], "target": [0,0,5], "fov": 45.0 }
 }

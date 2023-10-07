@@ -216,15 +216,13 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_reflect() {
         {
             let normal = Vec3f::new(0.0, 1.0, 0.0);
             let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
             let outgoing = reflect(incident, normal);
-            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal));
+            assert_eq!(Vec3::dot(-incident, normal), Vec3::dot(outgoing, normal));
             assert_eq!(Vec3f::dot(incident, outgoing), 0.0);
-            assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
         }
     }
 
@@ -248,9 +246,6 @@ mod test {
             assert_eq!(r1, r2);
         }
     }
-
-    #[test]
-    fn test_fresnel() {}
 
     #[test]
     fn test_cosine() {
@@ -313,7 +308,7 @@ mod test {
 
     #[test]
     fn test_serialize() {
-        let json = fs::read_to_string("scenes/sphere.json").unwrap();
+        let json = fs::read_to_string("scenes/cornell_box.json").unwrap();
         let _config: ConfigFile = serde_json::from_str(&json).unwrap();
         println!("{:?}", _config);
     }

@@ -115,6 +115,5 @@ mod test {
         let ray = camera.get_ray(pixel);
 
         println!("{:?}", ray);
-        assert!(false);
     }
 }

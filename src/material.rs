@@ -20,7 +20,7 @@ pub trait BSDF {
     fn sample(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, Vec3f);
 }
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum MaterialType {
     /// Mirror (perfectly specular)
     Mirror,
@@ -76,29 +76,48 @@ fn geometry_smith(normal: Vec3f, wo: Vec3f, wi: Vec3f, roughness: f64) -> f64 {
 }
 
 impl BSDF for Material {
-    fn sample_f(&self, normal: Vec3f, _wo: Vec3f) -> (Vec3f, f64) {
+    fn sample_f(&self, normal: Vec3f, wo: Vec3f) -> (Vec3f, f64) {
         match self.material {
             MaterialType::Lambert => {
                 let wi = Onb::local_to_world(normal, cosine_weighted_hemisphere());
-                let cos_theta = Vec3f::dot(normal, wi);
+                let cos_theta = Vec3f::dot(normal, wi).abs();
                 let pdf = cos_theta / PI;
                 (wi, pdf)
-            },
+            }
             MaterialType::Mirror => {
                 let wi = reflect(-wo, normal);
-                (wi, 1.0)
-            },
+                let pdf = 1.0;
+                (wi, pdf)
+            }
+            MaterialType::Transparent => {
+                let mut rng = rand::thread_rng();
+                let r = rng.gen_range(0.0..1.0);
+
+                let fr = fresnel(-wo, normal, self.ior);
+
+                if r <= fr {
+                    let wi = refract(-wo, normal, self.ior);
+                    (wi, 1.0)
+                } else {
+                    let wi = reflect(-wo, normal);
+                    (wi, 1.0)
+                }
+            }
             _ => panic!("not implemented"),
         }
     }
 
-    fn bsdf(&self, _normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
+    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
             MaterialType::Mirror => {
-                let cos_theta = Vec3::dot(normal, wi);
-                self.albedo / PI * (1.0 / cos_theta)
-            },
+                let cos_theta = Vec3::dot(normal, wi).abs();
+                self.albedo / cos_theta
+            }
+            MaterialType::Transparent => {
+                let cos_theta = Vec3::dot(normal, wi).abs();
+                self.albedo / cos_theta
+            }
             _ => panic!("not implemented"),
         }
     }
@@ -174,3 +193,6 @@ impl BSDF for Material {
         }
     }
 }
+
+#[cfg(test)]
+mod test {}

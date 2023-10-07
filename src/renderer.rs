@@ -47,11 +47,16 @@ impl Renderer {
     }
 
     fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
-        let mut direct_light = Vec3::from(0.0);
-
-        let point = hit.get_point();
-
         let material = scene.objects[hit.idx].material;
+
+        if material.material == MaterialType::Mirror
+            || material.material == MaterialType::Transparent
+        {
+            return Vec3::from(0.0);
+        }
+
+        let mut direct_light = Vec3::from(0.0);
+        let point = hit.get_point();
 
         for &light in &scene.lights {
             let (direction, distance, normal) = Self::sample_light(&light, hit.point);
