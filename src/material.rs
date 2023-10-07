@@ -92,11 +92,12 @@ impl BSDF for Material {
         }
     }
 
-    fn bsdf(&self, _normal: Vec3f, _wo: Vec3f, _wi: Vec3f) -> Vec3f {
+    fn bsdf(&self, _normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
             MaterialType::Mirror => {
-                self.albedo / PI 
+                let cos_theta = Vec3::dot(normal, wi);
+                self.albedo / PI * (1.0 / cos_theta)
             },
             _ => panic!("not implemented"),
         }
