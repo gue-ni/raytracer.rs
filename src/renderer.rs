@@ -2,12 +2,10 @@ use crate::camera::*;
 use crate::common::*;
 use crate::geometry::*;
 use crate::material::*;
-
 use crate::ray::*;
 use crate::vector::*;
 
 use image::RgbImage;
-
 use std::thread;
 use std::thread::available_parallelism;
 use std::vec;
@@ -31,9 +29,12 @@ pub struct Renderer;
 impl Renderer {
     /// Visualize Normal Vector
     #[allow(dead_code)]
-    fn visualize_normal(hit: &Hit, _scene: &Scene, _incoming: &Ray, _depth: u32) -> Vec3f {
-        (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
-        //(hit.normal + 0.5) * 0.5
+    fn visualize_normal(ray: &Ray, scene: &Scene, _bounce: u32) -> Vec3f {
+        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
+            (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
+        } else {
+            scene.background
+        }
     }
 
     /// Returns direction to light, distance and normal
@@ -84,6 +85,7 @@ impl Renderer {
         direct_light / (scene.lights.len() as f64)
     }
 
+    #[allow(dead_code)]
     fn path_tracing(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
         if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
             let material = scene.objects[hit.idx].material;
