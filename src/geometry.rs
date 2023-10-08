@@ -2,10 +2,11 @@ use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::f64::consts::PI;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Result};
+use std::io;
+use std::io::{BufRead, BufReader};
 
 #[derive(Debug)]
 pub struct Hit {
@@ -58,11 +59,11 @@ impl Sphere {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Triangle(pub Vec3f, pub Vec3f, pub Vec3f);
 
 /// Convex polygon mesh
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Mesh {
     triangles: Vec<Triangle>,
 }
@@ -94,7 +95,7 @@ impl Mesh {
         Vec3::new(x, y, z)
     }
 
-    pub fn from_obj(path: &str) -> Result<Mesh> {
+    pub fn from_obj(path: &str) -> io::Result<Mesh> {
         let mut mesh = Mesh::new();
 
         let mut vertices: Vec<Vec3f> = Vec::new();
@@ -132,14 +133,25 @@ impl Mesh {
     }
 }
 
+fn load_from_obj<'de, D>(deserializer: D) -> Result<Mesh, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let obj_path: &str = Deserialize::deserialize(deserializer)?;
+    Ok(Mesh::from_obj(obj_path))
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum Geometry {
+    #[serde(deserialize_with = "load_from_obj")]
     MESH(Mesh),
     SPHERE(Sphere),
 }
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Object {
-    pub geometry: Sphere,
+    pub geometry: Geometry,
     pub material: Material,
 }
 
@@ -452,8 +464,38 @@ mod test {
                 ]
             }"#;
             let _scene: Scene = serde_json::from_str(json).unwrap();
-            //println!("{:?}", scene);
         }
+    }
+
+    #[test]
+    fn test_deserialize_2() {
+        let json = r#"{
+                "background": [0.5, 0.0, 1.0],
+                "objects": [
+                    {
+                        "geometry": "scenes/cube.obj",
+                        "material": {
+                            "albedo": [1.0, 0.0, 0.0],
+                            "emittance": 1.0,
+                            "roughness": 1.0,
+                            "ior": 1.0,
+                            "metallic": 1.0,
+                            "material": "Lambert"
+                        }
+                    }
+                ],
+                "lights": [
+                    {
+                        "geometry": {
+                            "radius": 0.5,
+                            "center": [0.0, 4.0, 0.0]
+                        },
+                        "emission": [10,10,5]
+                    }
+                ]
+            }"#;
+        let _scene: Scene = serde_json::from_str(json).unwrap();
+        println!("{:?}", _scene);
     }
 
     #[test]
