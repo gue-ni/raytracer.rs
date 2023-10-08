@@ -1,8 +1,8 @@
 use crate::ray::*;
 use crate::vector::*;
-use serde::{Deserialize, Serialize};
-
 use rand::Rng;
+use serde::{Deserialize, Serialize};
+use std::f64::consts::PI;
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Camera {
@@ -28,7 +28,7 @@ impl Camera {
         Camera {
             position,
             target,
-            fov,
+            fov: fov * (PI / 180.0),
             resolution: Vec2f::from(res),
             aspect_ratio: (res.1 as f64) / (res.0 as f64),
             focal_length: 3.0,
@@ -49,7 +49,8 @@ impl Camera {
         let height = 2.0 * half_height;
         let width = 2.0 * half_width;
 
-        let bottom_left = self.target - (right * half_width) - (up * half_height);
+        let target = self.position + forward;
+        let bottom_left = target - (right * half_width) - (up * half_height);
 
         let view_point = bottom_left + (right * width * coord.x) + (up * height * coord.y);
 
@@ -70,7 +71,7 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
-    pub fn ray(&self, pixel: (u32, u32)) -> Ray {
+    pub fn _ray(&self, pixel: (u32, u32)) -> Ray {
         let ray = self.ray_without_dof(pixel);
         let focal_point = ray.point_at(self.focal_length);
 
@@ -100,13 +101,23 @@ mod test {
 
     #[test]
     fn test_get_ray() {
-        let eye = Vec3::new(0.0, 1.0, 1.0);
+        let eye = Vec3::new(0.0, 0.0, 0.0);
         let target = Vec3::new(0.0, 0.0, 1.0);
 
         let camera = Camera::new(eye, target, 45.0, (512, 512));
-        let pixel = (256, 256);
-        let ray = camera.get_ray(pixel);
 
-        println!("{:?}", ray);
+        {
+            let pixel = (510, 510);
+            let ray2 = camera.get_ray(pixel);
+            println!("{:?}", ray2);
+        }
+        {
+            let ray = camera.get_ray((511, 511));
+            println!("{:?}", ray);
+        }
+        {
+            let ray = camera.get_ray((0, 0));
+            println!("{:?}", ray);
+        }
     }
 }

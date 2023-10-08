@@ -156,7 +156,7 @@ impl Renderer {
                     for sample in 0..samples {
                         for i in 0..chunk.len() {
                             let xy = get_xy((worker * chunk_size + i) as u32, width);
-                            let ray = camera.ray(xy);
+                            let ray = camera.get_ray(xy);
                             let color = Self::path_tracing(&ray, scene, bounces);
                             assert!(0.0 <= f64::min(color.x, f64::min(color.y, color.z)));
                             chunk[i] += color / (samples as f64);
@@ -174,8 +174,7 @@ impl Renderer {
 
     /// Render Scene to RgbImage
     pub fn render(camera: &Camera, scene: &Scene, samples: u32, bounces: u32) -> RgbImage {
-        let multithreading = true;
-        if multithreading {
+        if true {
             Self::render_multithreaded(camera, scene, samples, bounces)
         } else {
             Self::render_singlethread(camera, scene, samples, bounces)

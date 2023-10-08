@@ -2,8 +2,8 @@ use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
 
-use serde::{Deserialize, Deserializer, Serialize};
 use serde::de;
+use serde::{Deserialize, Deserializer, Serialize};
 use std::f64::consts::PI;
 use std::fs::File;
 use std::io;
@@ -124,9 +124,7 @@ impl Mesh {
                     mesh.triangles
                         .push(Triangle(vertices[v0], vertices[v1], vertices[v2]));
                 }
-                _ => {
-                    println!("Skip line {:?}", tokens[0]);
-                }
+                _ => (),
             }
         }
 
@@ -504,6 +502,17 @@ mod test {
         if let Ok(mesh) = Mesh::from_obj("scenes/cube.obj") {
             println!("{:?}", mesh);
             assert_eq!(mesh.triangles.len(), 6 * 2);
+        }
+    }
+
+    #[test]
+    fn test_hit_cube() {
+        let mesh = Mesh::from_obj("scenes/cube.obj").unwrap();
+
+        let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
+
+        if let Some(hit) = mesh.hit(&ray, 0.001, f64::INFINITY) {
+            println!("{:?}", hit);
         }
     }
 }
