@@ -265,13 +265,15 @@ impl Hittable for Triangle {
 
 impl Hittable for Mesh {
     fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
+        let mut closest = max_t;
+        let mut hit: Option<Hit> = None;
         for triangle in &self.triangles {
-            let hit_record = triangle.hit(ray, min_t, max_t);
-            if hit_record.is_some() {
-                return hit_record;
+            if let Some(tmp) = triangle.hit(ray, min_t, closest) {
+                closest = tmp.t;
+                hit = Some(tmp);
             }
         }
-        None
+        hit
     }
 }
 
