@@ -227,6 +227,7 @@ where
     T: Number + SquareRoot,
 {
     fn length(self) -> T;
+    fn length2(self) -> T;
     fn normalize(self) -> Self;
 }
 
@@ -236,6 +237,10 @@ where
 {
     fn length(self) -> T {
         Self::dot(self, self).sqrt()
+    }
+
+    fn length2(self) -> T {
+        Self::dot(self, self)
     }
 
     fn normalize(self) -> Self {
