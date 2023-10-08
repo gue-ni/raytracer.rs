@@ -107,7 +107,7 @@ impl BSDF for Material {
         }
     }
 
-    fn bsdf(&self, normal: Vec3f, wo: Vec3f, wi: Vec3f) -> Vec3f {
+    fn bsdf(&self, normal: Vec3f, _wo: Vec3f, wi: Vec3f) -> Vec3f {
         match self.material {
             MaterialType::Lambert => self.albedo / PI,
             MaterialType::Mirror => {

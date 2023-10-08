@@ -4,6 +4,8 @@ use crate::vector::*;
 
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
+use std::fs::File;
+use std::io::{BufRead, BufReader, Result};
 
 #[derive(Debug)]
 pub struct Hit {
@@ -70,18 +72,35 @@ impl Mesh {
         Self { triangles: vec![] }
     }
 
-    // fn parse_face() -> Triangle {}
+    fn parse_indices(tokens: &[&str]) -> (usize, usize, usize) {
+        assert!(tokens.len() == 3);
+        let mut tmp: Vec<usize> = Vec::new();
+        for token in tokens {
+            let indices: Vec<&str> = token.split('/').collect();
+            assert!(indices.len() == 3);
 
-    // fn parse_vertex() -> Vec3f {}
+            let vertex_index = indices[0].parse::<usize>().unwrap();
+            tmp.push(vertex_index - 1);
+        }
 
-    /*
-    pub fn from_obj(path: &str) -> io::Result<Mesh> {
+        (tmp[0], tmp[1], tmp[2])
+    }
+
+    fn parse_vertex(tokens: &[&str]) -> Vec3f {
+        assert!(tokens.len() == 3);
+        let x = tokens[0].parse::<f64>().unwrap();
+        let y = tokens[1].parse::<f64>().unwrap();
+        let z = tokens[2].parse::<f64>().unwrap();
+        Vec3::new(x, y, z)
+    }
+
+    pub fn from_obj(path: &str) -> Result<Mesh> {
         let mut mesh = Mesh::new();
 
         let mut vertices: Vec<Vec3f> = Vec::new();
 
         let file = File::open(path)?;
-        let reader = fs::BufReader::new(file);
+        let reader = BufReader::new(file);
 
         for line in reader.lines() {
             let line = line?;
@@ -90,30 +109,27 @@ impl Mesh {
                 continue;
             }
 
-            let items = line.split_ascii_whitespace().collect();
-            println!(":?", items);
+            let tokens: Vec<&str> = line.split_whitespace().collect();
 
-            match items[0] {
+            match tokens[0] {
                 "v" => {
-                    let v = Vec3::new(
-                        items[1].parse::<f64>(),
-                        items[2].parse::<f64>(),
-                        items[3].parse::<f64>()
-                    );
-                    vertices.push(v);
-
-                    //vertices.push(parse_vertex(...));
-                },
+                    let vertex_tokens = &tokens[1..];
+                    vertices.push(Self::parse_vertex(vertex_tokens));
+                }
                 "f" => {
-                    //mesh.triangles.push(parse_face(...));
-                },
-                _ => (),
+                    let index_tokens = &tokens[1..];
+                    let (v0, v1, v2) = Self::parse_indices(index_tokens);
+                    mesh.triangles
+                        .push(Triangle(vertices[v0], vertices[v1], vertices[v2]));
+                }
+                _ => {
+                    println!("Skip line {:?}", tokens[0]);
+                }
             }
         }
 
         Ok(mesh)
     }
-    */
 }
 
 pub enum Geometry {
@@ -437,6 +453,14 @@ mod test {
             }"#;
             let _scene: Scene = serde_json::from_str(json).unwrap();
             //println!("{:?}", scene);
+        }
+    }
+
+    #[test]
+    fn test_load_obj() {
+        if let Ok(mesh) = Mesh::from_obj("scenes/cube.obj") {
+            println!("{:?}", mesh);
+            assert_eq!(mesh.triangles.len(), 6 * 2);
         }
     }
 }
