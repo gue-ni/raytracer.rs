@@ -3,6 +3,7 @@ use crate::ray::Ray;
 use crate::vector::*;
 
 use serde::{Deserialize, Deserializer, Serialize};
+use serde::de;
 use std::f64::consts::PI;
 use std::fs::File;
 use std::io;
@@ -138,7 +139,7 @@ where
     D: Deserializer<'de>,
 {
     let obj_path: &str = Deserialize::deserialize(deserializer)?;
-    Ok(Mesh::from_obj(obj_path))
+    Mesh::from_obj(obj_path).map_err(de::Error::custom)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
