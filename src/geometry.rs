@@ -1,8 +1,14 @@
 use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
+use crate::common::*;
 
-use serde::{Deserialize, Serialize};
+use serde::de;
+use serde::{Deserialize, Deserializer, Serialize};
+use std::f64::consts::PI;
+use std::fs::File;
+use std::io;
+use std::io::{BufRead, BufReader};
 
 #[derive(Debug)]
 pub struct Hit {
@@ -32,6 +38,10 @@ impl Hit {
             idx,
         }
     }
+
+    pub fn get_point(&self) -> Vec3f {
+        self.point + self.normal * 0.001
+    }
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -45,33 +55,127 @@ impl Sphere {
     pub fn new(center: Vec3f, radius: f64) -> Self {
         Sphere { center, radius }
     }
+
+    pub fn surface_area(&self) -> f64 {
+        4.0 * PI * self.radius * self.radius
+    }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Triangle(pub Vec3f, pub Vec3f, pub Vec3f);
 
 /// Convex polygon mesh
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Mesh {
     triangles: Vec<Triangle>,
 }
 
+impl Mesh {
+    pub fn new() -> Self {
+        Self { triangles: vec![] }
+    }
+
+    fn parse_indices(tokens: &[&str]) -> (usize, usize, usize) {
+        assert!(tokens.len() == 3);
+        let mut tmp: Vec<usize> = Vec::new();
+        for token in tokens {
+            let indices: Vec<&str> = token.split('/').collect();
+            assert!(indices.len() == 3);
+
+            let vertex_index = indices[0].parse::<usize>().unwrap();
+            tmp.push(vertex_index - 1);
+        }
+
+        (tmp[0], tmp[1], tmp[2])
+    }
+
+    fn parse_vertex(tokens: &[&str]) -> Vec3f {
+        assert!(tokens.len() == 3);
+        let x = tokens[0].parse::<f64>().unwrap();
+        let y = tokens[1].parse::<f64>().unwrap();
+        let z = tokens[2].parse::<f64>().unwrap();
+        Vec3::new(x, y, z)
+    }
+
+    pub fn from_obj(path: &str) -> io::Result<Mesh> {
+        let mut mesh = Mesh::new();
+
+        let mut vertices: Vec<Vec3f> = Vec::new();
+
+        let file = File::open(path)?;
+        let reader = BufReader::new(file);
+
+        for line in reader.lines() {
+            let line = line?;
+
+            if line.starts_with('#') || line.is_empty() {
+                continue;
+            }
+
+            let tokens: Vec<&str> = line.split_whitespace().collect();
+
+            match tokens[0] {
+                "v" => {
+                    let vertex_tokens = &tokens[1..];
+                    vertices.push(Self::parse_vertex(vertex_tokens));
+                }
+                "f" => {
+                    let index_tokens = &tokens[1..];
+                    let (v0, v1, v2) = Self::parse_indices(index_tokens);
+                    mesh.triangles
+                        .push(Triangle(vertices[v0], vertices[v1], vertices[v2]));
+                }
+                _ => (),
+            }
+        }
+
+        Ok(mesh)
+    }
+}
+
+fn load_from_obj<'de, D>(deserializer: D) -> Result<Mesh, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let obj_path: &str = Deserialize::deserialize(deserializer)?;
+    Mesh::from_obj(obj_path).map_err(de::Error::custom)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum Geometry {
+    #[serde(deserialize_with = "load_from_obj")]
     MESH(Mesh),
     SPHERE(Sphere),
 }
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Object {
-    pub geometry: Sphere,
+    pub geometry: Geometry,
     pub material: Material,
+}
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub struct Light {
+    pub geometry: Sphere,
+    pub emission: Vec3f,
+}
+
+impl Light {
+    pub fn sample(&self, point: Vec3f) -> (Vec3f, f64, Vec3f) {
+        let sphere = self.geometry;
+        let normal = point_on_sphere();
+        let point_on_light = sphere.center + normal * sphere.radius;
+        let light_dir = point_on_light - point;
+        let distance = light_dir.length();
+        (light_dir / distance, distance, normal)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Scene {
-    #[serde(skip)]
-    pub lights: Vec<usize>, // indices of the objects that emit light
     pub background: Vec3f,
+    pub lights: Vec<Light>,
     pub objects: Vec<Object>,
 }
 
@@ -173,13 +277,15 @@ impl Hittable for Triangle {
 
 impl Hittable for Mesh {
     fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
+        let mut closest = max_t;
+        let mut hit: Option<Hit> = None;
         for triangle in &self.triangles {
-            let hit_record = triangle.hit(ray, min_t, max_t);
-            if hit_record.is_some() {
-                return hit_record;
+            if let Some(tmp) = triangle.hit(ray, min_t, closest) {
+                closest = tmp.t;
+                hit = Some(tmp);
             }
         }
-        None
+        hit
     }
 }
 
@@ -198,12 +304,9 @@ impl Hittable for Scene {
         closest.t = max_t;
 
         for (i, object) in self.objects.iter().enumerate() {
-            match object.geometry.hit(ray, min_t, closest.t) {
-                None => {}
-                Some(hit) => {
-                    closest = hit;
-                    closest.idx = i;
-                }
+            if let Some(hit) = object.geometry.hit(ray, min_t, closest.t) {
+                closest = hit;
+                closest.idx = i;
             }
         }
 
@@ -362,10 +465,68 @@ mod test {
                             "material": "Lambert"
                         }
                     }
+                ],
+                "lights": [
+                    {
+                        "geometry": {
+                            "radius": 0.5,
+                            "center": [0.0, 4.0, 0.0]
+                        },
+                        "emission": [10,10,5]
+                    }
                 ]
             }"#;
             let _scene: Scene = serde_json::from_str(json).unwrap();
-            //println!("{:?}", scene);
+        }
+    }
+
+    #[test]
+    fn test_deserialize_2() {
+        let json = r#"{
+                "background": [0.5, 0.0, 1.0],
+                "objects": [
+                    {
+                        "geometry": "scenes/cube.obj",
+                        "material": {
+                            "albedo": [1.0, 0.0, 0.0],
+                            "emittance": 1.0,
+                            "roughness": 1.0,
+                            "ior": 1.0,
+                            "metallic": 1.0,
+                            "material": "Lambert"
+                        }
+                    }
+                ],
+                "lights": [
+                    {
+                        "geometry": {
+                            "radius": 0.5,
+                            "center": [0.0, 4.0, 0.0]
+                        },
+                        "emission": [10,10,5]
+                    }
+                ]
+            }"#;
+        let _scene: Scene = serde_json::from_str(json).unwrap();
+        println!("{:?}", _scene);
+    }
+
+    #[test]
+    fn test_load_obj() {
+        if let Ok(mesh) = Mesh::from_obj("scenes/cube.obj") {
+            println!("{:?}", mesh);
+            assert_eq!(mesh.triangles.len(), 6 * 2);
+        }
+    }
+
+    #[test]
+    fn test_hit_cube() {
+        let mesh = Mesh::from_obj("scenes/cube.obj").unwrap();
+
+        let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
+
+        if let Some(hit) = mesh.hit(&ray, 0.001, f64::INFINITY) {
+            println!("{:?}", hit);
         }
     }
 }

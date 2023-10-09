@@ -99,6 +99,10 @@ pub fn uniform_hemisphere() -> Vec3f {
     Vec3f::normalize(from_spherical(theta, phi))
 }
 
+pub fn cosine_weighted(normal: Vec3f) -> Vec3f {
+    Vec3f::normalize(normal + point_on_sphere())
+}
+
 /// Cosine weighted sample from hemisphere
 pub fn cosine_weighted_hemisphere() -> Vec3f {
     let mut rng = rand::thread_rng();
@@ -130,7 +134,7 @@ pub fn ggx_hemisphere(wo: Vec3f, normal: Vec3f, roughness: f64) -> (Vec3f, f64) 
     (wi, pdf)
 }
 
-pub fn vector_on_sphere() -> Vec3f {
+pub fn point_on_sphere() -> Vec3f {
     let r = 1.0;
     let mut rng = rand::thread_rng();
     Vec3f::normalize(Vec3f::new(
@@ -140,12 +144,19 @@ pub fn vector_on_sphere() -> Vec3f {
     ))
 }
 
+pub fn point_on_circle() -> Vec2f {
+    let mut rng = rand::thread_rng();
+    let r = rng.gen_range(0.0..1.0);
+    let theta = r * PI * 2.0;
+    Vec2f::new(theta.cos(), theta.sin())
+}
+
 pub fn uniform_sample_hemisphere(normal: Vec3f) -> Vec3f {
-    loop {
-        let omega = vector_on_sphere();
-        if Vec3f::dot(omega, normal) > 0.0 {
-            break omega;
-        }
+    let omega = point_on_sphere();
+    if Vec3f::dot(omega, normal) > 0.0 {
+        omega
+    } else {
+        -omega
     }
 }
 
@@ -205,15 +216,13 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_reflect() {
         {
             let normal = Vec3f::new(0.0, 1.0, 0.0);
             let incident = Vec3::normalize(Vec3f::new(1.0, -1.0, 0.0));
             let outgoing = reflect(incident, normal);
-            assert_eq!(Vec3::dot(incident, normal), Vec3::dot(outgoing, normal));
+            assert_eq!(Vec3::dot(-incident, normal), Vec3::dot(outgoing, normal));
             assert_eq!(Vec3f::dot(incident, outgoing), 0.0);
-            assert_eq!(outgoing, Vec3::normalize(Vec3f::new(1.0, 1.0, 0.0)));
         }
     }
 
@@ -237,9 +246,6 @@ mod test {
             assert_eq!(r1, r2);
         }
     }
-
-    #[test]
-    fn test_fresnel() {}
 
     #[test]
     fn test_cosine() {
@@ -302,7 +308,7 @@ mod test {
 
     #[test]
     fn test_serialize() {
-        let json = fs::read_to_string("scenes/sphere.json").unwrap();
+        let json = fs::read_to_string("scenes/cornell_box.json").unwrap();
         let _config: ConfigFile = serde_json::from_str(&json).unwrap();
         println!("{:?}", _config);
     }

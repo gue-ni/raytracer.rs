@@ -74,18 +74,7 @@
 					"material": "Lambert"
 				}
 			},
-			{
-				"comment": "Light",
-				"geometry": { "center": [0, -1.3, 5], "radius": 0.25 },
-				"material": {
-					"albedo": [1, 1, 1],
-					"emittance": 10,
-					"roughness": 0,
-					"ior": 0,
-					"metallic": 0,
-					"material": "Lambert"
-				}
-			},
+
 			{
 				"comment": "Metallic Sphere",
 				"geometry": { "center": [-1.0, 1.25, 5.0], "radius": 0.75 },
@@ -95,7 +84,7 @@
 					"roughness": 0.2,
 					"ior": 0,
 					"metallic": 0.5,
-					"material": "Lambert"
+					"material": "Transparent"
 				}
 			},
 			{
@@ -107,7 +96,7 @@
 					"roughness": 0,
 					"ior": 1.5,
 					"metallic": 0,
-					"material": "Lambert"
+					"material": "Mirror"
 				}
 			},
 			{
@@ -122,7 +111,14 @@
 					"material": "Lambert"
 				}
 			}
+		],
+		"lights": [
+			{
+				"comment": "Light",
+				"geometry": { "center": [0, -1.3, 5], "radius": 0.25 },
+				"emission": [10, 10, 10]
+			}
 		]
 	},
-	"camera": { "position": [0, 0, 0] }
+	"camera": { "position": [0, 0, 0], "target": [0,0,5], "fov": 45.0 }
 }
