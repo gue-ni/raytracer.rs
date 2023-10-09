@@ -1,7 +1,7 @@
+use crate::common::*;
 use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
-use crate::common::*;
 
 use serde::de;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -15,7 +15,6 @@ pub struct Hit {
     pub t: f64,
     pub normal: Vec3f,
     pub point: Vec3f,
-    pub idx: usize,
 }
 
 impl Default for Hit {
@@ -24,19 +23,13 @@ impl Default for Hit {
             t: f64::INFINITY,
             normal: Vec3f::from(0.0),
             point: Vec3f::from(0.0),
-            idx: 0,
         }
     }
 }
 
 impl Hit {
-    pub fn new(t: f64, normal: Vec3f, point: Vec3f, idx: usize) -> Self {
-        Self {
-            t,
-            normal,
-            point,
-            idx,
-        }
+    pub fn new(t: f64, normal: Vec3f, point: Vec3f) -> Self {
+        Self { t, normal, point }
     }
 
     pub fn get_point(&self) -> Vec3f {
@@ -226,7 +219,7 @@ impl Hittable for Sphere {
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
-            Some(Hit::new(t, (point - self.center) / self.radius, point, 0))
+            Some(Hit::new(t, (point - self.center) / self.radius, point))
         } else {
             None
         }
@@ -276,7 +269,7 @@ impl Hittable for Triangle {
             return None;
         }
 
-        Some(Hit::new(t, normal, point, 0))
+        Some(Hit::new(t, normal, point))
     }
 }
 
@@ -303,6 +296,7 @@ impl Hittable for Geometry {
     }
 }
 
+/*
 impl Hittable for Scene {
     fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         let mut closest = Hit::default();
@@ -322,10 +316,10 @@ impl Hittable for Scene {
         }
     }
 }
+*/
 
 impl HittableCollection for Scene {
     fn closest_hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<(Hit, usize)> {
-
         let mut closest = max_t;
         let mut result: Option<(Hit, usize)> = None;
 
@@ -336,7 +330,7 @@ impl HittableCollection for Scene {
             }
         }
 
-       result 
+        result
     }
 }
 

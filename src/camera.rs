@@ -1,6 +1,6 @@
+use crate::common::*;
 use crate::ray::*;
 use crate::vector::*;
-use crate::common::*;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
