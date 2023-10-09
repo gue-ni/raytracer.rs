@@ -30,7 +30,7 @@ impl Renderer {
     /// Visualize Normal Vector
     #[allow(dead_code)]
     fn visualize_normal(ray: &Ray, scene: &Scene, _bounce: u32) -> Vec3f {
-        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
+        if let Some((hit, _)) = scene.closest_hit(ray, 0.001, f64::INFINITY) {
             (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
         } else {
             scene.background
@@ -77,8 +77,8 @@ impl Renderer {
 
     #[allow(dead_code)]
     fn path_tracing(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
-        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-            let material = scene.objects[hit.idx].material;
+        if let Some((hit, idx)) = scene.closest_hit(ray, 0.001, f64::INFINITY) {
+            let material = scene.objects[idx].material;
             let point = hit.get_point();
             let wo = -ray.direction;
 
