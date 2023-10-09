@@ -1,6 +1,7 @@
 use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
+use crate::common::*;
 
 use serde::de;
 use serde::{Deserialize, Deserializer, Serialize};
