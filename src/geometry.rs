@@ -233,17 +233,18 @@ impl Hittable for Triangle {
         let v1v2 = self.2 - self.1;
         let v2v0 = self.0 - self.2;
 
-        let normal = Vec3f::normalize(Vec3f::cross(v0v1, v0v2));
-        let ndot = Vec3f::dot(normal, ray.direction);
+        let normal = Vec3::cross(v0v1, v0v2).normalize();
+        let ndot = Vec3::dot(normal, ray.direction);
 
-        if f64::abs(ndot) < f64::EPSILON {
+        if ndot.abs() < 0.001 {
             return None;
         }
 
-        let d = -Vec3f::dot(normal, self.0);
+        let d = -Vec3::dot(normal, self.0);
 
-        let t = -(Vec3f::dot(normal, ray.origin) + d) / ndot;
-        if t < min_t && t > max_t {
+        let t = -(Vec3::dot(normal, ray.origin) + d) / ndot;
+
+        if t < min_t || max_t < t {
             return None;
         }
 
@@ -252,24 +253,24 @@ impl Hittable for Triangle {
         let mut c: Vec3f;
 
         let vp0 = point - self.0;
-        c = Vec3f::cross(v0v1, vp0);
-        if Vec3f::dot(normal, c) < 0.0 {
+        c = Vec3::cross(v0v1, vp0);
+        if Vec3::dot(normal, c) < 0.0 {
             return None;
         }
 
         let vp1 = point - self.1;
-        c = Vec3f::cross(v1v2, vp1);
-        if Vec3f::dot(normal, c) < 0.0 {
+        c = Vec3::cross(v1v2, vp1);
+        if Vec3::dot(normal, c) < 0.0 {
             return None;
         }
 
         let vp2 = point - self.2;
-        c = Vec3f::cross(v2v0, vp2);
-        if Vec3f::dot(normal, c) < 0.0 {
+        c = Vec3::cross(v2v0, vp2);
+        if Vec3::dot(normal, c) < 0.0 {
             return None;
         }
 
-        Some(Hit::new(t, normal, point))
+        Some(Hit { t, normal, point })
     }
 }
 
