@@ -1,6 +1,7 @@
 use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
+use crate::common::*;
 
 use serde::de;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -158,6 +159,17 @@ pub struct Object {
 pub struct Light {
     pub geometry: Sphere,
     pub emission: Vec3f,
+}
+
+impl Light {
+    pub fn sample(&self, point: Vec3f) -> (Vec3f, f64, Vec3f) {
+        let sphere = self.geometry;
+        let normal = point_on_sphere();
+        let point_on_light = sphere.center + normal * sphere.radius;
+        let light_dir = point_on_light - point;
+        let distance = light_dir.length();
+        (light_dir / distance, distance, normal)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

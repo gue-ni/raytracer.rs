@@ -37,16 +37,6 @@ impl Renderer {
         }
     }
 
-    /// Returns direction to light, distance and normal
-    fn sample_light(object: &Light, point: Vec3f) -> (Vec3f, f64, Vec3f) {
-        let sphere = object.geometry;
-        let normal = point_on_sphere();
-        let point_on_light = sphere.center + normal * sphere.radius;
-        let light_dir = point_on_light - point;
-        let distance = light_dir.length();
-        (light_dir / distance, distance, normal)
-    }
-
     fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
         let material = scene.objects[hit.idx].material;
 
@@ -60,7 +50,7 @@ impl Renderer {
         let point = hit.get_point();
 
         for &light in &scene.lights {
-            let (direction, distance, normal) = Self::sample_light(&light, hit.point);
+            let (direction, distance, normal) = light.sample(hit.point);
             let shadow_ray = Ray::new(point, direction);
 
             let cos_theta = Vec3::dot(normal, -direction);
