@@ -30,16 +30,14 @@ impl Renderer {
     /// Visualize Normal Vector
     #[allow(dead_code)]
     fn visualize_normal(ray: &Ray, scene: &Scene, _bounce: u32) -> Vec3f {
-        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
+        if let Some((hit, _)) = scene.closest_hit(ray, 0.001, f64::INFINITY) {
             (Vec3f::from(1.0) + hit.normal * Vec3f::new(1.0, -1.0, -1.0)) * 0.5
         } else {
             scene.background
         }
     }
 
-    fn sample_lights(scene: &Scene, hit: &Hit, wo: Vec3f) -> Vec3f {
-        let material = scene.objects[hit.idx].material;
-
+    fn sample_lights(scene: &Scene, hit: &Hit, material: &Material, wo: Vec3f) -> Vec3f {
         if material.material == MaterialType::Mirror
             || material.material == MaterialType::Transparent
         {
@@ -55,9 +53,9 @@ impl Renderer {
 
             let cos_theta = Vec3::dot(normal, -direction);
 
-            let closest = scene.hit(&shadow_ray, 0.001, f64::INFINITY);
+            let closest = scene.closest_hit(&shadow_ray, 0.001, f64::INFINITY);
 
-            if (closest.is_none() || distance < closest.unwrap().t) && 0.0 < cos_theta {
+            if (closest.is_none() || distance < closest.unwrap().0.t) && 0.0 < cos_theta {
                 let emission = light.emission;
 
                 let pdf = {
@@ -77,14 +75,14 @@ impl Renderer {
 
     #[allow(dead_code)]
     fn path_tracing(ray: &Ray, scene: &Scene, bounce: u32) -> Vec3f {
-        if let Some(hit) = scene.hit(ray, 0.001, f64::INFINITY) {
-            let material = scene.objects[hit.idx].material;
+        if let Some((hit, idx)) = scene.closest_hit(ray, 0.001, f64::INFINITY) {
+            let material = scene.objects[idx].material;
             let point = hit.get_point();
             let wo = -ray.direction;
 
             let mut color = material.albedo * material.emittance;
 
-            color += Self::sample_lights(scene, &hit, wo);
+            color += Self::sample_lights(scene, &hit, &material, wo);
 
             if 0 < bounce {
                 let (wi, pdf) = material.sample_f(hit.normal, wo);

@@ -1,7 +1,7 @@
+use crate::common::*;
 use crate::material::*;
 use crate::ray::Ray;
 use crate::vector::*;
-use crate::common::*;
 
 use serde::de;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -15,7 +15,6 @@ pub struct Hit {
     pub t: f64,
     pub normal: Vec3f,
     pub point: Vec3f,
-    pub idx: usize,
 }
 
 impl Default for Hit {
@@ -24,19 +23,13 @@ impl Default for Hit {
             t: f64::INFINITY,
             normal: Vec3f::from(0.0),
             point: Vec3f::from(0.0),
-            idx: 0,
         }
     }
 }
 
 impl Hit {
-    pub fn new(t: f64, normal: Vec3f, point: Vec3f, idx: usize) -> Self {
-        Self {
-            t,
-            normal,
-            point,
-            idx,
-        }
+    pub fn new(t: f64, normal: Vec3f, point: Vec3f) -> Self {
+        Self { t, normal, point }
     }
 
     pub fn get_point(&self) -> Vec3f {
@@ -198,6 +191,11 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit>;
 }
 
+pub trait HittableCollection {
+    /// Returns closest hit
+    fn closest_hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<(Hit, usize)>;
+}
+
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         let m = ray.origin - self.center;
@@ -221,7 +219,7 @@ impl Hittable for Sphere {
 
         if min_t < t && t < max_t {
             let point = ray.point_at(t);
-            Some(Hit::new(t, (point - self.center) / self.radius, point, 0))
+            Some(Hit::new(t, (point - self.center) / self.radius, point))
         } else {
             None
         }
@@ -235,17 +233,18 @@ impl Hittable for Triangle {
         let v1v2 = self.2 - self.1;
         let v2v0 = self.0 - self.2;
 
-        let normal = Vec3f::normalize(Vec3f::cross(v0v1, v0v2));
-        let ndot = Vec3f::dot(normal, ray.direction);
+        let normal = Vec3::cross(v0v1, v0v2).normalize();
+        let ndot = Vec3::dot(normal, ray.direction);
 
-        if f64::abs(ndot) < f64::EPSILON {
+        if ndot.abs() < 0.001 {
             return None;
         }
 
-        let d = -Vec3f::dot(normal, self.0);
+        let d = -Vec3::dot(normal, self.0);
 
-        let t = -(Vec3f::dot(normal, ray.origin) + d) / ndot;
-        if t < min_t && t > max_t {
+        let t = -(Vec3::dot(normal, ray.origin) + d) / ndot;
+
+        if t < min_t || max_t < t {
             return None;
         }
 
@@ -254,24 +253,24 @@ impl Hittable for Triangle {
         let mut c: Vec3f;
 
         let vp0 = point - self.0;
-        c = Vec3f::cross(v0v1, vp0);
-        if Vec3f::dot(normal, c) < 0.0 {
+        c = Vec3::cross(v0v1, vp0);
+        if Vec3::dot(normal, c) < 0.0 {
             return None;
         }
 
         let vp1 = point - self.1;
-        c = Vec3f::cross(v1v2, vp1);
-        if Vec3f::dot(normal, c) < 0.0 {
+        c = Vec3::cross(v1v2, vp1);
+        if Vec3::dot(normal, c) < 0.0 {
             return None;
         }
 
         let vp2 = point - self.2;
-        c = Vec3f::cross(v2v0, vp2);
-        if Vec3f::dot(normal, c) < 0.0 {
+        c = Vec3::cross(v2v0, vp2);
+        if Vec3::dot(normal, c) < 0.0 {
             return None;
         }
 
-        Some(Hit::new(t, normal, point, 0))
+        Some(Hit { t, normal, point })
     }
 }
 
@@ -298,6 +297,7 @@ impl Hittable for Geometry {
     }
 }
 
+/*
 impl Hittable for Scene {
     fn hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<Hit> {
         let mut closest = Hit::default();
@@ -317,6 +317,23 @@ impl Hittable for Scene {
         }
     }
 }
+*/
+
+impl HittableCollection for Scene {
+    fn closest_hit(&self, ray: &Ray, min_t: f64, max_t: f64) -> Option<(Hit, usize)> {
+        let mut closest = max_t;
+        let mut result: Option<(Hit, usize)> = None;
+
+        for (i, object) in self.objects.iter().enumerate() {
+            if let Some(hit) = object.geometry.hit(ray, min_t, closest) {
+                closest = hit.t;
+                result = Some((hit, i));
+            }
+        }
+
+        result
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -325,7 +342,7 @@ mod test {
     use crate::ray::*;
 
     #[test]
-    fn test_sphere_hit() {
+    fn test_hit_sphere() {
         let sphere = Sphere::new(Vec3f::new(0.0, 0.0, 5.0), 1.0);
         let ray = Ray::new(Vec3f::new(0.0, 0.0, 0.0), Vec3f::new(0.0, 0.0, 1.0));
         if let Some(hit) = sphere.hit(&ray, 0.0, f64::INFINITY) {
@@ -338,7 +355,7 @@ mod test {
     }
 
     #[test]
-    fn test_sphere_hit_inside() {
+    fn test_hit_inside_sphere() {
         let sphere = Sphere::new(Vec3f::from(0.0), 3.0);
         let ray = Ray::towards(sphere.center, Vec3::new(0.0, 0.0, 1.0));
         if let Some(hit) = sphere.hit(&ray, 0.0, f64::INFINITY) {
@@ -352,7 +369,7 @@ mod test {
     }
 
     #[test]
-    fn test_triangle_hit() {
+    fn test_hit_triangle() {
         let triangle = Triangle(
             Vec3f::new(-0.5, 0.0, 5.0),
             Vec3f::new(0.0, 1.0, 5.0),
@@ -366,7 +383,7 @@ mod test {
     }
 
     #[test]
-    fn test_mesh_hit() {
+    fn test_hit_mesh() {
         let s = 0.5;
         let quad = Mesh {
             triangles: vec![
@@ -391,6 +408,14 @@ mod test {
         let hit = possible_hit.unwrap();
         assert_eq!(hit.point, Vec3f::new(0.0, 0.0, -s));
         assert_eq!(hit.normal, Vec3f::new(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn test_hit_cube() {
+        let mesh = Mesh::from_obj("scenes/cube.obj").unwrap();
+        let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
+        let hit = mesh.hit(&ray, 0.001, f64::INFINITY).unwrap();
+        println!("{:?}", hit);
     }
 
     #[test]
@@ -444,8 +469,7 @@ mod test {
                     "material": "Lambert"
                 }
             }"#;
-            let _object: Object = serde_json::from_str(json).unwrap();
-            //println!("{:?}", object);
+            let _: Object = serde_json::from_str(json).unwrap();
         }
         {
             let json = r#"{
@@ -476,7 +500,7 @@ mod test {
                     }
                 ]
             }"#;
-            let _scene: Scene = serde_json::from_str(json).unwrap();
+            let _: Scene = serde_json::from_str(json).unwrap();
         }
     }
 
@@ -507,26 +531,12 @@ mod test {
                     }
                 ]
             }"#;
-        let _scene: Scene = serde_json::from_str(json).unwrap();
-        println!("{:?}", _scene);
+        let _: Scene = serde_json::from_str(json).unwrap();
     }
 
     #[test]
     fn test_load_obj() {
-        if let Ok(mesh) = Mesh::from_obj("scenes/cube.obj") {
-            println!("{:?}", mesh);
-            assert_eq!(mesh.triangles.len(), 6 * 2);
-        }
-    }
-
-    #[test]
-    fn test_hit_cube() {
         let mesh = Mesh::from_obj("scenes/cube.obj").unwrap();
-
-        let ray = Ray::new(Vec3::new(0.0, 0.0, -5.0), Vec3::new(0.0, 0.0, 1.0));
-
-        if let Some(hit) = mesh.hit(&ray, 0.001, f64::INFINITY) {
-            println!("{:?}", hit);
-        }
+        assert_eq!(mesh.triangles.len(), 6 * 2);
     }
 }

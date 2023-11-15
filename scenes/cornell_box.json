@@ -120,5 +120,5 @@
 			}
 		]
 	},
-	"camera": { "position": [0, 0, 0], "target": [0,0,5], "fov": 45.0 }
+	"camera": { "position": [0, 0, 0], "target": [0,0,5], "fov": 55.0 }
 }

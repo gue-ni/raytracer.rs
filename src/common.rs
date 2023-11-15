@@ -79,6 +79,16 @@ pub fn fresnel(incident: Vec3f, normal: Vec3f, ior: f64) -> f64 {
     1.0 - kr
 }
 
+/// Convert degrees to radians
+pub fn radians(deg: f64) -> f64 {
+    deg * (PI / 180.0)
+}
+
+/// Convert radians to degrees
+pub fn degrees(rad: f64) -> f64 {
+    rad * (180.0 / PI)
+}
+
 /// Returns vector based on spherical coordinates
 /// But: in our coordinate system, y is up
 pub fn from_spherical(theta: f64, phi: f64) -> Vec3f {
@@ -307,7 +317,7 @@ mod test {
     }
 
     #[test]
-    fn test_serialize() {
+    fn test_deserialize_scene() {
         let json = fs::read_to_string("scenes/cornell_box.json").unwrap();
         let _config: ConfigFile = serde_json::from_str(&json).unwrap();
         println!("{:?}", _config);

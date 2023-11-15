@@ -1,3 +1,4 @@
+use crate::common::*;
 use crate::ray::*;
 use crate::vector::*;
 use rand::Rng;
@@ -11,16 +12,16 @@ pub struct Camera {
     pub fov: f64,
 
     #[serde(skip)]
+    pub resolution: Vec2f,
+
+    #[serde(skip)]
     aspect_ratio: f64,
 
     #[serde(skip)]
-    pub focal_length: f64,
+    focal_length: f64,
 
     #[serde(skip)]
-    pub aperture: f64,
-
-    #[serde(skip)]
-    pub resolution: Vec2f,
+    aperture: f64,
 }
 
 impl Camera {
@@ -28,7 +29,7 @@ impl Camera {
         Camera {
             position,
             target,
-            fov: fov * (PI / 180.0),
+            fov: radians(fov),
             resolution: Vec2f::from(res),
             aspect_ratio: (res.1 as f64) / (res.0 as f64),
             focal_length: 3.0,
@@ -39,6 +40,7 @@ impl Camera {
     pub fn get_ray(&self, pixel: (u32, u32)) -> Ray {
         let coord = Vec2f::from(pixel) / self.resolution;
 
+        // TODO: cache this
         let forward = (self.target - self.position).normalize();
         let right = Vec3::cross(forward, Vec3::new(0.0, 1.0, 0.0)).normalize();
         let up = Vec3::cross(right, forward).normalize();
@@ -51,10 +53,14 @@ impl Camera {
 
         let target = self.position + forward;
         let bottom_left = target - (right * half_width) - (up * half_height);
-
         let view_point = bottom_left + (right * width * coord.x) + (up * height * coord.y);
+        let direction = (view_point - self.position).normalize();
 
-        Ray::new(self.position, (view_point - self.position).normalize())
+        // depth of field
+        let focal_point = self.position + direction * self.focal_length;
+        let jitter = point_on_sphere() * self.aperture;
+
+        Ray::towards(self.position + jitter, focal_point)
     }
 
     pub fn ray_without_dof(&self, pixel: (u32, u32)) -> Ray {
